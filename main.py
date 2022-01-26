@@ -20,7 +20,7 @@ def run_simulation(vehicleIds_to_routes:dict):
         sumoBinary = sumolib.checkBinary("sumo")
     else:
         sumoBinary = sumolib.checkBinary("sumo-gui")
-    sumoCmd = [sumoBinary, "-c", ENV["configPath"]]
+    sumoCmd = [sumoBinary, "-c", ENV["configPath"], "--collision.check-junctions", "--collision.action", "warn"]
 
     traci.start(sumoCmd)
     for vId in vehicleIds_to_routes:
@@ -37,7 +37,7 @@ def run_simulation(vehicleIds_to_routes:dict):
                 print(message)
             except traci.exceptions.TraCIException as e:
                 print(e)
-        print(traci.simulation.getCollidingVehiclesIDList())
+        print(traci.simulation.getCollisions())
         
         step += 1
     traci.close()
