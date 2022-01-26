@@ -25,10 +25,15 @@ def run_simulation(vehicles:list):
     traci.start(sumoCmd)
     for v in vehicles:
         vehicle:Vehicle = v
-        vehicle.addToRoute("route_0")
+        vehicle.add_to_route("route_0")
     step = 0
-    while step < 1000:
+    while step < 30:
         traci.simulationStep()
+        try:
+            print(traci.vehicle.getSpeed("aaa"))
+        except traci.exceptions.TraCIException as e:
+            print(e)
+            break
         step += 1
     traci.close()
 
