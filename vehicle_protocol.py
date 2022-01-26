@@ -1,4 +1,4 @@
-class Protocol:
+class VehicleProtocol:
     def __init__(self):
         self.conflicting_vehicleIds = []
     
