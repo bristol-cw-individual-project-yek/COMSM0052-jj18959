@@ -15,7 +15,7 @@ else:
 ENV = dotenv.dotenv_values(".env")
 
 
-def run_simulation(vehicles:list):
+def run_simulation(vehicleIds_to_routes:dict):
     if ("--no-gui" in sys.argv):
         sumoBinary = sumolib.checkBinary("sumo")
     else:
@@ -23,22 +23,29 @@ def run_simulation(vehicles:list):
     sumoCmd = [sumoBinary, "-c", ENV["configPath"]]
 
     traci.start(sumoCmd)
-    for v in vehicles:
-        vehicle:Vehicle = v
-        vehicle.add_to_route("route_0")
+    for vId in vehicleIds_to_routes:
+        vehicle:Vehicle = Vehicle(vId)
+        vehicle.add_to_route(vehicleIds_to_routes[vId])
     step = 0
-    while step < 30:
+    while step < 100:
         traci.simulationStep()
-        try:
-            print(traci.vehicle.getSpeed("aaa"))
-        except traci.exceptions.TraCIException as e:
-            print(e)
-            break
+        
+        for vId in vehicleIds_to_routes:
+            try:
+                message:str = "Speed of " + vId + ": " + str(traci.vehicle.getSpeed(vId))
+                message += "\nPosition of " + vId + ": " + str(traci.vehicle.getPosition(vId))
+                print(message)
+            except traci.exceptions.TraCIException as e:
+                print(e)
+        print(traci.simulation.getCollidingVehiclesIDList())
+        
         step += 1
     traci.close()
 
 
 if __name__ == "__main__":
-    test_vehicle = Vehicle("aaa")
-    vehicles = [test_vehicle]
-    run_simulation(vehicles)
+    vehicleIds_to_routes = {
+        "aaa"   :   "route_0",
+        "bbb"   :   "route_1"
+    }
+    run_simulation(vehicleIds_to_routes)
