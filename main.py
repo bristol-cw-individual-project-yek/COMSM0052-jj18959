@@ -35,12 +35,10 @@ def run_simulation(vehicleIds_to_routes:dict):
         traci.simulationStep()
         vIds_to_be_removed = []
 
-        # Print speed and positions of all vehicles
+        # Update all active vehicles
         for vId in vehicles:
             try:
-                message:str = "Speed of " + vId + ": " + str(traci.vehicle.getSpeed(vId))
-                message += "\nPosition of " + vId + ": " + str(traci.vehicle.getPosition(vId))
-                print(message)
+                vehicles[vId].update()
             except traci.exceptions.TraCIException as e:
                 print(e)
                 vIds_to_be_removed.append(vId)
