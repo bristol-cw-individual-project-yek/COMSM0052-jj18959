@@ -1,15 +1,19 @@
 from numpy import Infinity
 from vehicle_conflict_detection import ConflictDetectionAlgorithm
+from vehicle_state import VehicleState
+from vehicle_protocol import VehicleProtocol
 import traci
 
 class Vehicle:
 
     def __init__(self, vehicleId):
+        self.currentState = VehicleState.DRIVING
         self.vehicleId = vehicleId
         self.currentRoute = []
         self.currentRouteIndex = -1
         self.currentPosition = (Infinity, Infinity)
         self.conflictDetectionAlgorithm = ConflictDetectionAlgorithm()
+        self.conflictResolutionProtocol = VehicleProtocol()
     
 
     def add_to_route(self, routeId):
@@ -31,8 +35,18 @@ class Vehicle:
 
 
     def update(self, vehicles:dict):
+        conflicting_vehicles = self.conflictDetectionAlgorithm.detect_conflicts(self, vehicles)
+        self.currentState = self.conflictResolutionProtocol.decide_state(self, conflicting_vehicles)
         self.currentRouteIndex = traci.vehicle.getRouteIndex(self.vehicleId)
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
         #message:str = "Position of " + self.vehicleId + ": " + str(self.currentPosition)
         #print(message)
-        print("Vehicles that conflict with " + self.vehicleId + ": " + str(self.conflictDetectionAlgorithm.detect_conflicts(self, vehicles)))
+        print("Vehicles that conflict with " + self.vehicleId + ": " + str(conflicting_vehicles))
+        self.actBasedOnState()
+    
+
+    def actBasedOnState(self):
+        if self.currentState == VehicleState.DRIVING:
+            traci.vehicle.setSpeed(self.vehicleId, 1)
+        elif self.currentState == VehicleState.WAITING:
+            traci.vehicle.setSpeed(self.vehicleId, 0)

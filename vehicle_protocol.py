@@ -1,12 +1,9 @@
-class VehicleProtocol:
-    def __init__(self):
-        self.conflicting_vehicleIds = []
-    
-    
-    def resolve_conflicts(self):
-        for vId in self.conflicting_vehicleIds:
-            self.resolve_conflict(vId)
+from vehicle_state import VehicleState
 
+class VehicleProtocol:
     
-    def resolve_conflict(self, vId):
-        print(vId)
+    def decide_state(self, vehicle, conflicting_vehicles):
+        for other_vehicle in conflicting_vehicles:
+            if other_vehicle.currentState == VehicleState.DRIVING:
+                return VehicleState.WAITING
+        return VehicleState.DRIVING
