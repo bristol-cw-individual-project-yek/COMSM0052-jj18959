@@ -3,7 +3,8 @@ import os, sys
 import dotenv
 import traci
 import sumolib
-from vehicle_shepherd import VehicleShepherd
+import vehicle
+from vehicle import vehicle_shepherd
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -24,14 +25,14 @@ def run_simulation(vehicleIds_to_routes:dict):
 
     traci.start(sumoCmd)
 
-    vehicle_shepherd = VehicleShepherd()
-    vehicle_shepherd.add_vehicles(vehicleIds_to_routes)
+    shepherd = vehicle_shepherd.VehicleShepherd()
+    shepherd.add_vehicles(vehicleIds_to_routes)
     
     step = 0
-    while step < 100 and len(vehicle_shepherd.vehicles) > 0:
+    while step < 100 and len(shepherd.vehicles) > 0:
         traci.simulationStep()
 
-        vehicle_shepherd.update_vehicles()
+        shepherd.update_vehicles()
         # Print collisions that are currently happening
         #print(traci.simulation.getCollisions())
         

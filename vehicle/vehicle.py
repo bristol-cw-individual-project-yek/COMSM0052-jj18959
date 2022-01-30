@@ -1,7 +1,7 @@
 from numpy import Infinity
-from vehicle_conflict_detection import ConflictDetectionAlgorithm
-from vehicle_state import VehicleState
-from vehicle_protocol import VehicleProtocol
+from vehicle.vehicle_conflict_detection import ConflictDetectionAlgorithm
+from vehicle.vehicle_state import VehicleState
+from vehicle.vehicle_protocol import VehicleProtocol
 import traci
 
 class Vehicle:

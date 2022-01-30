@@ -1,4 +1,4 @@
-from vehicle import Vehicle
+from vehicle.vehicle import Vehicle
 import traci
 
 class VehicleShepherd:

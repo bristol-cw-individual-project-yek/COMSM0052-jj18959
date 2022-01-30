@@ -1,4 +1,4 @@
-from vehicle_state import VehicleState
+from vehicle.vehicle_state import VehicleState
 
 class VehicleProtocol:
     
