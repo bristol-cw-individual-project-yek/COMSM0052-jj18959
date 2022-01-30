@@ -1,5 +1,5 @@
 from numpy import Infinity
-from vehicle_conflict_detection import ConflictDetection
+from vehicle_conflict_detection import ConflictDetectionAlgorithm
 import traci
 
 class Vehicle:
@@ -9,6 +9,7 @@ class Vehicle:
         self.currentRoute = []
         self.currentRouteIndex = -1
         self.currentPosition = (Infinity, Infinity)
+        self.conflictDetectionAlgorithm = ConflictDetectionAlgorithm()
     
 
     def add_to_route(self, routeId):
@@ -34,4 +35,4 @@ class Vehicle:
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
         #message:str = "Position of " + self.vehicleId + ": " + str(self.currentPosition)
         #print(message)
-        print("Vehicles that conflict with " + self.vehicleId + ": " + str(ConflictDetection.detect_conflicts(self, vehicles)))
+        print("Vehicles that conflict with " + self.vehicleId + ": " + str(self.conflictDetectionAlgorithm.detect_conflicts(self, vehicles)))
