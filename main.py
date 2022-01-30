@@ -30,11 +30,10 @@ def run_simulation(vehicleIds_to_routes:dict):
     step = 0
     while step < 100 and len(vehicle_shepherd.vehicles) > 0:
         traci.simulationStep()
-        vIds_to_be_removed = []
 
         vehicle_shepherd.update_vehicles()
         # Print collisions that are currently happening
-        print(traci.simulation.getCollisions())
+        #print(traci.simulation.getCollisions())
         
         step += 1
     
