@@ -2,6 +2,7 @@ from numpy import Infinity
 from vehicle.vehicle_conflict_detection import ConflictDetectionAlgorithm
 from vehicle.vehicle_state import VehicleState
 from vehicle.vehicle_protocol import VehicleProtocol
+import vehicle.grid as grid
 import traci
 
 class Vehicle:
@@ -12,6 +13,7 @@ class Vehicle:
         self.currentRoute = []
         self.currentRouteIndex = -1
         self.currentPosition = (Infinity, Infinity)
+        self.currentGridPosition = (Infinity, Infinity)
         self.conflictDetectionAlgorithm = ConflictDetectionAlgorithm()
         self.conflictResolutionProtocol = VehicleProtocol()
     
@@ -39,8 +41,10 @@ class Vehicle:
         self.currentState = self.conflictResolutionProtocol.decide_state(self, conflicting_vehicles)
         self.currentRouteIndex = traci.vehicle.getRouteIndex(self.vehicleId)
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
-        #message:str = "Position of " + self.vehicleId + ": " + str(self.currentPosition)
-        #print(message)
+        self.currentGridPosition = grid.position_to_grid_square(self.currentPosition)
+        message:str = "Position of " + self.vehicleId + ": " + str(self.currentPosition) + "\n"
+        message += "Grid position of " + self.vehicleId + ": " + str(self.currentGridPosition)
+        print(message)
         print("Vehicles that conflict with " + self.vehicleId + ": " + str(conflicting_vehicles))
         self.actBasedOnState()
     
