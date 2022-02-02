@@ -1,0 +1,26 @@
+road_map:
+  nodes: 
+    node1: 
+      x: 50.0
+      y: 0.0
+    node2:
+      x: 0.0
+      y: 0.0
+    node3:
+      x: 0.0
+      y: 50.0
+  
+  edges:
+    # nodeId: "fromNode toNode"
+    "1" : "node1 node2"
+    "2" : "node2 node3"
+    "3" : "node2 node1"
+
+  routes:
+    route1:
+      edges:
+        - "1"
+        - "2"
+    route2:
+      edges:
+        - "3"
