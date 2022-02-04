@@ -3,6 +3,8 @@ import os, sys
 from time import time
 import dotenv
 import network.network as ntwk
+import network.grid_network as grid
+import network.spider_network as spider
 import traci
 import sumolib
 import vehicle
@@ -20,8 +22,8 @@ ENV = dotenv.dotenv_values(".env")
 
 def run_simulation(vehicleIds_to_routes:dict):
     temp_file_name = "tmp_" + str(round(time()))
-    road_network = ntwk.Network()
-    path = road_network.generateNetwork(temp_file_name)
+    road_network = grid.GridNetwork()
+    path = road_network.generateFile(temp_file_name)
     if ("--no-gui" in sys.argv):
         sumoBinary = sumolib.checkBinary("sumo")
     else:

@@ -9,13 +9,14 @@ class Network:
         pass
 
 
-    def generateNetwork(self, output_file_name:str):
+    def generateFile(self, output_file_name:str):
         if not os.path.exists(Network.TEMP_FILE_DIRECTORY):
             os.makedirs(Network.TEMP_FILE_DIRECTORY)
         network_file_name = output_file_name + ".net.xml"
         network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
-        netgen_cmd = "netgenerate --grid=true --output-file=" + network_file_path
-        os.system(netgen_cmd)
+
+        self.generateNetwork(network_file_path)
+
         network_tree : ET = ET.parse(network_file_path)
         network_root = network_tree.getroot()
         location = None
@@ -48,4 +49,10 @@ class Network:
         print(sumo_path)
 
         return sumo_path
+
+
+    def generateNetwork(self, network_file_path:str):
+        netgen_cmd = "netgenerate --rand --rand.iterations=200 --output-file=" + network_file_path
+        os.system(netgen_cmd)
+        
 
