@@ -19,14 +19,16 @@ ENV = dotenv.dotenv_values(".env")
 
 
 def run_simulation(vehicleIds_to_routes:dict):
-    temp_file_name = "tmp-" + str(round(time())) + ".net.xml"
+    temp_file_name = "tmp_" + str(round(time()))
     road_network = ntwk.Network()
-    road_network.generateNetwork(temp_file_name)
+    path = road_network.generateNetwork(temp_file_name)
     if ("--no-gui" in sys.argv):
         sumoBinary = sumolib.checkBinary("sumo")
     else:
         sumoBinary = sumolib.checkBinary("sumo-gui")
-    sumoCmd = [sumoBinary, "-c", temp_file_name, "--collision.check-junctions", "--collision.action", "warn"]
+    sumoCmd = [sumoBinary, "-c", path, "--collision.check-junctions", "--collision.action", "warn"]
+
+    print(sumoCmd)
 
     traci.start(sumoCmd)
 
