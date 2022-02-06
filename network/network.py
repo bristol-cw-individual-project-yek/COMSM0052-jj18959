@@ -1,5 +1,6 @@
 import os
 import xml.etree.ElementTree as ET
+import randomTrips
 
 class Network:
 
@@ -16,26 +17,8 @@ class Network:
         network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
 
         self.generateNetwork(network_file_path)
-
-        network_tree : ET = ET.parse(network_file_path)
-        network_root = network_tree.getroot()
-        location = None
-        edges = []
-        connections = []
-        junctions = []
-        for child in network_root:
-            attrib = child.attrib
-            if child.tag == "edge":
-                edges.append(attrib)
-            if child.tag == "location":
-                location = attrib
-            if child.tag == "junction":
-                junctions.append(attrib)
-            if child.tag == "connection":
-                connections.append(attrib)
-        print("Edges: ", len(edges))
-        print("Connections: ", len(connections))
-        print("Junctions: ", len(junctions))
+        
+        self.generateRandomRoutes(network_file_path)
 
         sumo_cfg_file_name = output_file_name + ".sumocfg"
         sumo_root = ET.Element("configuration")
@@ -43,12 +26,21 @@ class Network:
         sumo_input = ET.SubElement(sumo_root, "input")
         sumo_network_elem = ET.SubElement(sumo_input, "net-file")
         sumo_network_elem.set("value",network_file_name)
+        sumo_route_elem = ET.SubElement(sumo_input, "route-files")
+        sumo_route_elem.set("value", network_file_name.replace(".net", ".rou"))
         sumo_path = os.path.join(Network.TEMP_FILE_DIRECTORY, sumo_cfg_file_name)
         sumo_tree.write(sumo_path, encoding="utf-8")
 
         print(sumo_path)
 
         return sumo_path
+
+
+    def generateRandomRoutes(self, network_file_path:str):
+        trip_args = []
+        trip_args.append("-n=" + network_file_path)
+        trip_args.append("-o=" + network_file_path.replace(".net", ".rou"))
+        randomTrips.main(randomTrips.get_options(args=trip_args))
 
 
     def generateNetwork(self, network_file_path:str):
