@@ -1,4 +1,5 @@
 network-type: "random"
-vehicles:
-  - type: "default"
+vehicle-groups:
+  group-1:
+    type: "default"
     num: 10
