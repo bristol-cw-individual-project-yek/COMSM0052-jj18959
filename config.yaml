@@ -1,5 +1,6 @@
 network-type: "random"
+steps: 3600
 vehicle-groups:
   group-1:
-    type: "default"
+    policy-type: "default"
     num: 10
