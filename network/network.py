@@ -42,9 +42,19 @@ class Network:
         trip_args.append("-n=" + network_file_path)
         trip_args.append("-o=" + trip_file_path)
         randomTrips.main(randomTrips.get_options(args=trip_args))
-        routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + network_file_path.replace(".net", ".rou") + " --named-routes=true"
+        route_file_path = network_file_path.replace(".net", ".rou")
+        routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + route_file_path + " --named-routes=true"
         os.system(routes_cmd)
-        
+
+        # Remove any generated vehicles from the file - we will define those ourselves.
+        route_tree = ET.ElementTree()
+        route_tree.parse(route_file_path)
+        root = route_tree.getroot()
+        children = root.getchildren()
+        for child in children:
+            if child.tag == "vehicle":
+                root.remove(child)
+        route_tree.write(route_file_path, "utf-8")
 
 
     def generateNetwork(self, network_file_path:str):
