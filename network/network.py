@@ -7,7 +7,7 @@ class Network:
     TEMP_FILE_DIRECTORY = "temp"
 
     def __init__(self):
-        pass
+        self.routeIds = []
 
 
     def generateFile(self, output_file_name:str):
@@ -51,9 +51,12 @@ class Network:
         route_tree.parse(route_file_path)
         root = route_tree.getroot()
         children = root.getchildren()
+        self.routeIds.clear()
         for child in children:
             if child.tag == "vehicle":
                 root.remove(child)
+            elif child.tag == "route":
+                self.routeIds.append(child.attrib["id"])
         route_tree.write(route_file_path, "utf-8")
 
 
