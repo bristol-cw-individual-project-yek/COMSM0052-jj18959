@@ -26,9 +26,22 @@ except:
     pass
 
 
+def get_network():
+    try:
+        if CONFIG["network-type"] == "random":
+            network = ntwk.Network()
+        elif CONFIG["network-type"] == "grid":
+            network = grid.GridNetwork()
+        elif CONFIG["network-type"] == "spider":
+            network = spider.SpiderNetwork()
+        return network
+    except:
+        pass
+
+
 def run_simulation(has_gui:bool=False):
     temp_file_name = "tmp_" + str(round(time()))
-    road_network = grid.GridNetwork()
+    road_network:ntwk.Network = get_network()
     path = road_network.generateFile(temp_file_name)
     if not has_gui:
         sumoBinary = sumolib.checkBinary("sumo")
