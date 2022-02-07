@@ -1,4 +1,5 @@
 from vehicle.vehicle import Vehicle
+import random
 import traci
 
 class VehicleShepherd:
@@ -7,11 +8,21 @@ class VehicleShepherd:
         self.vehicles = {}
     
 
-    def add_vehicles(self, vehicleIds_to_routes:dict):
-        for vId in vehicleIds_to_routes:
-            vehicle:Vehicle = Vehicle(vId)
-            vehicle.add_to_route(vehicleIds_to_routes[vId])
-            self.vehicles[vId] = vehicle
+    # TODO: Write test for this
+    def add_vehicles(self, vehicleGroups:dict, routeIds: list):
+        for group in vehicleGroups:
+            for i in range(vehicleGroups[group]["num"]):
+                vId = group + "-" + str(i)
+                vehicle:Vehicle = Vehicle(vId)
+
+                policyType = vehicleGroups[group]["policy-type"]
+                if policyType == "default":
+                    pass
+
+                routeId = routeIds[random.randint(0, len(routeIds) - 1)]
+                vehicle.add_to_route(routeId)
+                self.vehicles[vId] = vehicle
+                routeIds.remove(routeId)
     
 
     def update_vehicles(self):

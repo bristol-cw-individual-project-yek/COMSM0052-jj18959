@@ -18,6 +18,10 @@ class Vehicle:
         self.conflictResolutionProtocol = VehicleProtocol()
     
 
+    def set_conflict_resolution_protocol(self, protocol:VehicleProtocol):
+        self.conflictResolutionProtocol = protocol
+    
+
     def add_to_route(self, routeId):
         traci.vehicle.add(self.vehicleId, routeId)
         self.currentRoute = list(traci.route.getEdges(routeId))
