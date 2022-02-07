@@ -37,10 +37,14 @@ class Network:
 
 
     def generateRandomRoutes(self, network_file_path:str):
+        trip_file_path = network_file_path.replace(".net", "_trips.rou")
         trip_args = []
         trip_args.append("-n=" + network_file_path)
-        trip_args.append("-o=" + network_file_path.replace(".net", ".rou"))
+        trip_args.append("-o=" + trip_file_path)
         randomTrips.main(randomTrips.get_options(args=trip_args))
+        routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + network_file_path.replace(".net", ".rou") + " --named-routes=true"
+        os.system(routes_cmd)
+        
 
 
     def generateNetwork(self, network_file_path:str):

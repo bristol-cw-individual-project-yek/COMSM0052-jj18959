@@ -1,5 +1,6 @@
 from cgi import test
 import os, sys
+import shutil
 from time import time
 import dotenv
 import network.network as ntwk
@@ -20,11 +21,11 @@ else:
 ENV = dotenv.dotenv_values(".env")
 
 
-def run_simulation(vehicleIds_to_routes:dict):
+def run_simulation(vehicleIds_to_routes:dict, has_gui:bool=False):
     temp_file_name = "tmp_" + str(round(time()))
     road_network = grid.GridNetwork()
     path = road_network.generateFile(temp_file_name)
-    if ("--no-gui" in sys.argv):
+    if not has_gui:
         sumoBinary = sumolib.checkBinary("sumo")
     else:
         sumoBinary = sumolib.checkBinary("sumo-gui")
@@ -48,11 +49,15 @@ def run_simulation(vehicleIds_to_routes:dict):
         step += 1
     
     traci.close()
+    shutil.rmtree("temp")
 
 
 if __name__ == "__main__":
+    # TODO: Replace w/ config
     vehicleIds_to_routes = {
-        "aaa"   :   "route_0",
-        "bbb"   :   "route_1"
+        "aaa"   :   "r0",
     }
-    run_simulation(vehicleIds_to_routes)
+    if "--gui" in sys.argv:
+        run_simulation(vehicleIds_to_routes, has_gui=True)
+    else:
+        run_simulation(vehicleIds_to_routes, has_gui=False)
