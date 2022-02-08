@@ -1,5 +1,14 @@
-network-type: "random"
-steps: 3600
+network-type: "grid"
+
+# Settings specific to the "random" map type
+random-iterations: 10
+
+# Settings specific to the "grid" map type
+
+# Settings specific to the "spider" map type
+
+
+steps: 200
 vehicle-groups:
   group-1:
     policy-type: "default"

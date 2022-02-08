@@ -29,7 +29,7 @@ except:
 def get_network():
     try:
         if CONFIG["network-type"] == "random":
-            network = ntwk.Network()
+            network = ntwk.Network(CONFIG["random-iterations"])
         elif CONFIG["network-type"] == "grid":
             network = grid.GridNetwork()
         elif CONFIG["network-type"] == "spider":
@@ -42,6 +42,7 @@ def get_network():
 def run_simulation(has_gui:bool=False):
     temp_file_name = "tmp_" + str(round(time()))
     road_network:ntwk.Network = get_network()
+    route_steps = CONFIG["steps"]
     path = road_network.generateFile(temp_file_name)
     if not has_gui:
         sumoBinary = sumolib.checkBinary("sumo")
@@ -58,7 +59,7 @@ def run_simulation(has_gui:bool=False):
     print(shepherd.vehicles)
     
     step = 0
-    while step < 100 and len(shepherd.vehicles) > 0:
+    while step < route_steps and len(shepherd.vehicles) > 0:
         traci.simulationStep()
 
         shepherd.update_vehicles()
