@@ -8,9 +8,9 @@ class Network:
 
     TEMP_FILE_DIRECTORY = "temp"
 
-    def __init__(self, rand_iters:int=200):
+    def __init__(self, settings:dict):
         self.routeIds = []
-        self.rand_iters = rand_iters
+        self.settings = settings
 
 
     def generateFile(self, output_file_name:str):
@@ -64,7 +64,13 @@ class Network:
 
 
     def generateNetwork(self, network_file_path:str):
-        netgen_cmd = "netgenerate --rand --rand.iterations=" + str(self.rand_iters) + " --output-file=" + network_file_path
+        netgen_cmd = "netgenerate --rand" + " --output-file=" + network_file_path
+        #settings_cmd =  " --rand.iterations=" + str(self.settings["iterations"]) + " --"
+        settings_cmd = " --bidi-probability=" + str(self.settings["bidi-probability"])
+        for key in self.settings:
+            if not key == "bidi-probability":
+                settings_cmd += " --rand." + str(key) + "=" + str(self.settings[key])
+        netgen_cmd += settings_cmd
         os.system(netgen_cmd)
         
 

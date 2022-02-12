@@ -29,11 +29,11 @@ except:
 def get_network():
     try:
         if CONFIG["network-type"] == "random":
-            network = ntwk.Network(CONFIG["random-iterations"])
+            network = ntwk.Network(CONFIG["random-settings"])
         elif CONFIG["network-type"] == "grid":
-            network = grid.GridNetwork()
+            network = grid.GridNetwork(CONFIG["grid-settings"])
         elif CONFIG["network-type"] == "spider":
-            network = spider.SpiderNetwork()
+            network = spider.SpiderNetwork(CONFIG["spider-settings"])
         return network
     except:
         pass
