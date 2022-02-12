@@ -1,11 +1,32 @@
-network-type: "grid"
+network-type: "random"
 
 # Settings specific to the "random" map type
-random-iterations: 10
+random-settings:
+  iterations: 10
+  bidi-probability: 1
+  max-distance: 250
+  min-distance: 100
+  min-angle: 45
+  num-tries: 50
+  connectivity: 0.95
 
 # Settings specific to the "grid" map type
+grid-settings:
+  number: 5
+  length: 100
+  x-number: 5
+  y-number: 5
+  x-length: 100
+  y-length: 100
+  x-attach-length: 0
+  y-attach-length: 0
 
 # Settings specific to the "spider" map type
+spider-settings:
+  arm-number: 13
+  circle-number: 20
+  space-radius: 100
+  omit-center: false
 
 
 steps: 200
