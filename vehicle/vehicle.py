@@ -18,12 +18,16 @@ class Vehicle:
         self.conflictResolutionProtocol = VehicleProtocol()
     
 
+    def set_conflict_resolution_protocol(self, protocol:VehicleProtocol):
+        self.conflictResolutionProtocol = protocol
+    
+
     def add_to_route(self, routeId):
         traci.vehicle.add(self.vehicleId, routeId)
         self.currentRoute = list(traci.route.getEdges(routeId))
-        print(self.currentRoute)
-        print(str(traci.junction.getIDList()))
-        print(str(traci.vehicle.getLaneID(self.vehicleId)))
+        #print(self.currentRoute)
+        #print(str(traci.junction.getIDList()))
+        #print(str(traci.vehicle.getLaneID(self.vehicleId)))
 
         # Set a constant speed
         # TODO: Change this
@@ -44,8 +48,8 @@ class Vehicle:
         self.currentGridPosition = grid.position_to_grid_square(self.currentPosition)
         message:str = "Position of " + self.vehicleId + ": " + str(self.currentPosition) + "\n"
         message += "Grid position of " + self.vehicleId + ": " + str(self.currentGridPosition)
-        print(message)
-        print("Vehicles that conflict with " + self.vehicleId + ": " + str(conflicting_vehicles))
+        #print(message)
+        #print("Vehicles that conflict with " + self.vehicleId + ": " + str(conflicting_vehicles))
         self.actBasedOnState()
     
 

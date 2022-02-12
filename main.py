@@ -8,8 +8,8 @@ import network.grid_network as grid
 import network.spider_network as spider
 import traci
 import sumolib
-import vehicle
 from vehicle import vehicle_shepherd
+import yaml
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -19,11 +19,30 @@ else:
     sys.exit("Please declare the environment variable 'SUMO_HOME'")
 
 ENV = dotenv.dotenv_values(".env")
+try: 
+    with open("config.yaml", "r") as stream:
+        CONFIG = yaml.safe_load(stream)
+except:
+    pass
 
 
-def run_simulation(vehicleIds_to_routes:dict, has_gui:bool=False):
+def get_network():
+    try:
+        if CONFIG["network-type"] == "random":
+            network = ntwk.Network(CONFIG["random-settings"])
+        elif CONFIG["network-type"] == "grid":
+            network = grid.GridNetwork(CONFIG["grid-settings"])
+        elif CONFIG["network-type"] == "spider":
+            network = spider.SpiderNetwork(CONFIG["spider-settings"])
+        return network
+    except:
+        pass
+
+
+def run_simulation(has_gui:bool=False):
     temp_file_name = "tmp_" + str(round(time()))
-    road_network = grid.GridNetwork()
+    road_network:ntwk.Network = get_network()
+    route_steps = CONFIG["steps"]
     path = road_network.generateFile(temp_file_name)
     if not has_gui:
         sumoBinary = sumolib.checkBinary("sumo")
@@ -36,10 +55,11 @@ def run_simulation(vehicleIds_to_routes:dict, has_gui:bool=False):
     traci.start(sumoCmd)
 
     shepherd = vehicle_shepherd.VehicleShepherd()
-    shepherd.add_vehicles(vehicleIds_to_routes)
+    shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
+    print(shepherd.vehicles)
     
     step = 0
-    while step < 100 and len(shepherd.vehicles) > 0:
+    while step < route_steps and len(shepherd.vehicles) > 0:
         traci.simulationStep()
 
         shepherd.update_vehicles()
@@ -53,11 +73,9 @@ def run_simulation(vehicleIds_to_routes:dict, has_gui:bool=False):
 
 
 if __name__ == "__main__":
+    print(CONFIG)
     # TODO: Replace w/ config
-    vehicleIds_to_routes = {
-        "aaa"   :   "r0",
-    }
     if "--gui" in sys.argv:
-        run_simulation(vehicleIds_to_routes, has_gui=True)
+        run_simulation(has_gui=True)
     else:
-        run_simulation(vehicleIds_to_routes, has_gui=False)
+        run_simulation(has_gui=False)

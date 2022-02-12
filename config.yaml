@@ -1,26 +1,34 @@
-road_map:
-  nodes: 
-    node1: 
-      x: 50.0
-      y: 0.0
-    node2:
-      x: 0.0
-      y: 0.0
-    node3:
-      x: 0.0
-      y: 50.0
-  
-  edges:
-    # nodeId: "fromNode toNode"
-    "1" : "node1 node2"
-    "2" : "node2 node3"
-    "3" : "node2 node1"
+network-type: "spider"
 
-  routes:
-    route1:
-      edges:
-        - "1"
-        - "2"
-    route2:
-      edges:
-        - "3"
+# Settings specific to the "random" map type
+random-settings:
+  iterations: 10
+  bidi-probability: 1
+  max-distance: 250
+  min-distance: 100
+  min-angle: 45
+  num-tries: 50
+  connectivity: 0.95
+
+# Settings specific to the "grid" map type
+grid-settings:
+  x-number: 5
+  y-number: 5
+  x-length: 100
+  y-length: 100
+  x-attach-length: 0
+  y-attach-length: 0
+
+# Settings specific to the "spider" map type
+spider-settings:
+  arm-number: 13
+  circle-number: 20
+  space-radius: 100
+  omit-center: false
+
+
+steps: 200
+vehicle-groups:
+  group-1:
+    policy-type: "default"
+    num: 10
