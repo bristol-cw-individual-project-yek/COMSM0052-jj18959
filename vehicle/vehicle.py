@@ -1,7 +1,7 @@
 from numpy import Infinity
 from vehicle.vehicle_conflict_detection import ConflictDetectionAlgorithm
 from vehicle.vehicle_state import VehicleState
-from vehicle.vehicle_protocol import VehicleProtocol
+from vehicle.vehicle_policy import VehiclePolicy
 import vehicle.grid as grid
 import traci
 
@@ -15,11 +15,11 @@ class Vehicle:
         self.currentPosition = (Infinity, Infinity)
         self.currentGridPosition = (Infinity, Infinity)
         self.conflictDetectionAlgorithm = ConflictDetectionAlgorithm()
-        self.conflictResolutionProtocol = VehicleProtocol()
+        self.conflictResolutionPolicy = VehiclePolicy()
     
 
-    def set_conflict_resolution_protocol(self, protocol:VehicleProtocol):
-        self.conflictResolutionProtocol = protocol
+    def set_conflict_resolution_protocol(self, policy:VehiclePolicy):
+        self.conflictResolutionPolicy = policy
     
 
     def add_to_route(self, routeId):
@@ -42,7 +42,7 @@ class Vehicle:
 
     def update(self, vehicles:dict):
         conflicting_vehicles = self.conflictDetectionAlgorithm.detect_conflicts(self, vehicles)
-        self.currentState = self.conflictResolutionProtocol.decide_state(self, conflicting_vehicles)
+        self.currentState = self.conflictResolutionPolicy.decide_state(self, conflicting_vehicles)
         self.currentRouteIndex = traci.vehicle.getRouteIndex(self.vehicleId)
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
         self.currentGridPosition = grid.position_to_grid_square(self.currentPosition)
