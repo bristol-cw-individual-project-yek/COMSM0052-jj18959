@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 
 from torch import rand
 import randomTrips
+import sumolib
 
 class Network:
 
@@ -11,6 +12,7 @@ class Network:
     def __init__(self, settings:dict):
         self.routeIds = []
         self.settings = settings
+        self.net:sumolib.net.Net = None
 
 
     def generateFile(self, output_file_name:str):
@@ -20,6 +22,7 @@ class Network:
         network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
 
         self.generateNetwork(network_file_path)
+        self.net = sumolib.net.readNet(network_file_path)
         
         self.generateRandomRoutes(network_file_path)
 
@@ -72,5 +75,6 @@ class Network:
                 settings_cmd += " --rand." + str(key) + "=" + str(self.settings[key])
         netgen_cmd += settings_cmd
         os.system(netgen_cmd)
+        
         
 

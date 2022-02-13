@@ -2,11 +2,13 @@ from vehicle.vehicle import Vehicle
 from vehicle.custom_policy import CustomPolicy
 import random
 import traci
+from network.network import Network
 
 class VehicleShepherd:
 
-    def __init__(self):
-        self.vehicles = {}
+    def __init__(self, network:Network):
+        self.vehicles:dict = {}
+        self.network:Network = network
     
 
     # TODO: Write test for this
@@ -36,7 +38,8 @@ class VehicleShepherd:
         # Update all active vehicles
         for vId in self.vehicles:
             try:
-                self.vehicles[vId].update(self.vehicles)
+                vehicle:Vehicle = self.vehicles[vId]
+                vehicle.update(self.vehicles, self.network)
             except traci.exceptions.TraCIException as e:
                 print(e)
                 vIds_to_be_removed.append(vId)
