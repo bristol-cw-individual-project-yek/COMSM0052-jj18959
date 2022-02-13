@@ -10,12 +10,6 @@ class ConflictDetection:
         return manhattan_distance
     
 
-    def get_next_junction(self, vehicle, network:Network):
-        current_edge = vehicle.currentRoute[vehicle.currentRouteIndex]
-        next_junction = network.net.getEdge(current_edge).getToNode()
-        return next_junction
-    
-
     def get_vehicles_on_edge(self, edge, vehicle_list:list):
         valid_vehicles = []
         edge_id = edge.getID()
@@ -29,7 +23,7 @@ class ConflictDetection:
         visible_vehicles = list(vehicles.values())    # TODO: change this
         result = []
 
-        next_junction = self.get_next_junction(vehicle, network)
+        next_junction = vehicle.get_next_junction(network)
         incoming_edges = next_junction.getIncoming()
         incoming_vehicles = []
         for edge in incoming_edges:

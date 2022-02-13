@@ -61,3 +61,9 @@ class Vehicle:
             traci.vehicle.setSpeed(self.vehicleId, 1)
         elif self.currentState == VehicleState.WAITING:
             traci.vehicle.setSpeed(self.vehicleId, 0)
+    
+
+    def get_next_junction(self, network:Network):
+        current_edge = self.currentRoute[self.currentRouteIndex]
+        next_junction = network.net.getEdge(current_edge).getToNode()
+        return next_junction
