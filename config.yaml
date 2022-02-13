@@ -1,4 +1,4 @@
-network-type: "spider"
+network-type: "grid"
 
 # Settings specific to the "random" map type
 random-settings:
@@ -12,10 +12,10 @@ random-settings:
 
 # Settings specific to the "grid" map type
 grid-settings:
-  x-number: 5
-  y-number: 5
-  x-length: 100
-  y-length: 100
+  x-number: 2
+  y-number: 2
+  x-length: 50
+  y-length: 50
   x-attach-length: 0
   y-attach-length: 0
 

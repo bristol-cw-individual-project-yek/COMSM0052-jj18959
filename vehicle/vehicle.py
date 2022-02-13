@@ -1,9 +1,10 @@
 from numpy import Infinity
-from vehicle.vehicle_conflict_detection import ConflictDetectionAlgorithm
+from vehicle.vehicle_conflict_detection import ConflictDetection
 from vehicle.vehicle_state import VehicleState
 from vehicle.vehicle_policy import VehiclePolicy
 import vehicle.grid as grid
 import traci
+from network.network import Network
 
 class Vehicle:
 
@@ -14,7 +15,7 @@ class Vehicle:
         self.currentRouteIndex = -1
         self.currentPosition = (Infinity, Infinity)
         self.currentGridPosition = (Infinity, Infinity)
-        self.conflictDetectionAlgorithm = ConflictDetectionAlgorithm()
+        self.conflictDetectionAlgorithm = ConflictDetection()
         self.conflictResolutionPolicy = VehiclePolicy()
     
 
@@ -40,12 +41,14 @@ class Vehicle:
         traci.vehicle.setDecel(self.vehicleId, 99999)
 
 
-    def update(self, vehicles:dict):
-        conflicting_vehicles = self.conflictDetectionAlgorithm.detect_conflicts(self, vehicles)
-        self.currentState = self.conflictResolutionPolicy.decide_state(self, conflicting_vehicles)
+    def update(self, vehicles:dict, network:Network):
         self.currentRouteIndex = traci.vehicle.getRouteIndex(self.vehicleId)
+        if self.currentRouteIndex < 0:
+            self.currentRouteIndex = 0
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
         self.currentGridPosition = grid.position_to_grid_square(self.currentPosition)
+        conflicting_vehicles = self.conflictDetectionAlgorithm.detect_conflicts(self, vehicles, network)
+        self.currentState = self.conflictResolutionPolicy.decide_state(self, conflicting_vehicles)
         message:str = "Position of " + self.vehicleId + ": " + str(self.currentPosition) + "\n"
         message += "Grid position of " + self.vehicleId + ": " + str(self.currentGridPosition)
         #print(message)
