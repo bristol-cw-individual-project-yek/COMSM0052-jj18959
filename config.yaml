@@ -32,3 +32,7 @@ vehicle-groups:
   group-1:
     policy-type: "default"
     num: 10
+  group-2:
+    policy-type: "custom"
+    policy-path: "test_custom.py"
+    num: 1

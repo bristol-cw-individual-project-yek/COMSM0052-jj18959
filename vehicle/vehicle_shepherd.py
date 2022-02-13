@@ -1,4 +1,5 @@
 from vehicle.vehicle import Vehicle
+from vehicle.custom_policy import CustomPolicy
 import random
 import traci
 
@@ -18,6 +19,10 @@ class VehicleShepherd:
                 policyType = vehicleGroups[group]["policy-type"]
                 if policyType == "default":
                     pass
+                elif policyType == "custom":
+                    path = vehicleGroups[group]["policy-path"]
+                    custom_policy = CustomPolicy(path)
+                    vehicle.set_conflict_resolution_policy(custom_policy)
 
                 routeId = routeIds[random.randint(0, len(routeIds) - 1)]
                 vehicle.add_to_route(routeId)

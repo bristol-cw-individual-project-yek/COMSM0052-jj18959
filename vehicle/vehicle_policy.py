@@ -1,6 +1,6 @@
 from vehicle.vehicle_state import VehicleState
 
-class VehicleProtocol:
+class VehiclePolicy:
     
     # Default conflict resolution protocol.
     # If any conflicting vehicles are detected that are driving, the vehicle just stops
