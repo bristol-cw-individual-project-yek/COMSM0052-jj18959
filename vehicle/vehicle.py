@@ -69,3 +69,10 @@ class Vehicle:
         current_edge = self.currentRoute[self.currentRouteIndex]
         next_junction = network.net.getEdge(current_edge).getToNode()
         return next_junction
+    
+
+    def get_distance_to_junction(self):
+        junction_pos = self.nextJunction.getCoord()
+        distance_x = abs(junction_pos[0] - self.currentPosition[0])
+        distance_y = abs(junction_pos[1] - self.currentPosition[1])
+        return (distance_x ** 2 + distance_y ** 2) ** 0.5
