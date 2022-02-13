@@ -1,0 +1,38 @@
+network-type: "grid"
+
+# Settings specific to the "random" map type
+random-settings:
+  iterations: 10
+  bidi-probability: 1
+  max-distance: 250
+  min-distance: 100
+  min-angle: 45
+  num-tries: 50
+  connectivity: 0.95
+
+# Settings specific to the "grid" map type
+grid-settings:
+  x-number: 2
+  y-number: 2
+  x-length: 50
+  y-length: 50
+  x-attach-length: 0
+  y-attach-length: 0
+
+# Settings specific to the "spider" map type
+spider-settings:
+  arm-number: 13
+  circle-number: 20
+  space-radius: 100
+  omit-center: false
+
+
+steps: 200
+vehicle-groups:
+  group-1:
+    policy-type: "default"
+    num: 10
+  group-2:
+    policy-type: "custom"
+    policy-path: "test_custom.py"
+    num: 1
