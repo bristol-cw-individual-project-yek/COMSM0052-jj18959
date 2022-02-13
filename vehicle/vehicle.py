@@ -1,7 +1,7 @@
 from numpy import Infinity
 from vehicle.vehicle_conflict_detection import ConflictDetection
 from vehicle.vehicle_state import VehicleState
-from vehicle.vehicle_policy import VehiclePolicy
+from vehicle.policy.policy import Policy
 import vehicle.grid as grid
 import traci
 from network.network import Network
@@ -16,11 +16,11 @@ class Vehicle:
         self.currentPosition = (Infinity, Infinity)
         self.currentGridPosition = (Infinity, Infinity)
         self.conflictDetectionAlgorithm = ConflictDetection()
-        self.conflictResolutionPolicy = VehiclePolicy()
+        self.conflictResolutionPolicy = Policy()
         self.nextJunction = None
     
 
-    def set_conflict_resolution_policy(self, policy:VehiclePolicy):
+    def set_conflict_resolution_policy(self, policy:Policy):
         self.conflictResolutionPolicy = policy
     
 

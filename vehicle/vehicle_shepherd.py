@@ -1,5 +1,5 @@
 from vehicle.vehicle import Vehicle
-from vehicle.custom_policy import CustomPolicy
+from vehicle.policy.custom_policy import CustomPolicy
 import random
 import traci
 from network.network import Network
