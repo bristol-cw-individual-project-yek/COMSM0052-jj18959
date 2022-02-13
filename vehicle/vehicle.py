@@ -18,7 +18,7 @@ class Vehicle:
         self.conflictResolutionPolicy = VehiclePolicy()
     
 
-    def set_conflict_resolution_protocol(self, policy:VehiclePolicy):
+    def set_conflict_resolution_policy(self, policy:VehiclePolicy):
         self.conflictResolutionPolicy = policy
     
 
