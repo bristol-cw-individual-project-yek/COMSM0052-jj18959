@@ -115,3 +115,4 @@ dmypy.json
 
 # Temporary files
 temp
+config.yaml
