@@ -1,5 +1,7 @@
 from vehicle.vehicle import Vehicle
 from vehicle.policy.custom_policy import CustomPolicy
+from vehicle.policy.policy import Policy
+from vehicle.policy.first_come_first_serve_policy import FirstComeFirstServePolicy
 import random
 import traci
 from network.network import Network
@@ -19,13 +21,14 @@ class VehicleShepherd:
                 vehicle:Vehicle = Vehicle(vId)
 
                 policyType = vehicleGroups[group]["policy-type"]
-                if policyType == "default":
-                    pass
-                elif policyType == "custom":
+                if policyType == "custom":
                     path = vehicleGroups[group]["policy-path"]
-                    custom_policy = CustomPolicy(path)
-                    vehicle.set_conflict_resolution_policy(custom_policy)
-
+                    policy = CustomPolicy(path)
+                elif policyType == "first-come-first-serve" or policyType == "fcfs":
+                    policy = FirstComeFirstServePolicy()
+                else:
+                    policy = Policy()
+                vehicle.set_conflict_resolution_policy(policy)
                 routeId = routeIds[random.randint(0, len(routeIds) - 1)]
                 vehicle.add_to_route(routeId)
                 self.vehicles[vId] = vehicle
