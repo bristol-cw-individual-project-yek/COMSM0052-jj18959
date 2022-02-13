@@ -23,7 +23,7 @@ class ConflictDetection:
         visible_vehicles = list(vehicles.values())    # TODO: change this
         result = []
 
-        next_junction = vehicle.get_next_junction(network)
+        next_junction = vehicle.nextJunction
         incoming_edges = next_junction.getIncoming()
         incoming_vehicles = []
         for edge in incoming_edges:

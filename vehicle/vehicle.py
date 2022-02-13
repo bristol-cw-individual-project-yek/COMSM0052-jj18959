@@ -17,6 +17,7 @@ class Vehicle:
         self.currentGridPosition = (Infinity, Infinity)
         self.conflictDetectionAlgorithm = ConflictDetection()
         self.conflictResolutionPolicy = VehiclePolicy()
+        self.nextJunction = None
     
 
     def set_conflict_resolution_policy(self, policy:VehiclePolicy):
@@ -45,6 +46,7 @@ class Vehicle:
         self.currentRouteIndex = traci.vehicle.getRouteIndex(self.vehicleId)
         if self.currentRouteIndex < 0:
             self.currentRouteIndex = 0
+        self.nextJunction = self.get_next_junction(network)
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
         self.currentGridPosition = grid.position_to_grid_square(self.currentPosition)
         conflicting_vehicles = self.conflictDetectionAlgorithm.detect_conflicts(self, vehicles, network)
