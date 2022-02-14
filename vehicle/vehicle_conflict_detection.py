@@ -1,5 +1,3 @@
-from network.network import Network
-
 class ConflictDetection:
     MANHATTAN_DISTANCE_LIMIT = 2
 
@@ -19,7 +17,7 @@ class ConflictDetection:
         return valid_vehicles
 
 
-    def detect_conflicts(self, vehicle, vehicles:dict, network:Network):
+    def detect_conflicts(self, vehicle, vehicles:dict):
         visible_vehicles = list(vehicles.values())    # TODO: change this
         result = []
 
