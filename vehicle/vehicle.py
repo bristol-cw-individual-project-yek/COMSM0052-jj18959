@@ -24,9 +24,10 @@ class Vehicle:
         self.conflictResolutionPolicy = policy
     
 
-    def add_to_route(self, routeId):
+    def add_to_route(self, routeId, network):
         traci.vehicle.add(self.vehicleId, routeId)
         self.currentRoute = list(traci.route.getEdges(routeId))
+        self.nextJunction = self.get_next_junction(network)
         #print(self.currentRoute)
         #print(str(traci.junction.getIDList()))
         #print(str(traci.vehicle.getLaneID(self.vehicleId)))
@@ -49,7 +50,7 @@ class Vehicle:
         self.nextJunction = self.get_next_junction(network)
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
         self.currentGridPosition = grid.position_to_grid_square(self.currentPosition)
-        conflicting_vehicles = self.conflictDetectionAlgorithm.detect_conflicts(self, vehicles)
+        conflicting_vehicles = self.conflictDetectionAlgorithm.detect_other_vehicles(self, vehicles)
         self.currentState = self.conflictResolutionPolicy.decide_state(self, conflicting_vehicles)
         message:str = "Position of " + self.vehicleId + ": " + str(self.currentPosition) + "\n"
         message += "Grid position of " + self.vehicleId + ": " + str(self.currentGridPosition)
@@ -92,3 +93,7 @@ class Vehicle:
         distance_x = abs(vector1[0] - vector2[0])
         distance_y = abs(vector1[1] - vector2[1])
         return (distance_x ** 2 + distance_y ** 2) ** 0.5
+    
+
+    def get_current_edge(self):
+        return self.currentRoute[self.currentRouteIndex]

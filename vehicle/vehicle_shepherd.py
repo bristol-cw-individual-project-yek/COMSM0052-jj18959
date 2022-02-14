@@ -30,7 +30,7 @@ class VehicleShepherd:
                     policy = Policy()
                 vehicle.set_conflict_resolution_policy(policy)
                 routeId = routeIds[random.randint(0, len(routeIds) - 1)]
-                vehicle.add_to_route(routeId)
+                vehicle.add_to_route(routeId, self.network)
                 self.vehicles[vId] = vehicle
                 routeIds.remove(routeId)
     
