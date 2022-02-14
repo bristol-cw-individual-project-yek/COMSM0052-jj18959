@@ -76,3 +76,10 @@ class Vehicle:
         distance_x = abs(junction_pos[0] - self.currentPosition[0])
         distance_y = abs(junction_pos[1] - self.currentPosition[1])
         return (distance_x ** 2 + distance_y ** 2) ** 0.5
+    
+
+    def get_distance_to_vehicle(self, vehicle):
+        other_vehicle_pos = vehicle.currentPosition
+        distance_x = abs(other_vehicle_pos[0] - self.currentPosition[0])
+        distance_y = abs(other_vehicle_pos[1] - self.currentPosition[1])
+        return (distance_x ** 2 + distance_y ** 2) ** 0.5
