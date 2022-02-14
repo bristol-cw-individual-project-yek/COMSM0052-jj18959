@@ -71,14 +71,21 @@ class Vehicle:
         return next_junction
     
 
-    def get_distance_to_junction(self):
-        junction_pos = self.nextJunction.getCoord()
+    def get_distance_to_junction(self, junction=None):
+        if junction:
+            junction_pos = junction.getCoord()
+        else:
+            junction_pos = self.get_next_junction_pos()
         return Vehicle.get_distance(self.currentPosition, junction_pos)
     
 
     def get_distance_to_vehicle(self, vehicle):
         other_vehicle_pos = vehicle.currentPosition
         return Vehicle.get_distance(self.currentPosition, other_vehicle_pos)
+    
+
+    def get_next_junction_pos(self):
+        return self.nextJunction.getCoord()
     
 
     def get_distance(vector1:tuple, vector2:tuple):
