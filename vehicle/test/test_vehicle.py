@@ -12,8 +12,12 @@ class TestVehicle(unittest.TestCase):
         self.assertEqual(vehicle1.get_distance_to_vehicle(vehicle2), 5)
 
     
-    def test_get_distance_to_junction(self):
+    def test_get_direction_to_vehicle(self):
         vehicle1 = Vehicle("1")
+        vehicle2 = Vehicle("2")
+        vehicle1.currentPosition = (0, 0)
+        vehicle2.currentPosition = (3, 4)
+        self.assertAlmostEqual(vehicle1.get_direction_to_vehicle(vehicle2), 143.1, 1)
         
 
 if __name__ == "__main__":

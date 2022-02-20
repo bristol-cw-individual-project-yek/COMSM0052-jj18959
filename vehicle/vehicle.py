@@ -4,6 +4,7 @@ from vehicle.vehicle_state import VehicleState
 from vehicle.policy.policy import Policy
 import vehicle.grid as grid
 import traci
+import math
 from network.network import Network
 
 class Vehicle:
@@ -18,6 +19,7 @@ class Vehicle:
         self.conflictDetectionAlgorithm = ConflictDetection()
         self.conflictResolutionPolicy = Policy()
         self.nextJunction = None
+        self.visibilityAngle = 60   # in degrees
     
 
     def set_conflict_resolution_policy(self, policy:Policy):
@@ -97,3 +99,9 @@ class Vehicle:
 
     def get_current_edge(self):
         return self.currentRoute[self.currentRouteIndex]
+
+
+    def get_direction_to_vehicle(self, other_vehicle):
+        diff_x = other_vehicle.currentPosition[0] - self.currentPosition[0]
+        diff_y = other_vehicle.currentPosition[1] - self.currentPosition[1]
+        return math.degrees(math.atan2(diff_y, diff_x)) + 90
