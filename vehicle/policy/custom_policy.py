@@ -1,7 +1,7 @@
-from vehicle.vehicle_policy import VehiclePolicy
+from vehicle.policy.policy import Policy
 import importlib
 
-class CustomPolicy(VehiclePolicy):
+class CustomPolicy(Policy):
     
     def __init__(self, module_path:str):
         new_path_arr = module_path.replace("/", ".").replace("\\", ".").split(".")

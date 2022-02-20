@@ -1,4 +1,5 @@
-from network.network import Network
+import sumolib.net as net
+from typing import Union
 
 class ConflictDetection:
     MANHATTAN_DISTANCE_LIMIT = 2
@@ -10,29 +11,39 @@ class ConflictDetection:
         return manhattan_distance
     
 
-    def get_vehicles_on_edge(self, edge, vehicle_list:list):
+    def get_vehicles_on_edge(self, edge:Union[net.edge.Edge, str], vehicle_list:list):
         valid_vehicles = []
-        edge_id = edge.getID()
+        if type(edge) is net.edge.Edge:
+            edge_id:str = edge.getID()
+        elif type(edge) is str:
+            edge_id:str = edge
+        else:
+            edge_id = None
         for vehicle in vehicle_list:
             if vehicle.currentRoute[vehicle.currentRouteIndex] == edge_id:
                 valid_vehicles.append(vehicle)
         return valid_vehicles
 
 
-    def detect_conflicts(self, vehicle, vehicles:dict, network:Network):
+    # Detect other surrounding vehicles, including:
+    # - Vehicles in the same lane
+    # - Vehicles approaching the same junction
+    def detect_other_vehicles(self, vehicle, vehicles:dict) -> dict:
         visible_vehicles = list(vehicles.values())    # TODO: change this
-        result = []
-
+        result = {}
+        result["visible"] = visible_vehicles
+        try:
+            result["visible"].remove(vehicle)
+            pass
+        except:
+            pass
+        result["same_lane"] = self.get_vehicles_on_edge(vehicle.get_current_edge(), visible_vehicles)
+        
         next_junction = vehicle.nextJunction
         incoming_edges = next_junction.getIncoming()
-        incoming_vehicles = []
+        vehicles_approaching_same_junction = []
         for edge in incoming_edges:
-            incoming_vehicles.extend(self.get_vehicles_on_edge(edge, visible_vehicles))
-
-        for other_vehicle in incoming_vehicles:
-            if other_vehicle.vehicleId != vehicle.vehicleId:
-                manhattan_distance = self.get_manhattan_distance(other_vehicle.currentGridPosition, vehicle.currentGridPosition)
-                if manhattan_distance <= self.MANHATTAN_DISTANCE_LIMIT:
-                    result.append(other_vehicle)
+            vehicles_approaching_same_junction.extend(self.get_vehicles_on_edge(edge, visible_vehicles))
+        result["same_junction"] = vehicles_approaching_same_junction
         
         return result
