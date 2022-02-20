@@ -62,7 +62,7 @@ class Vehicle:
     
 
     def actBasedOnState(self):
-        if self.currentState == VehicleState.DRIVING:
+        if self.currentState == VehicleState.DRIVING or self.currentState == VehicleState.CROSSING:
             traci.vehicle.setSpeed(self.vehicleId, 1)
         elif self.currentState == VehicleState.WAITING:
             traci.vehicle.setSpeed(self.vehicleId, 0)
