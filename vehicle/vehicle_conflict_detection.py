@@ -32,22 +32,18 @@ class ConflictDetection:
         visible_vehicles = list(vehicles.values())    # TODO: change this
         result = {}
         result["visible"] = visible_vehicles
-        result["same_lane"] = self.get_vehicles_on_edge(vehicle.get_current_edge(), visible_vehicles)
         try:
-            result["same_lane"].remove(vehicle)
+            result["visible"].remove(vehicle)
+            pass
         except:
             pass
-
+        result["same_lane"] = self.get_vehicles_on_edge(vehicle.get_current_edge(), visible_vehicles)
+        
         next_junction = vehicle.nextJunction
         incoming_edges = next_junction.getIncoming()
         vehicles_approaching_same_junction = []
         for edge in incoming_edges:
             vehicles_approaching_same_junction.extend(self.get_vehicles_on_edge(edge, visible_vehicles))
-        
         result["same_junction"] = vehicles_approaching_same_junction
-        try:
-            result["same_junction"].remove(vehicle)
-        except:
-            pass
         
         return result
