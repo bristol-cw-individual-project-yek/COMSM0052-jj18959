@@ -12,7 +12,7 @@ class FirstComeFirstServePolicy(Policy):
         
         #if vehicle.currentState == VehicleState.DRIVING or vehicle.currentState == VehicleState.WAITING:
         for other_vehicle in conflicting_vehicles["same_junction"]:
-            if (other_vehicle.get_distance_to_junction(next_junction) <= distance_to_junction or \
+            if (other_vehicle.get_distance_to_junction(next_junction) < distance_to_junction or \
                 other_vehicle.currentState == VehicleState.CROSSING) and \
                 vehicle.get_distance_to_junction(next_junction) <= FirstComeFirstServePolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION and other_vehicle.currentState != VehicleState.WAITING:
                 return VehicleState.WAITING
