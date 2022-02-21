@@ -13,6 +13,23 @@ class VehicleShepherd:
         self.network:Network = network
     
 
+    def add_vehicle_types(self, vehicleTypes:dict):
+        for vehicleType in vehicleTypes:
+            vehType = vehicleTypes[vehicleType]
+            traci.vehicletype.copy("DEFAULT_VEHTYPE", vehicleType)
+            traci.vehicletype.setHeight(vehicleType, vehType["height"])
+            traci.vehicletype.setWidth(vehicleType, vehType["width"])
+            traci.vehicletype.setLength(vehicleType, vehType["length"])
+            colourHex = vehType["colour"]
+            r = (colourHex >> 16) & 0xff
+            g = (colourHex >> 8) & 0xff
+            b = colourHex & 0xff
+            a = 0xff
+            traci.vehicletype.setColor(vehicleType, (r, g, b, a))
+
+        print("Vehicle types: " + str(traci.vehicletype.getIDList()))
+    
+
     # TODO: Write test for this
     def add_vehicles(self, vehicleGroups:dict, routeIds: list):
         for group in vehicleGroups:

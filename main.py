@@ -55,6 +55,7 @@ def run_simulation(has_gui:bool=False):
     traci.start(sumoCmd)
 
     shepherd = vehicle_shepherd.VehicleShepherd(road_network)
+    shepherd.add_vehicle_types(CONFIG["vehicle-types"])
     shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
     print(shepherd.vehicles)
     

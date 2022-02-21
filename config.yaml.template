@@ -35,5 +35,12 @@ vehicle-groups:
   group-2:
     policy-type: "custom"
     policy-path: "test_custom.py"
-    num: 0
+    num: 1
     vehicle-type: "bus"
+
+vehicle-types:
+  bus:
+    length: 10
+    width:  4
+    height: 5
+    colour: 0x00dbff
