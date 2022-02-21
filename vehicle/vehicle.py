@@ -22,6 +22,7 @@ class Vehicle:
         self.visibilityAngle = 60   # in degrees
         self.vehicleType = vehicleType
         self.speed = 1
+        self.priority = -1
     
 
     def set_vehicle_type(self, vehicle_type):
@@ -36,6 +37,11 @@ class Vehicle:
 
     def set_conflict_resolution_policy(self, policy:Policy):
         self.conflictResolutionPolicy = policy
+    
+
+    def set_priority(self, priority:int):
+        self.priority = priority
+        print("Priority of ", self.vehicleId, ": ", self.priority)
     
 
     def add_to_route(self, routeId, network):
@@ -78,6 +84,8 @@ class Vehicle:
             traci.vehicle.setSpeed(self.vehicleId, self.speed)
         elif self.currentState == VehicleState.WAITING:
             traci.vehicle.setSpeed(self.vehicleId, 0)
+        else:
+            traci.vehicle.setSpeed(self.vehicleId, self.speed)
     
 
     def get_next_junction(self, network:Network):

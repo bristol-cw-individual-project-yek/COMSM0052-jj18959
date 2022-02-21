@@ -61,6 +61,7 @@ class VehicleShepherd:
                     policy = Policy()
                 vehicle.set_conflict_resolution_policy(policy)
                 routeId = routeIds[random.randint(0, len(routeIds) - 1)]
+                vehicle.add_to_route(routeId, self.network)
                 if "vehicle-type" in vehGroup:
                     try:
                         vehType = vehGroup["vehicle-type"]
@@ -73,8 +74,10 @@ class VehicleShepherd:
                         vehicle.set_speed(self.vehicleTypes[vehType]["speed"])
                     except KeyError:
                         print(traceback.format_exc())
-                
-                vehicle.add_to_route(routeId, self.network)
+                try:
+                    vehicle.set_priority(vehGroup["priority"])
+                except KeyError:
+                    print(traceback.format_exc())
                 self.vehicles[vId] = vehicle
                 routeIds.remove(routeId)
     
