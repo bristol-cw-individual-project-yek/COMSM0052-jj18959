@@ -16,13 +16,13 @@ class VehicleShepherd:
     # TODO: Write test for this
     def add_vehicles(self, vehicleGroups:dict, routeIds: list):
         for group in vehicleGroups:
-            for i in range(vehicleGroups[group]["num"]):
+            vehGroup = vehicleGroups[group]
+            for i in range(vehGroup["num"]):
                 vId = group + "-" + str(i)
                 vehicle:Vehicle = Vehicle(vId)
-
-                policyType = vehicleGroups[group]["policy-type"]
+                policyType = vehGroup["policy-type"]
                 if policyType == "custom":
-                    path = vehicleGroups[group]["policy-path"]
+                    path = vehGroup["policy-path"]
                     policy = CustomPolicy(path)
                 elif policyType == "first-come-first-serve" or policyType == "fcfs":
                     policy = FirstComeFirstServePolicy()
@@ -31,6 +31,8 @@ class VehicleShepherd:
                 vehicle.set_conflict_resolution_policy(policy)
                 routeId = routeIds[random.randint(0, len(routeIds) - 1)]
                 vehicle.add_to_route(routeId, self.network)
+                if "vehicle-type" in vehGroup:
+                    vehicle.set_vehicle_type(vehGroup["vehicle-type"])
                 self.vehicles[vId] = vehicle
                 routeIds.remove(routeId)
     

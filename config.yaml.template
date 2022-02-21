@@ -35,4 +35,5 @@ vehicle-groups:
   group-2:
     policy-type: "custom"
     policy-path: "test_custom.py"
-    num: 1
+    num: 0
+    vehicle-type: "bus"

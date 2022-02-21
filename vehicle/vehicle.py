@@ -9,7 +9,7 @@ from network.network import Network
 
 class Vehicle:
 
-    def __init__(self, vehicleId):
+    def __init__(self, vehicleId, vehicleType="DEFAULT_VEHTYPE"):
         self.currentState = VehicleState.DRIVING
         self.vehicleId = vehicleId
         self.currentRoute = []
@@ -20,6 +20,12 @@ class Vehicle:
         self.conflictResolutionPolicy = Policy()
         self.nextJunction = None
         self.visibilityAngle = 60   # in degrees
+        self.vehicleType = vehicleType
+    
+
+    def set_vehicle_type(self, vehicle_type):
+        self.vehicleType = vehicle_type
+        traci.vehicle.setType(self.vehicleId, self.vehicleType)
     
 
     def set_conflict_resolution_policy(self, policy:Policy):
@@ -27,7 +33,7 @@ class Vehicle:
     
 
     def add_to_route(self, routeId, network):
-        traci.vehicle.add(self.vehicleId, routeId)
+        traci.vehicle.add(self.vehicleId, routeId, typeID=self.vehicleType)
         self.currentRoute = list(traci.route.getEdges(routeId))
         self.nextJunction = self.get_next_junction(network)
         #print(self.currentRoute)
