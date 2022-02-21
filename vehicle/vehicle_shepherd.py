@@ -3,6 +3,7 @@ from vehicle.vehicle import Vehicle
 from vehicle.policy.custom_policy import CustomPolicy
 from vehicle.policy.policy import Policy
 from vehicle.policy.first_come_first_serve_policy import FirstComeFirstServePolicy
+from vehicle.policy.priority_policy import PriorityPolicy
 import random
 import traci
 from network.network import Network
@@ -51,17 +52,12 @@ class VehicleShepherd:
             for i in range(vehGroup["num"]):
                 vId = group + "-" + str(i)
                 vehicle:Vehicle = Vehicle(vId)
-                policyType = vehGroup["policy-type"]
-                if policyType == "custom":
-                    path = vehGroup["policy-path"]
-                    policy = CustomPolicy(path)
-                elif policyType == "first-come-first-serve" or policyType == "fcfs":
-                    policy = FirstComeFirstServePolicy()
-                else:
-                    policy = Policy()
-                vehicle.set_conflict_resolution_policy(policy)
+
+                self.set_policy(vehicle, vehGroup)
+
                 routeId = routeIds[random.randint(0, len(routeIds) - 1)]
                 vehicle.add_to_route(routeId, self.network)
+
                 if "vehicle-type" in vehGroup:
                     try:
                         vehType = vehGroup["vehicle-type"]
@@ -78,6 +74,7 @@ class VehicleShepherd:
                     vehicle.set_priority(vehGroup["priority"])
                 except KeyError:
                     print(traceback.format_exc())
+                
                 self.vehicles[vId] = vehicle
                 routeIds.remove(routeId)
     
@@ -96,3 +93,17 @@ class VehicleShepherd:
         # Stop tracking any vehicles that no longer exist
         for vId in vIds_to_be_removed:
             self.vehicles.pop(vId)
+    
+
+    def set_policy(self, vehicle:Vehicle, vehGroup:dict):
+        policyType = vehGroup["policy-type"]
+        if policyType == "custom":
+            path = vehGroup["policy-path"]
+            policy = CustomPolicy(path)
+        elif policyType == "first-come-first-serve" or policyType == "fcfs":
+            policy = FirstComeFirstServePolicy()
+        elif policyType == "priority":
+            policy = PriorityPolicy()
+        else:
+            policy = Policy()
+        vehicle.set_conflict_resolution_policy(policy)
