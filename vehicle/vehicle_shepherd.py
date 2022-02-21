@@ -1,3 +1,4 @@
+import traceback
 from vehicle.vehicle import Vehicle
 from vehicle.policy.custom_policy import CustomPolicy
 from vehicle.policy.policy import Policy
@@ -10,23 +11,36 @@ class VehicleShepherd:
 
     def __init__(self, network:Network):
         self.vehicles:dict = {}
+        self.vehicleTypes:dict = {}
         self.network:Network = network
     
 
     def add_vehicle_types(self, vehicleTypes:dict):
+        self.vehicleTypes = vehicleTypes
         for vehicleType in vehicleTypes:
             vehType = vehicleTypes[vehicleType]
             traci.vehicletype.copy("DEFAULT_VEHTYPE", vehicleType)
-            traci.vehicletype.setHeight(vehicleType, vehType["height"])
-            traci.vehicletype.setWidth(vehicleType, vehType["width"])
-            traci.vehicletype.setLength(vehicleType, vehType["length"])
-            colourHex = vehType["colour"]
-            r = (colourHex >> 16) & 0xff
-            g = (colourHex >> 8) & 0xff
-            b = colourHex & 0xff
-            a = 0xff
-            traci.vehicletype.setColor(vehicleType, (r, g, b, a))
-
+            try:
+                traci.vehicletype.setHeight(vehicleType, vehType["height"])
+            except KeyError as e:
+                pass
+            try:
+                traci.vehicletype.setWidth(vehicleType, vehType["width"])
+            except KeyError as e:
+                pass
+            try:
+                traci.vehicletype.setLength(vehicleType, vehType["length"])
+            except KeyError as e:
+                pass
+            try:
+                colourHex = vehType["colour"]
+                r = (colourHex >> 16) & 0xff
+                g = (colourHex >> 8) & 0xff
+                b = colourHex & 0xff
+                a = 0xff
+                traci.vehicletype.setColor(vehicleType, (r, g, b, a))
+            except KeyError as e:
+                pass
         print("Vehicle types: " + str(traci.vehicletype.getIDList()))
     
 
@@ -47,9 +61,20 @@ class VehicleShepherd:
                     policy = Policy()
                 vehicle.set_conflict_resolution_policy(policy)
                 routeId = routeIds[random.randint(0, len(routeIds) - 1)]
-                vehicle.add_to_route(routeId, self.network)
                 if "vehicle-type" in vehGroup:
-                    vehicle.set_vehicle_type(vehGroup["vehicle-type"])
+                    try:
+                        vehType = vehGroup["vehicle-type"]
+                        vehicle.set_vehicle_type(vehType)
+                    except KeyError:
+                        print(traceback.format_exc())
+                    except traci.exceptions.TraCIException:
+                        print(traceback.format_exc())
+                    try:
+                        vehicle.set_speed(self.vehicleTypes[vehType]["speed"])
+                    except KeyError:
+                        print(traceback.format_exc())
+                
+                vehicle.add_to_route(routeId, self.network)
                 self.vehicles[vId] = vehicle
                 routeIds.remove(routeId)
     

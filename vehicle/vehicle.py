@@ -21,11 +21,17 @@ class Vehicle:
         self.nextJunction = None
         self.visibilityAngle = 60   # in degrees
         self.vehicleType = vehicleType
+        self.speed = 1
     
 
     def set_vehicle_type(self, vehicle_type):
         self.vehicleType = vehicle_type
         traci.vehicle.setType(self.vehicleId, self.vehicleType)
+    
+
+    def set_speed(self, speed):
+        self.speed = speed
+        print("Speed of ", self.vehicleId, ": ", self.speed)
     
 
     def set_conflict_resolution_policy(self, policy:Policy):
@@ -42,7 +48,7 @@ class Vehicle:
 
         # Set a constant speed
         # TODO: Change this
-        traci.vehicle.setSpeed(self.vehicleId, 1)
+        traci.vehicle.setSpeed(self.vehicleId, self.speed)
 
         # Disregard all checks regarding safe speed, maximum acceleration/deceleration, right of way at intersections and red lights
         traci.vehicle.setSpeedMode(self.vehicleId, 32)
@@ -69,7 +75,7 @@ class Vehicle:
 
     def actBasedOnState(self):
         if self.currentState == VehicleState.DRIVING or self.currentState == VehicleState.CROSSING:
-            traci.vehicle.setSpeed(self.vehicleId, 1)
+            traci.vehicle.setSpeed(self.vehicleId, self.speed)
         elif self.currentState == VehicleState.WAITING:
             traci.vehicle.setSpeed(self.vehicleId, 0)
     
