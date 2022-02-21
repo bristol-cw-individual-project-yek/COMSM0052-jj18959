@@ -32,7 +32,18 @@ vehicle-groups:
   group-1:
     policy-type: "default"
     num: 10
+    priority: 1
   group-2:
     policy-type: "custom"
     policy-path: "test_custom.py"
     num: 1
+    vehicle-type: "bus"
+    priority: 2
+
+vehicle-types:
+  bus:
+    length: 10
+    width:  4
+    height: 5
+    colour: 0x00dbff
+    speed: 0.5
