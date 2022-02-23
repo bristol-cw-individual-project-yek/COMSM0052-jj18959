@@ -10,7 +10,7 @@ from network.network import Network
 class Vehicle:
 
     def __init__(self, vehicleId, vehicleType="DEFAULT_VEHTYPE"):
-        self.currentState = VehicleState.DRIVING
+        self.currentState:VehicleState = VehicleState.DRIVING
         self.vehicleId = vehicleId
         self.currentRoute = []
         self.currentRouteIndex = -1
@@ -125,3 +125,22 @@ class Vehicle:
         diff_x = other_vehicle.currentPosition[0] - self.currentPosition[0]
         diff_y = other_vehicle.currentPosition[1] - self.currentPosition[1]
         return math.degrees(math.atan2(diff_y, diff_x)) + 90
+    
+
+    def get_data_as_dict(self):
+        if self.currentState:
+            stateStr = self.currentState.name
+        else:
+            stateStr = "n/a"
+        result = {
+            "id"            : self.vehicleId,
+            "type"          : self.vehicleType,
+            "state"         : stateStr,
+            "position"      : self.currentPosition,
+            "route"         : self.currentRoute,
+            "lane"          : self.currentRoute[self.currentRouteIndex],
+            "next_junction" : self.nextJunction.getID(),
+            "current_speed" : self.speed,
+            "priority"      : self.priority
+        }
+        return result

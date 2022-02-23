@@ -10,10 +10,12 @@ from network.network import Network
 
 class VehicleShepherd:
 
-    def __init__(self, network:Network):
+    def __init__(self, network:Network, log_data=False):
         self.vehicles:dict = {}
         self.vehicleTypes:dict = {}
+        self.vehicleGroups:dict = {}
         self.network:Network = network
+        self.log_data = log_data
     
 
     def add_vehicle_types(self, vehicleTypes:dict):
@@ -49,6 +51,7 @@ class VehicleShepherd:
     def add_vehicles(self, vehicleGroups:dict, routeIds: list):
         for group in vehicleGroups:
             vehGroup = vehicleGroups[group]
+            self.vehicleGroups[group] = {}
             for i in range(vehGroup["num"]):
                 vId = group + "-" + str(i)
                 vehicle:Vehicle = Vehicle(vId)
@@ -76,23 +79,36 @@ class VehicleShepherd:
                     print(traceback.format_exc())
                 
                 self.vehicles[vId] = vehicle
+                self.vehicleGroups[group][vId] = vehicle
                 routeIds.remove(routeId)
     
 
     def update_vehicles(self):
-        vIds_to_be_removed = []
+        data = {}
 
         # Update all active vehicles
-        for vId in self.vehicles:
-            try:
-                vehicle:Vehicle = self.vehicles[vId]
-                vehicle.update(self.vehicles, self.network)
-            except traci.exceptions.TraCIException as e:
-                print(e)
-                vIds_to_be_removed.append(vId)
-        # Stop tracking any vehicles that no longer exist
-        for vId in vIds_to_be_removed:
-            self.vehicles.pop(vId)
+        for group in self.vehicleGroups:
+            vIds_to_be_removed = []
+            vehGroup = self.vehicleGroups[group]
+            group_data = {}
+            for vId in vehGroup:
+                try:
+                    vehicle:Vehicle = self.vehicles[vId]
+                    vehicle.update(self.vehicles, self.network)
+                    if self.log_data:
+                        group_data[vehicle.vehicleId] = vehicle.get_data_as_dict()
+                except traci.exceptions.TraCIException as e:
+                    print(e)
+                    vIds_to_be_removed.append(vId)
+            # Stop tracking any vehicles that no longer exist
+            for vId in vIds_to_be_removed:
+                self.vehicles.pop(vId)
+                self.vehicleGroups[group].pop(vId)
+            if self.log_data:
+                data[group] = group_data
+        
+        if self.log_data:
+            return data
     
 
     def set_policy(self, vehicle:Vehicle, vehGroup:dict):
