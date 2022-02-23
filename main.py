@@ -42,7 +42,7 @@ def get_network():
         pass
 
 
-def run_simulation(has_gui:bool=False):
+def run_simulation(has_gui:bool=False, log_data:bool=False):
     temp_file_name = "tmp_" + str(round(time()))
     road_network:ntwk.Network = get_network()
     route_steps = CONFIG["steps"]
@@ -57,7 +57,7 @@ def run_simulation(has_gui:bool=False):
 
     traci.start(sumoCmd)
 
-    shepherd = vehicle_shepherd.VehicleShepherd(road_network, log_data=True)
+    shepherd = vehicle_shepherd.VehicleShepherd(road_network, log_data=log_data)
     shepherd.add_vehicle_types(CONFIG["vehicle-types"])
     shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
     print(shepherd.vehicles)
@@ -67,14 +67,16 @@ def run_simulation(has_gui:bool=False):
     while step < route_steps and len(shepherd.vehicles) > 0:
         traci.simulationStep()
 
-        data[step] = shepherd.update_vehicles()
+        if log_data:
+            data[step] = shepherd.update_vehicles()
         # Print collisions that are currently happening
         #print(traci.simulation.getCollisions())
         
         step += 1
     
     traci.close()
-    log_data_as_json(data)
+    if log_data:
+        log_data_as_json(data)
     shutil.rmtree("temp")
 
 
@@ -90,9 +92,11 @@ def log_data_as_json(data, filename=""):
 
 
 if __name__ == "__main__":
-    print(CONFIG)
-    # TODO: Replace w/ config
+    # TODO: Replace w/ config(?)
+    has_gui = False
+    log_data = True
     if "--gui" in sys.argv:
-        run_simulation(has_gui=True)
-    else:
-        run_simulation(has_gui=False)
+        has_gui = True
+    if "--log" in sys.argv:
+        log_data = True
+    run_simulation(has_gui=has_gui, log_data=log_data)
