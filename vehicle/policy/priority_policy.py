@@ -21,7 +21,6 @@ class PriorityPolicy(Policy):
             for other_vehicle in conflicting_vehicles["same_lane"]:
                 if vehicle.get_distance_to_vehicle(other_vehicle) < PriorityPolicy.MIN_DISTANCE_FROM_VEHICLE_SAME_LANE and \
                     other_vehicle.get_distance_to_junction(next_junction) <= distance_to_junction:
-                    #print("Same lane conflict")
                     return VehicleState.WAITING
         
         if distance_to_junction <= PriorityPolicy.MIN_CROSSING_DISTANCE_FROM_JUNCTION:
