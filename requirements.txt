@@ -2,4 +2,4 @@ python-dotenv
 traci
 sumolib
 pyyaml
-torch
+numpy
