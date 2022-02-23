@@ -1,7 +1,6 @@
 import os
 import xml.etree.ElementTree as ET
 
-from torch import rand
 import randomTrips
 import sumolib
 
