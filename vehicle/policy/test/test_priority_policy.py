@@ -3,10 +3,18 @@ from vehicle.policy.priority_policy import PriorityPolicy
 from vehicle.vehicle_state import VehicleState
 from vehicle.vehicle import Vehicle
 from sumolib.net.node import Node
+import os
+import sys
+
+if "SUMO_HOME" in os.environ:
+    tools = os.path.join(os.environ["SUMO_HOME"], "tools")
+    sys.path.append(tools)
+else:
+    sys.exit("Please declare the environment variable 'SUMO_HOME'")
 
 class TestPriorityPolicy(unittest.TestCase):
 
-    def test_fcfs(self):
+    def test_priority(self):
         vehicles = []
         positions = [(0, 10), (9, 10), (12, 10)]
         priorities = [2, 2, 1]
