@@ -8,10 +8,11 @@ class Network:
 
     TEMP_FILE_DIRECTORY = "temp"
 
-    def __init__(self, settings:dict):
-        self.routeIds = []
+    def __init__(self, settings:dict, route_seed:int):
+        self.routeIds:list = []
         self.settings:dict = settings
         self.net:sumolib.net.Net = None
+        self.route_seed:int = route_seed
 
 
     def generateFile(self, output_file_name:str):
@@ -46,6 +47,7 @@ class Network:
         trip_args = []
         trip_args.append("-n=" + network_file_path)
         trip_args.append("-o=" + trip_file_path)
+        trip_args.append("--seed=" + str(self.route_seed))
         randomTrips.main(randomTrips.get_options(args=trip_args))
         route_file_path = network_file_path.replace(".net", ".rou")
         routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + route_file_path + " --named-routes=true --route-steps=" + str(route_steps)
