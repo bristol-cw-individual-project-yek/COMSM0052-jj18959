@@ -76,16 +76,25 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     
     traci.close()
     if log_data:
-        log_data_as_json(data)
+        log_data_as_json(step_data=data, network=road_network)
     shutil.rmtree("temp")
 
 
-def log_data_as_json(data, filename=""):
+def log_data_as_json(step_data:dict, network:ntwk.Network, filename=""):
+    data = {
+        "steps"                 : CONFIG["steps"],
+        "vehicle_group_data"    : CONFIG["vehicle-groups"],
+        "vehicle_type_data"     : CONFIG["vehicle-types"],
+        "network_data"          : network.getData(),
+        "step_data"             : step_data,
+    }
+    data["network_data"] = CONFIG["network-type"]
     directory_name = "logs"
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
     if filename == "":
         filename = date.today().isoformat()
+    filename += ".json"
     with open(directory_name + "/" + filename, "w") as f:
         f.write(json.dumps(data, indent=4))
         f.close()

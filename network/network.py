@@ -10,7 +10,7 @@ class Network:
 
     def __init__(self, settings:dict):
         self.routeIds = []
-        self.settings = settings
+        self.settings:dict = settings
         self.net:sumolib.net.Net = None
 
 
@@ -67,13 +67,18 @@ class Network:
 
     def generateNetwork(self, network_file_path:str):
         netgen_cmd = "netgenerate --rand" + " --output-file=" + network_file_path
-        #settings_cmd =  " --rand.iterations=" + str(self.settings["iterations"]) + " --"
         settings_cmd = " --bidi-probability=" + str(self.settings["bidi-probability"])
         for key in self.settings:
             if not key == "bidi-probability":
                 settings_cmd += " --rand." + str(key) + "=" + str(self.settings[key])
         netgen_cmd += settings_cmd
         os.system(netgen_cmd)
-        
+    
+
+    def getData(self) -> dict:
+        data = {
+            "settings"  : self.settings
+        }
+        return data
         
 
