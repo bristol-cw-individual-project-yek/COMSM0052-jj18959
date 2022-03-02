@@ -2,6 +2,7 @@ from numpy import Infinity
 from vehicle.vehicle_conflict_detection import ConflictDetection
 from vehicle.vehicle_state import VehicleState
 from vehicle.policy.policy import Policy
+from vehicle.policy.custom_policy import CustomPolicy
 import vehicle.grid as grid
 import traci
 import math
@@ -138,6 +139,9 @@ class Vehicle:
         if include_metadata:
             result["type"]      = self.vehicleType
             result["policy"]    = type(self.conflictResolutionPolicy).__name__  # TODO: Figure out how to handle custom policies
+            if (result["policy"] == "CustomPolicy"):
+                policy:CustomPolicy = self.conflictResolutionPolicy
+                result["policy_path"] = policy.module_path
         if include_info:
             result.update({
                 "state"         : stateStr,
