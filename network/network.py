@@ -79,7 +79,8 @@ class Network:
 
     def getData(self) -> dict:
         data = {
-            "settings"  : self.settings
+            "settings"      : self.settings,
+            "route_seed"    : self.route_seed
         }
         return data
         

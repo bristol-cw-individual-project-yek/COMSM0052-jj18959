@@ -1,5 +1,5 @@
 from cgi import test
-from datetime import date
+from datetime import date, datetime
 import os, sys
 import shutil
 from time import time
@@ -81,20 +81,22 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
 
 
 def log_data_as_json(step_data:dict, network:ntwk.Network, filename=""):
+    network_data = network.getData()
     data = {
+        "network_data"          : network_data,
         "steps"                 : CONFIG["steps"],
         "vehicle_group_data"    : CONFIG["vehicle-groups"],
         "vehicle_type_data"     : CONFIG["vehicle-types"],
-        "network_data"          : network.getData(),
         "step_data"             : step_data,
     }
-    data["network_data"] = CONFIG["network-type"]
+    data["network_data"]["network_type"] = CONFIG["network-type"]
     directory_name = "logs"
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
     if filename == "":
-        filename = date.today().isoformat()
-    filename += ".json"
+        filename = datetime.today().isoformat().replace(":", "-", -1).split(".")[0]
+    if not filename.endswith(".json"):
+        filename += ".json"
     with open(directory_name + "/" + filename, "w") as f:
         f.write(json.dumps(data, indent=4))
         f.close()
