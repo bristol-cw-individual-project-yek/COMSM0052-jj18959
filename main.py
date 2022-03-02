@@ -1,5 +1,3 @@
-from cgi import test
-from datetime import date, datetime
 import os, sys
 import shutil
 from time import time
@@ -11,7 +9,7 @@ import traci
 import sumolib
 from vehicle import vehicle_shepherd
 import yaml
-import json
+from logger.logger import Logger
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -75,30 +73,8 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     
     traci.close()
     if log_data:
-        log_data_as_json(step_data=data, network=road_network, vehicle_metadata=vehicle_metadata)
+        Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, vehicle_metadata=vehicle_metadata)
     shutil.rmtree("temp")
-
-
-def log_data_as_json(step_data:dict, network:ntwk.Network, vehicle_metadata:dict={}, entry_folder_name=""):
-    network_data = network.getData()
-    data = {
-        "network_data"          : network_data,
-        "steps"                 : CONFIG["steps"],
-        "vehicle_group_data"    : CONFIG["vehicle-groups"],
-        "vehicle_type_data"     : CONFIG["vehicle-types"],
-        "vehicle_metadata"      : vehicle_metadata,
-        "step_data"             : step_data,
-    }
-    data["network_data"]["network_type"] = CONFIG["network-type"]
-    log_directory_name = "logs"
-    if not os.path.exists(log_directory_name):
-        os.makedirs(log_directory_name)
-    if entry_folder_name == "":
-        entry_folder_name = datetime.today().isoformat().replace(":", "-", -1).split(".")[0]
-    os.makedirs(log_directory_name + "/" + entry_folder_name)
-    with open(log_directory_name + "/" + entry_folder_name + "/" + "data.json", "w") as f:
-        f.write(json.dumps(data, indent=4))
-        f.close()
 
 
 if __name__ == "__main__":
