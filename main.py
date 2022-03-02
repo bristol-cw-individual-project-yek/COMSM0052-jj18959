@@ -57,7 +57,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
 
     traci.start(sumoCmd)
 
-    shepherd = vehicle_shepherd.VehicleShepherd(road_network, log_data=log_data)
+    shepherd = vehicle_shepherd.VehicleShepherd(road_network)
     shepherd.add_vehicle_types(CONFIG["vehicle-types"])
     shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
     print(shepherd.vehicles)
@@ -65,10 +65,8 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     step = 0
     data = {}
     while step < route_steps and len(shepherd.vehicles) > 0:
+        data[step] = shepherd.update_vehicles()
         traci.simulationStep()
-
-        if log_data:
-            data[step] = shepherd.update_vehicles()
         # Print collisions that are currently happening
         #print(traci.simulation.getCollisions())
         
