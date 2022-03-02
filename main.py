@@ -79,7 +79,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     shutil.rmtree("temp")
 
 
-def log_data_as_json(step_data:dict, network:ntwk.Network, vehicle_metadata:dict={}, filename=""):
+def log_data_as_json(step_data:dict, network:ntwk.Network, vehicle_metadata:dict={}, entry_folder_name=""):
     network_data = network.getData()
     data = {
         "network_data"          : network_data,
@@ -90,14 +90,13 @@ def log_data_as_json(step_data:dict, network:ntwk.Network, vehicle_metadata:dict
         "step_data"             : step_data,
     }
     data["network_data"]["network_type"] = CONFIG["network-type"]
-    directory_name = "logs"
-    if not os.path.exists(directory_name):
-        os.makedirs(directory_name)
-    if filename == "":
-        filename = datetime.today().isoformat().replace(":", "-", -1).split(".")[0]
-    if not filename.endswith(".json"):
-        filename += ".json"
-    with open(directory_name + "/" + filename, "w") as f:
+    log_directory_name = "logs"
+    if not os.path.exists(log_directory_name):
+        os.makedirs(log_directory_name)
+    if entry_folder_name == "":
+        entry_folder_name = datetime.today().isoformat().replace(":", "-", -1).split(".")[0]
+    os.makedirs(log_directory_name + "/" + entry_folder_name)
+    with open(log_directory_name + "/" + entry_folder_name + "/" + "data.json", "w") as f:
         f.write(json.dumps(data, indent=4))
         f.close()
 
