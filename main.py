@@ -1,4 +1,3 @@
-from cgi import test
 import os, sys
 import shutil
 from time import time
@@ -10,6 +9,7 @@ import traci
 import sumolib
 from vehicle import vehicle_shepherd
 import yaml
+from logger.logger import Logger
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -22,6 +22,7 @@ ENV = dotenv.dotenv_values(".env")
 try: 
     with open("config.yaml", "r") as stream:
         CONFIG = yaml.safe_load(stream)
+        stream.close()
 except:
     pass
 
@@ -29,17 +30,17 @@ except:
 def get_network():
     try:
         if CONFIG["network-type"] == "random":
-            network = ntwk.Network(CONFIG["random-settings"])
+            network = ntwk.Network(CONFIG["random-settings"], route_seed=CONFIG["route-seed"])
         elif CONFIG["network-type"] == "grid":
-            network = grid.GridNetwork(CONFIG["grid-settings"])
+            network = grid.GridNetwork(CONFIG["grid-settings"], route_seed=CONFIG["route-seed"])
         elif CONFIG["network-type"] == "spider":
-            network = spider.SpiderNetwork(CONFIG["spider-settings"])
+            network = spider.SpiderNetwork(CONFIG["spider-settings"], route_seed=CONFIG["route-seed"])
         return network
     except:
         pass
 
 
-def run_simulation(has_gui:bool=False):
+def run_simulation(has_gui:bool=False, log_data:bool=False):
     temp_file_name = "tmp_" + str(round(time()))
     road_network:ntwk.Network = get_network()
     route_steps = CONFIG["steps"]
@@ -57,26 +58,31 @@ def run_simulation(has_gui:bool=False):
     shepherd = vehicle_shepherd.VehicleShepherd(road_network)
     shepherd.add_vehicle_types(CONFIG["vehicle-types"])
     shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
-    print(shepherd.vehicles)
+
+    vehicle_metadata = shepherd.get_vehicle_metadata()
     
     step = 0
+    data = {}
     while step < route_steps and len(shepherd.vehicles) > 0:
+        data[step] = shepherd.update_vehicles()
         traci.simulationStep()
-
-        shepherd.update_vehicles()
         # Print collisions that are currently happening
         #print(traci.simulation.getCollisions())
         
         step += 1
     
     traci.close()
+    if log_data:
+        Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, vehicle_metadata=vehicle_metadata)
     shutil.rmtree("temp")
 
 
 if __name__ == "__main__":
-    print(CONFIG)
-    # TODO: Replace w/ config
+    # TODO: Replace w/ config(?)
+    has_gui = False
+    log_data = True
     if "--gui" in sys.argv:
-        run_simulation(has_gui=True)
-    else:
-        run_simulation(has_gui=False)
+        has_gui = True
+    if "--log" in sys.argv:
+        log_data = True
+    run_simulation(has_gui=has_gui, log_data=log_data)

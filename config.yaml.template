@@ -1,4 +1,5 @@
 network-type: "grid"
+route-seed: 0
 
 # Settings specific to the "random" map type
 random-settings:

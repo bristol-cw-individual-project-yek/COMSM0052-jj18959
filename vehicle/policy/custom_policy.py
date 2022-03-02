@@ -10,8 +10,9 @@ class CustomPolicy(Policy):
         new_path = new_path_arr[0]
         for i in range(1, len(new_path_arr)):
             new_path += "." + new_path_arr[i]
-        self.module_path = importlib.import_module("".join(new_path))
+        self.module = importlib.import_module("".join(new_path))
+        self.module_path = module_path
     
 
     def decide_state(self, vehicle, conflicting_vehicles):
-        getattr(self.module_path, "decide_state")(vehicle, conflicting_vehicles)
+        getattr(self.module, "decide_state")(vehicle, conflicting_vehicles)
