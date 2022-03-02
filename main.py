@@ -60,7 +60,8 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     shepherd = vehicle_shepherd.VehicleShepherd(road_network)
     shepherd.add_vehicle_types(CONFIG["vehicle-types"])
     shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
-    print(shepherd.vehicles)
+
+    vehicle_metadata = shepherd.get_vehicle_metadata()
     
     step = 0
     data = {}
@@ -74,17 +75,18 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     
     traci.close()
     if log_data:
-        log_data_as_json(step_data=data, network=road_network)
+        log_data_as_json(step_data=data, network=road_network, vehicle_metadata=vehicle_metadata)
     shutil.rmtree("temp")
 
 
-def log_data_as_json(step_data:dict, network:ntwk.Network, filename=""):
+def log_data_as_json(step_data:dict, network:ntwk.Network, vehicle_metadata:dict={}, filename=""):
     network_data = network.getData()
     data = {
         "network_data"          : network_data,
         "steps"                 : CONFIG["steps"],
         "vehicle_group_data"    : CONFIG["vehicle-groups"],
         "vehicle_type_data"     : CONFIG["vehicle-types"],
+        "vehicle_metadata"      : vehicle_metadata,
         "step_data"             : step_data,
     }
     data["network_data"]["network_type"] = CONFIG["network-type"]

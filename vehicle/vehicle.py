@@ -127,20 +127,25 @@ class Vehicle:
         return math.degrees(math.atan2(diff_y, diff_x)) + 90
     
 
-    def get_data_as_dict(self):
+    def get_data_as_dict(self, include_metadata=False, include_info=True):
         if self.currentState:
             stateStr = self.currentState.name
         else:
             stateStr = "n/a"
         result = {
-            "id"            : self.vehicleId,
-            "type"          : self.vehicleType,
-            "state"         : stateStr,
-            "position"      : self.currentPosition,
-            "route"         : self.currentRoute,
-            "lane"          : self.currentRoute[self.currentRouteIndex],
-            "next_junction" : self.nextJunction.getID(),
-            "current_speed" : self.speed,
-            "priority"      : self.priority
+            "id"            : self.vehicleId
         }
+        if include_metadata:
+            result["type"]      = self.vehicleType
+            result["policy"]    = type(self.conflictResolutionPolicy).__name__  # TODO: Figure out how to handle custom policies
+        if include_info:
+            result.update({
+                "state"         : stateStr,
+                "position"      : self.currentPosition,
+                "route"         : self.currentRoute,
+                "lane"          : self.currentRoute[self.currentRouteIndex],
+                "next_junction" : self.nextJunction.getID(),
+                "current_speed" : self.speed,
+                "priority"      : self.priority
+            })
         return result

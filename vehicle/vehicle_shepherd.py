@@ -10,12 +10,11 @@ from network.network import Network
 
 class VehicleShepherd:
 
-    def __init__(self, network:Network, log_data=False):
+    def __init__(self, network:Network):
         self.vehicles:dict = {}
         self.vehicleTypes:dict = {}
         self.vehicleGroups:dict = {}
         self.network:Network = network
-        self.log_data = log_data
     
 
     def add_vehicle_types(self, vehicleTypes:dict):
@@ -84,7 +83,7 @@ class VehicleShepherd:
     
 
     def update_vehicles(self):
-        data = {}
+        vehicle_data = {}
 
         # Update all active vehicles
         for group in self.vehicleGroups:
@@ -95,8 +94,7 @@ class VehicleShepherd:
                 try:
                     vehicle:Vehicle = self.vehicles[vId]
                     vehicle.update(self.vehicles, self.network)
-                    if self.log_data:
-                        group_data[vehicle.vehicleId] = vehicle.get_data_as_dict()
+                    group_data[vehicle.vehicleId] = vehicle.get_data_as_dict()
                 except traci.exceptions.TraCIException as e:
                     print(e)
                     vIds_to_be_removed.append(vId)
@@ -104,12 +102,22 @@ class VehicleShepherd:
             for vId in vIds_to_be_removed:
                 self.vehicles.pop(vId)
                 self.vehicleGroups[group].pop(vId)
-            if self.log_data:
-                data[group] = group_data
+            vehicle_data[group] = group_data
+
+        data = {
+            "vehicle_groups":   vehicle_data
+        }
         
-        if self.log_data:
-            return data
+        return data
     
+
+    def get_vehicle_metadata(self):
+        data = {}
+        for vehId in self.vehicles:
+            vehicle:Vehicle = self.vehicles[vehId]
+            data[vehId] = vehicle.get_data_as_dict(include_metadata=True, include_info=False)
+        return data
+
 
     def set_policy(self, vehicle:Vehicle, vehGroup:dict):
         policyType = vehGroup["policy-type"]
