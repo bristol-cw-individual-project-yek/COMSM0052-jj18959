@@ -1,5 +1,5 @@
 from vehicle.policy.policy import Policy
-import importlib
+import importlib, inspect
 
 class CustomPolicy(Policy):
     
@@ -12,7 +12,13 @@ class CustomPolicy(Policy):
             new_path += "." + new_path_arr[i]
         self.module = importlib.import_module("".join(new_path))
         self.module_path = module_path
+
+        for name, obj in inspect.getmembers(self.module, inspect.isclass):
+            if issubclass(obj, Policy):
+                self.name = name
+                self.policy : Policy = obj()
+                break
     
 
     def decide_state(self, vehicle, conflicting_vehicles):
-        getattr(self.module, "decide_state")(vehicle, conflicting_vehicles)
+        return self.policy.decide_state(vehicle, conflicting_vehicles)
