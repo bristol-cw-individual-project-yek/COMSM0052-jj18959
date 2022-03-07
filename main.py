@@ -10,6 +10,7 @@ import sumolib
 from vehicle import vehicle_shepherd
 import yaml
 from logger.logger import Logger
+from traci._simulation import Collision
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -69,17 +70,29 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     
     step = 0
     data = {}
+    collision_data = {}
     while step < route_steps and len(shepherd.vehicles) > 0:
         data[step] = shepherd.update_vehicles()
         traci.simulationStep()
         # Print collisions that are currently happening
-        #print(traci.simulation.getCollisions())
-        
+        collisions = traci.simulation.getCollisions()
+        collisionDict = {}
+        for i in range(len(collisions)):
+            collision: Collision = collisions[i]
+            collisionDict[i] = {
+                "collider"      : collision.collider,
+                "victim"        : collision.victim,
+                "collisionType" : collision.type,
+                "lane"          : collision.lane,
+                "pos"           : collision.pos
+            }
+        if len(collisionDict) > 0:
+            collision_data[step] = collisionDict
         step += 1
     
     traci.close()
     if log_data:
-        Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, vehicle_metadata=vehicle_metadata)
+        Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, vehicle_metadata=vehicle_metadata)
     shutil.rmtree("temp")
 
 
