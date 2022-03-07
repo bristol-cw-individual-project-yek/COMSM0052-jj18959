@@ -29,15 +29,21 @@ except:
 
 def get_network():
     try:
+        route_seed = CONFIG["route-seed"]
+    except KeyError:
+        route_seed = 0
+    try:
         if CONFIG["network-type"] == "random":
-            network = ntwk.Network(CONFIG["random-settings"], route_seed=CONFIG["route-seed"])
+            network = ntwk.Network(CONFIG["random-settings"], route_seed=route_seed)
         elif CONFIG["network-type"] == "grid":
-            network = grid.GridNetwork(CONFIG["grid-settings"], route_seed=CONFIG["route-seed"])
+            network = grid.GridNetwork(CONFIG["grid-settings"], route_seed=route_seed)
         elif CONFIG["network-type"] == "spider":
-            network = spider.SpiderNetwork(CONFIG["spider-settings"], route_seed=CONFIG["route-seed"])
+            network = spider.SpiderNetwork(CONFIG["spider-settings"], route_seed=route_seed)
         return network
-    except:
-        pass
+    except KeyError as e:
+        print("Key missing: " + str(e))
+    except Exception as e:
+        raise e
 
 
 def run_simulation(has_gui:bool=False, log_data:bool=False):
