@@ -12,6 +12,7 @@ import yaml
 from logger.logger import Logger
 from traci._simulation import Collision
 import maps.map_builder as map_builder
+from maps.bounding_box import BoundingBox
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -102,6 +103,10 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     shutil.rmtree("temp")
 
 
+def test_osm_get():
+    map_builder.get_osm_area(BoundingBox(-2.6046, 51.4467, -2.5943, 51.453), "test_files/results")
+
+
 if __name__ == "__main__":
     # TODO: Replace w/ config(?)
     has_gui = False
@@ -110,4 +115,5 @@ if __name__ == "__main__":
         has_gui = True
     if "--log" in sys.argv:
         log_data = True
-    run_simulation(has_gui=has_gui, log_data=log_data)
+    #run_simulation(has_gui=has_gui, log_data=log_data)
+    test_osm_get()
