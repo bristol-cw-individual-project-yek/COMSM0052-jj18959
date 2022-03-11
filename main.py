@@ -11,6 +11,7 @@ from vehicle import vehicle_shepherd
 import yaml
 from logger.logger import Logger
 from traci._simulation import Collision
+import maps.map_builder as map_builder
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -33,18 +34,23 @@ def get_network():
         route_seed = CONFIG["route-seed"]
     except KeyError:
         route_seed = 0
-    try:
-        if CONFIG["network-type"] == "random":
-            network = ntwk.Network(CONFIG["random-settings"], route_seed=route_seed)
-        elif CONFIG["network-type"] == "grid":
-            network = grid.GridNetwork(CONFIG["grid-settings"], route_seed=route_seed)
-        elif CONFIG["network-type"] == "spider":
-            network = spider.SpiderNetwork(CONFIG["spider-settings"], route_seed=route_seed)
-        return network
-    except KeyError as e:
-        print("Key missing: " + str(e))
-    except Exception as e:
-        raise e
+    if  CONFIG["network-type"] == "custom" and "network-file-path" in CONFIG and CONFIG["network-file-path"] != "":
+        network = ntwk.Network({}, route_seed=route_seed, network_file_path=CONFIG["network-file-path"])
+    else:
+        try:
+            if CONFIG["network-type"] == "random":
+                network = ntwk.Network(CONFIG["random-settings"], route_seed=route_seed)
+            elif CONFIG["network-type"] == "grid":
+                network = grid.GridNetwork(CONFIG["grid-settings"], route_seed=route_seed)
+            elif CONFIG["network-type"] == "spider":
+                network = spider.SpiderNetwork(CONFIG["spider-settings"], route_seed=route_seed)
+        except KeyError as e:
+            print("Key missing: " + str(e))
+            network = None
+        except Exception as e:
+            raise e
+            network = None
+    return network
 
 
 def run_simulation(has_gui:bool=False, log_data:bool=False):

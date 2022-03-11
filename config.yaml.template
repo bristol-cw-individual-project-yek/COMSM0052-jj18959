@@ -1,5 +1,8 @@
-network-type: "grid"
+network-type: "custom"
 route-seed: 0
+
+# Map settings for non-random generated maps
+network-file-path: ""
 
 # Settings specific to the "random" map type
 random-settings:

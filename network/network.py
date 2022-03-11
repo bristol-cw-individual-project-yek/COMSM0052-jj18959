@@ -8,23 +8,28 @@ class Network:
 
     TEMP_FILE_DIRECTORY = "temp"
 
-    def __init__(self, settings:dict, route_seed:int):
+    def __init__(self, settings:dict, route_seed:int, network_file_path:str = None):
         self.routeIds:list = []
         self.settings:dict = settings
         self.net:sumolib.net.Net = None
         self.route_seed:int = route_seed
+        self.network_file_path = network_file_path
 
 
     def generateFile(self, output_file_name:str):
         if not os.path.exists(Network.TEMP_FILE_DIRECTORY):
             os.makedirs(Network.TEMP_FILE_DIRECTORY)
-        network_file_name = output_file_name + ".net.xml"
-        network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
-
-        self.generateNetwork(network_file_path)
-        self.net = sumolib.net.readNet(network_file_path)
         
-        self.generateRandomRoutes(network_file_path)
+        network_file_name = output_file_name + ".net.xml"
+        if not self.network_file_path:
+            self.network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
+            self.generateNetwork(self.network_file_path)
+        else:
+            network_file_name = os.path.abspath(self.network_file_path)
+        
+        self.net = sumolib.net.readNet(self.network_file_path)
+        
+        self.generateRandomRoutes(self.network_file_path)
 
         sumo_cfg_file_name = output_file_name + ".sumocfg"
         sumo_root = ET.Element("configuration")
