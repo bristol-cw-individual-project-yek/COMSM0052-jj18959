@@ -1,4 +1,5 @@
 import os
+from urllib.error import HTTPError
 import wget
 from maps.bounding_box import BoundingBox
 import ssl
@@ -13,4 +14,12 @@ def get_osm_area(bbox:BoundingBox, output_file:str):
     ssl._create_default_https_context = ssl._create_unverified_context
     if not output_file.endswith(".osm"):
         output_file += ".osm"
-    wget.download(f"http://api.openstreetmap.org/api/0.6/map?bbox={bbox.lat_min},{bbox.long_min},{bbox.lat_max},{bbox.long_max}", output_file)
+    try:
+        wget.download(f"http://api.openstreetmap.org/api/0.6/map?bbox={bbox.lat_min},{bbox.long_min},{bbox.lat_max},{bbox.long_max}", output_file)
+    except HTTPError as e:
+        print(str(e))
+        if bbox.get_area > 0.25:
+            print("The area of your bounding box is too big (max is 0.25).")
+        else:
+            print("You may have requested a map with too many nodes (limit is 50000).")
+        quit()
