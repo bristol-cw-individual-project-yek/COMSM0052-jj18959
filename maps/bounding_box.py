@@ -1,8 +1,8 @@
 class BoundingBox:
 
     def __init__(self, lat_min:float, long_min:float, lat_max:float, long_max:float):
-        assert(long_max > long_min)
-        assert(lat_max > lat_min)
+        assert(long_max >= long_min)
+        assert(lat_max >= lat_min)
         self.lat_min = lat_min
         self.long_min = long_min
         self.lat_max = lat_max
