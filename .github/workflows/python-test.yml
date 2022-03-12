@@ -27,5 +27,6 @@ jobs:
       - name: Install Eclipse SUMO
         run: |
           sudo apt-get install sumo sumo-tools sumo-doc
+      - run: export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"
       - name: Test with pytest
         run: python -m unittest discover --verbose
