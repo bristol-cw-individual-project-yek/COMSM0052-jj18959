@@ -16,7 +16,7 @@ def get_osm_area(bbox:BoundingBox, output_file:str):
     if not output_file.endswith(".osm"):
         output_file += ".osm"
     try:
-        url = f"http://api.openstreetmap.org/api/0.6/map?bbox={bbox.lat_min},{bbox.long_min},{bbox.lat_max},{bbox.long_max}"
+        url = f"http://api.openstreetmap.org/api/0.6/map?bbox={bbox.long_min},{bbox.lat_min},{bbox.long_max},{bbox.lat_max}"
         print(url)
         return wget.download(url, output_file)
     except HTTPError as e:

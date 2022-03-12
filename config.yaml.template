@@ -4,8 +4,8 @@ route-seed: 0
 # Map settings for non-random generated maps
 network-file-path: ""
 osm-area-settings:
-  origin-latitude: -2.6
-  origin-longitude: 51.5
+  origin-latitude: 51.5
+  origin-longitude: -2.6
   width: 0.5
   height: 0.5
 
