@@ -3,3 +3,4 @@ traci
 sumolib
 pyyaml
 numpy
+wget

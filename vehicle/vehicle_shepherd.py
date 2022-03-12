@@ -51,35 +51,42 @@ class VehicleShepherd:
         for group in vehicleGroups:
             vehGroup = vehicleGroups[group]
             self.vehicleGroups[group] = {}
+            missed_vehicles = 0
             for i in range(vehGroup["num"]):
-                vId = group + "-" + str(i)
-                vehicle:Vehicle = Vehicle(vId)
-
-                self.set_policy(vehicle, vehGroup)
-
-                routeId = routeIds[random.randint(0, len(routeIds) - 1)]
-                vehicle.add_to_route(routeId, self.network)
-
-                if "vehicle-type" in vehGroup:
-                    try:
-                        vehType = vehGroup["vehicle-type"]
-                        vehicle.set_vehicle_type(vehType)
-                    except KeyError:
-                        print(traceback.format_exc())
-                    except traci.exceptions.TraCIException:
-                        print(traceback.format_exc())
-                    try:
-                        vehicle.set_speed(self.vehicleTypes[vehType]["speed"])
-                    except KeyError:
-                        print(traceback.format_exc())
-                try:
-                    vehicle.set_priority(vehGroup["priority"])
-                except KeyError:
-                    print(traceback.format_exc())
                 
-                self.vehicles[vId] = vehicle
-                self.vehicleGroups[group][vId] = vehicle
-                routeIds.remove(routeId)
+                if len(routeIds) > 0:
+                    vId = group + "-" + str(i)
+                    vehicle:Vehicle = Vehicle(vId)
+
+                    self.set_policy(vehicle, vehGroup)
+                    routeId = routeIds[random.randint(0, len(routeIds) - 1)]
+                    vehicle.add_to_route(routeId, self.network)
+
+                    if "vehicle-type" in vehGroup:
+                        try:
+                            vehType = vehGroup["vehicle-type"]
+                            vehicle.set_vehicle_type(vehType)
+                        except KeyError:
+                            print(traceback.format_exc())
+                        except traci.exceptions.TraCIException:
+                            print(traceback.format_exc())
+                        try:
+                            vehicle.set_speed(self.vehicleTypes[vehType]["speed"])
+                        except KeyError:
+                            print(traceback.format_exc())
+                    try:
+                        vehicle.set_priority(vehGroup["priority"])
+                    except KeyError:
+                        print(traceback.format_exc())
+                    
+                    self.vehicles[vId] = vehicle
+                    self.vehicleGroups[group][vId] = vehicle
+                    routeIds.remove(routeId)
+                else:
+                    missed_vehicles += 1
+        if missed_vehicles > 0:
+            # TODO: Do something with missed vehicles
+            print(f"Vehicles not created: {missed_vehicles}")
     
 
     def update_vehicles(self):
