@@ -35,26 +35,39 @@ def get_network():
         route_seed = CONFIG["route-seed"]
     except KeyError:
         route_seed = 0
-    if  CONFIG["network-type"] == "custom" and "network-file-path" in CONFIG and CONFIG["network-file-path"] != "":
-        network = ntwk.Network({}, route_seed=route_seed, network_file_path=CONFIG["network-file-path"])
-    else:
-        try:
-            if CONFIG["network-type"] == "random":
-                network = ntwk.Network(CONFIG["random-settings"], route_seed=route_seed)
-            elif CONFIG["network-type"] == "grid":
-                network = grid.GridNetwork(CONFIG["grid-settings"], route_seed=route_seed)
-            elif CONFIG["network-type"] == "spider":
-                network = spider.SpiderNetwork(CONFIG["spider-settings"], route_seed=route_seed)
-        except KeyError as e:
-            print("Key missing: " + str(e))
-            network = None
-        except Exception as e:
-            raise e
-            network = None
+    try:
+        if CONFIG["network-type"] == "local":
+            network = ntwk.Network({}, route_seed=route_seed, network_file_path=CONFIG["network-file-path"])
+        elif CONFIG["network-type"] == "osm":
+            osm_settings = CONFIG["osm-area-settings"]
+            origin_lat = osm_settings["origin-latitude"]
+            origin_long = osm_settings["origin-longitude"]
+            width = osm_settings["width"]
+            height = osm_settings["height"]
+            bbox:BoundingBox = BoundingBox.from_origin(origin_lat=origin_lat, origin_long=origin_long, width=width, height=height)
+
+            # TODO: Decouple this, as well as the one in network/network.py
+            if not os.path.exists(ntwk.Network.TEMP_FILE_DIRECTORY):
+                os.makedirs(ntwk.Network.TEMP_FILE_DIRECTORY)
+            osm_path = map_builder.get_osm_area(bbox, f"{ntwk.Network.TEMP_FILE_DIRECTORY}/results")
+            file_path = map_builder.build_map_from_osm(osm_path)
+            network = ntwk.Network({}, route_seed=route_seed, network_file_path=file_path)
+        elif CONFIG["network-type"] == "random":
+            network = ntwk.Network(CONFIG["random-settings"], route_seed=route_seed)
+        elif CONFIG["network-type"] == "grid":
+            network = grid.GridNetwork(CONFIG["grid-settings"], route_seed=route_seed)
+        elif CONFIG["network-type"] == "spider":
+            network = spider.SpiderNetwork(CONFIG["spider-settings"], route_seed=route_seed)
+    except KeyError as e:
+        print("Key missing from config.yaml: " + str(e))
+        raise(e)
+    except Exception as e:
+        raise e
     return network
 
 
 def run_simulation(has_gui:bool=False, log_data:bool=False):
+    shutil.rmtree("temp", ignore_errors=True)
     temp_file_name = "tmp_" + str(round(time()))
     road_network:ntwk.Network = get_network()
     route_steps = CONFIG["steps"]
@@ -104,7 +117,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
 
 
 def test_osm_get():
-    map_builder.get_osm_area(BoundingBox(-2.6046, 51.4467, -2.5943, 51.453), "test_files/results")
+    map_builder.get_osm_area(BoundingBox(-2.65, 51, -2.5943, 52), "test_files/results")
 
 
 if __name__ == "__main__":
@@ -115,5 +128,4 @@ if __name__ == "__main__":
         has_gui = True
     if "--log" in sys.argv:
         log_data = True
-    #run_simulation(has_gui=has_gui, log_data=log_data)
-    test_osm_get()
+    run_simulation(has_gui=has_gui, log_data=log_data)
