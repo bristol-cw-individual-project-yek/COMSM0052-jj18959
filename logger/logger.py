@@ -4,7 +4,7 @@ from datetime import datetime
 import network.network as ntwk
 
 class Logger:
-    def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.Network, collision_data:dict, vehicle_metadata:dict={}, entry_folder_name="") -> None:
+    def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.Network, collision_data:dict, vehicle_metadata:dict={}, metrics:dict={}, entry_folder_name="") -> None:
         log_directory_name = "logs"
         if not os.path.exists(log_directory_name):
             os.makedirs(log_directory_name)
@@ -32,6 +32,7 @@ class Logger:
         data = {
             "network_data"          : network_data,
             "steps"                 : config_data["steps"],
+            "metrics"               : metrics,
             "vehicle_group_data"    : vehicle_group_data,
             "custom_policies"       : custom_policies,
             "vehicle_type_data"     : config_data["vehicle-types"],
