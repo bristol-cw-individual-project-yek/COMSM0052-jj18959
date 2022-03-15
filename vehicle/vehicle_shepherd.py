@@ -107,7 +107,6 @@ class VehicleShepherd:
                     vIds_to_be_removed.append(vId)
             # Stop tracking any vehicles that no longer exist
             for vId in vIds_to_be_removed:
-                self.vehicles.pop(vId)
                 self.vehicleGroups[group].pop(vId)
             vehicle_data[group] = group_data
 
