@@ -24,6 +24,7 @@ class Vehicle:
         self.vehicleType = vehicleType
         self.speed = 1
         self.priority = -1
+        self.timeSpentWaiting = 0
     
 
     def set_vehicle_type(self, vehicle_type):
@@ -78,6 +79,8 @@ class Vehicle:
         #print(message)
         #print("Vehicles that conflict with " + self.vehicleId + ": " + str(conflicting_vehicles))
         self.actBasedOnState()
+        if self.currentState == VehicleState.WAITING:
+            self.timeSpentWaiting += 1
     
 
     def actBasedOnState(self):
@@ -144,12 +147,13 @@ class Vehicle:
                 result["policy_path"] = policy.module_path
         if include_info:
             result.update({
-                "state"         : stateStr,
-                "position"      : self.currentPosition,
-                "route"         : self.currentRoute,
-                "lane"          : self.currentRoute[self.currentRouteIndex],
-                "next_junction" : self.nextJunction.getID(),
-                "current_speed" : self.speed,
-                "priority"      : self.priority
+                "state"                 : stateStr,
+                "position"              : self.currentPosition,
+                "route"                 : self.currentRoute,
+                "lane"                  : self.currentRoute[self.currentRouteIndex],
+                "next_junction"         : self.nextJunction.getID(),
+                "current_speed"         : self.speed,
+                "priority"              : self.priority,
+                "time_spent_waiting"    : self.timeSpentWaiting
             })
         return result
