@@ -1,5 +1,4 @@
-from scipy import skew
-from scipy.stats import kurtosis
+from scipy import stats
 
 class FairnessCalculator:
 
@@ -9,8 +8,8 @@ class FairnessCalculator:
             waiting_times.append(vehicles[vId].timeSpentWaiting)
         
         # Non-adjusted Fisher-Pearson coefficient of skewness
-        skew = skew(waiting_times)
-        kurtosis = kurtosis(waiting_times)
+        skew = stats.skew(waiting_times)
+        kurtosis = stats.kurtosis(waiting_times)
         
         results = {
             "skew"      : skew,
