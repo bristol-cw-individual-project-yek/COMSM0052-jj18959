@@ -32,7 +32,9 @@ jobs:
           export SUMO_HOME="/opt/hostedtoolcache/Python/3.9.10/x64/bin/sumo"
           echo $SUMO_HOME
       - run: |
-          export PYTHONPATH=$SUMO_HOME/tools:$PYTHONPATH
+          echo $SUMO_HOME
+          echo $PYTHONPATH
+          export PYTHONPATH=$PYTHONPATH:$SUMO_HOME/tools
           echo $PYTHONPATH
       - name: Test with pytest
         run: python -m unittest discover --verbose
