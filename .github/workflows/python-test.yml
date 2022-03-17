@@ -28,14 +28,6 @@ jobs:
         run: |
           sudo apt-get install sumo sumo-tools sumo-doc
       - run: which sumo
-      - run: |
-          export SUMO_HOME="/opt/hostedtoolcache/Python/3.9.10/x64/bin/sumo"
-          echo $SUMO_HOME
-      - run: |
-          echo $SUMO_HOME
-          echo $PYTHONPATH
-          export PYTHONPATH=$PYTHONPATH:$SUMO_HOME/tools
-          echo $PYTHONPATH
       - name: Test with pytest
         run: |
           export SUMO_HOME="/opt/hostedtoolcache/Python/3.9.10/x64/bin/sumo"
