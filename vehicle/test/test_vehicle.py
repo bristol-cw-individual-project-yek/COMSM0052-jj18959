@@ -1,5 +1,4 @@
 import unittest
-from vehicle.vehicle import Vehicle
 import os
 import sys
 
@@ -8,6 +7,8 @@ if "SUMO_HOME" in os.environ:
     sys.path.append(tools)
 else:
     sys.exit("Please declare the environment variable 'SUMO_HOME'")
+
+from vehicle.vehicle import Vehicle
 
 class TestVehicle(unittest.TestCase):
 
