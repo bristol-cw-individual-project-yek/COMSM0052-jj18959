@@ -4,3 +4,4 @@ sumolib
 pyyaml
 numpy
 wget
+eclipse-sumo

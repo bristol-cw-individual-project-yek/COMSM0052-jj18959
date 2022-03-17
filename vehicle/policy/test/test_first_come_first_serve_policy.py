@@ -3,14 +3,6 @@ from vehicle.policy.first_come_first_serve_policy import FirstComeFirstServePoli
 from vehicle.vehicle_state import VehicleState
 from vehicle.vehicle import Vehicle
 from sumolib.net.node import Node
-import os
-import sys
-
-if "SUMO_HOME" in os.environ:
-    tools = os.path.join(os.environ["SUMO_HOME"], "tools")
-    sys.path.append(tools)
-else:
-    sys.exit("Please declare the environment variable 'SUMO_HOME'")
 
 class TestFirstComeFirstServePolicy(unittest.TestCase):
 
