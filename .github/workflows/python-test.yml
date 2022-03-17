@@ -27,7 +27,7 @@ jobs:
       - name: Install Eclipse SUMO
         run: |
           sudo apt-get install sumo sumo-tools sumo-doc
-          ls ..
+      - run: ls ../..
       - run: |
           export SUMO_HOME="$PWD/sumo"
           echo $SUMO_HOME
