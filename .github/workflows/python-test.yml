@@ -29,7 +29,7 @@ jobs:
           sudo apt-get install sumo sumo-tools sumo-doc
       - run: dpkg -L sumo
       - run: |
-          export SUMO_HOME="$PWD/sumo"
+          export SUMO_HOME="/usr/bin/sumo"
           echo $SUMO_HOME
       - run: |
           export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"
