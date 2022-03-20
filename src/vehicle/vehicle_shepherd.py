@@ -1,12 +1,12 @@
 import traceback
-from vehicle.vehicle import Vehicle
-from vehicle.policy.custom_policy import CustomPolicy
-from vehicle.policy.policy import Policy
-from vehicle.policy.first_come_first_serve_policy import FirstComeFirstServePolicy
-from vehicle.policy.priority_policy import PriorityPolicy
+from src.vehicle.vehicle import Vehicle
+from src.vehicle.policy.custom_policy import CustomPolicy
+from src.vehicle.policy.policy import Policy
+from src.vehicle.policy.first_come_first_serve_policy import FirstComeFirstServePolicy
+from src.vehicle.policy.priority_policy import PriorityPolicy
 import random
 import traci
-from network.network import Network
+from src.network.network import Network
 
 class VehicleShepherd:
 

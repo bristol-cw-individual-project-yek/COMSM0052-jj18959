@@ -1,5 +1,5 @@
-from vehicle.policy.policy import Policy
-from vehicle.vehicle_state import VehicleState
+from src.vehicle.policy.policy import Policy
+from src.vehicle.vehicle_state import VehicleState
 
 class FirstComeFirstServePolicy(Policy):
 

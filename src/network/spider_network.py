@@ -1,5 +1,5 @@
 import os
-from network.network import Network
+from src.network.network import Network
 
 class SpiderNetwork(Network):
 

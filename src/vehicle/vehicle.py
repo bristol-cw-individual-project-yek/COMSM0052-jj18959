@@ -1,12 +1,12 @@
 from numpy import Infinity
-from vehicle.vehicle_conflict_detection import ConflictDetection
-from vehicle.vehicle_state import VehicleState
-from vehicle.policy.policy import Policy
-from vehicle.policy.custom_policy import CustomPolicy
-import vehicle.grid as grid
+from src.vehicle.vehicle_conflict_detection import ConflictDetection
+from src.vehicle.vehicle_state import VehicleState
+from src.vehicle.policy.policy import Policy
+from src.vehicle.policy.custom_policy import CustomPolicy
+import src.vehicle.grid as grid
 import traci
 import math
-from network.network import Network
+from src.network.network import Network
 
 class Vehicle:
 

@@ -2,18 +2,18 @@ import os, sys
 import shutil
 from time import time
 import dotenv
-import network.network as ntwk
-import network.grid_network as grid
-import network.spider_network as spider
+import src.network.network as ntwk
+import src.network.grid_network as grid
+import src.network.spider_network as spider
 import traci
 import sumolib
-from vehicle import vehicle_shepherd
+from src.vehicle import vehicle_shepherd
 import yaml
-from logger.logger import Logger
+from src.logger.logger import Logger
 from traci._simulation import Collision
-import maps.map_builder as map_builder
-from maps.bounding_box import BoundingBox
-from stats.fairness_calculator import FairnessCalculator
+import src.maps.map_builder as map_builder
+from src.maps.bounding_box import BoundingBox
+from src.stats.fairness_calculator import FairnessCalculator
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")

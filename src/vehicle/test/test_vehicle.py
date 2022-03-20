@@ -1,5 +1,5 @@
 import unittest
-from vehicle.vehicle import Vehicle
+from src.vehicle.vehicle import Vehicle
 import os
 import sys
 
