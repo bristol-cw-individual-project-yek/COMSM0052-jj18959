@@ -6,7 +6,6 @@ from src.vehicle.policy.custom_policy import CustomPolicy
 import src.vehicle.grid as grid
 import traci
 import math
-from src.network.network import Network
 
 class Vehicle:
 
@@ -65,7 +64,7 @@ class Vehicle:
         traci.vehicle.setDecel(self.vehicleId, 99999)
 
 
-    def update(self, vehicles:dict, network:Network):
+    def update(self, vehicles:dict, network):
         self.currentRouteIndex = traci.vehicle.getRouteIndex(self.vehicleId)
         if self.currentRouteIndex < 0:
             self.currentRouteIndex = 0
@@ -92,7 +91,7 @@ class Vehicle:
             traci.vehicle.setSpeed(self.vehicleId, self.speed)
     
 
-    def get_next_junction(self, network:Network):
+    def get_next_junction(self, network):
         current_edge = self.currentRoute[self.currentRouteIndex]
         next_junction = network.net.getEdge(current_edge).getToNode()
         return next_junction
