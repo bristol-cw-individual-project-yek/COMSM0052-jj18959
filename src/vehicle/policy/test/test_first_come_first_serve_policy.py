@@ -15,6 +15,7 @@ class TestFirstComeFirstServePolicy(unittest.TestCase):
         junction = Node("junction", "junction", (10, 10), [])
         for i in range(3):
             vehicle = Vehicle(str(i))
+            vehicle.isActive = True
             vehicle.set_conflict_resolution_policy(FirstComeFirstServePolicy())
             vehicle.nextJunction = junction
             vehicle.currentPosition = positions[i]

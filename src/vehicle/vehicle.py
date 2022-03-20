@@ -24,6 +24,7 @@ class Vehicle:
         self.speed = 1
         self.priority = -1
         self.timeSpentWaiting = 0
+        self.isActive = False
     
 
     def set_vehicle_type(self, vehicle_type):

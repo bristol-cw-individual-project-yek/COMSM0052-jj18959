@@ -25,6 +25,11 @@ class TestVehicleConflictDetection(unittest.TestCase):
         }
 
         # Set up vehicles 1 and 3 to be in the same lane
+        vehicle1.isActive = True
+        vehicle2.isActive = True
+        vehicle3.isActive = True
+        vehicle4.isActive = True
+        
         vehicle1.currentRoute = ["lane1", "lane2", "lane3"]
         vehicle2.currentRoute = ["lane4", "lane2", "lane6"]
         vehicle3.currentRoute = ["lane2", "lane1", "lane9"]
