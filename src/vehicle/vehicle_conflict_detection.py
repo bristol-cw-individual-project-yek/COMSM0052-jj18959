@@ -29,7 +29,7 @@ class ConflictDetection:
     # - Vehicles in the same lane
     # - Vehicles approaching the same junction
     def detect_other_vehicles(self, vehicle, vehicles:dict, filters:list=None) -> dict:
-        visible_vehicles = filter(lambda v : v.isActive, list(vehicles.values()))    # TODO: change this
+        visible_vehicles = list(filter(lambda v : v.isActive, list(vehicles.values())))
         result = {}
         if not filters or "visible" in filters:
             result["visible"] = visible_vehicles
