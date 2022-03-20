@@ -1,28 +1,26 @@
 import unittest
-from vehicle.policy.first_come_first_serve_policy import FirstComeFirstServePolicy
-from vehicle.vehicle_state import VehicleState
-from vehicle.vehicle import Vehicle
+from src.vehicle.policy.priority_policy import PriorityPolicy
+from src.vehicle.vehicle_state import VehicleState
+from src.vehicle.vehicle import Vehicle
 from sumolib.net.node import Node
 import os
 import sys
 
-if "SUMO_HOME" in os.environ:
-    tools = os.path.join(os.environ["SUMO_HOME"], "tools")
-    sys.path.append(tools)
-else:
-    sys.exit("Please declare the environment variable 'SUMO_HOME'")
 
-class TestFirstComeFirstServePolicy(unittest.TestCase):
+class TestPriorityPolicy(unittest.TestCase):
 
-    def test_fcfs(self):
+    def test_priority(self):
         vehicles = []
         positions = [(0, 10), (9, 10), (12, 10)]
+        priorities = [2, 2, 1]
         junction = Node("junction", "junction", (10, 10), [])
         for i in range(3):
             vehicle = Vehicle(str(i))
-            vehicle.set_conflict_resolution_policy(FirstComeFirstServePolicy())
+            vehicle.set_conflict_resolution_policy(PriorityPolicy())
             vehicle.nextJunction = junction
             vehicle.currentPosition = positions[i]
+            vehicle.priority = priorities[i]
+            vehicle.currentState = VehicleState.DRIVING
             vehicles.append(vehicle)
         conflicts = [
             {
@@ -41,9 +39,11 @@ class TestFirstComeFirstServePolicy(unittest.TestCase):
                 "same_lane"     : []
             },
         ]
-        expected_results = [VehicleState.WAITING, VehicleState.CROSSING, VehicleState.WAITING]
-        for i in range(len(vehicles)):
-            self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicle, conflicts[i]), expected_results[i])
+        expected_results = [VehicleState.WAITING, VehicleState.WAITING, VehicleState.CROSSING]
+        
+        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[0], conflicts[0]), expected_results[0])
+        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[1], conflicts[1]), expected_results[1])
+        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[2], conflicts[2]), expected_results[2])
         
 
 if __name__ == "__main__":

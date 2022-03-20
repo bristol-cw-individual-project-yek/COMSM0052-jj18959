@@ -1,5 +1,5 @@
 import unittest
-from maps.bounding_box import BoundingBox
+from src.maps.bounding_box import BoundingBox
 
 class BoundingBoxTest(unittest.TestCase):
 

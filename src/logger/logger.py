@@ -1,7 +1,7 @@
 import os
 import json
 from datetime import datetime
-import network.network as ntwk
+import src.network.network as ntwk
 
 class Logger:
     def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.Network, collision_data:dict, vehicle_metadata:dict={}, metrics:dict={}, entry_folder_name="") -> None:

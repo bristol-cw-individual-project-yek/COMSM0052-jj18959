@@ -1,4 +1,4 @@
-from vehicle.vehicle_state import VehicleState
+from src.vehicle.vehicle_state import VehicleState
 
 class Policy:
     MIN_WAITING_DISTANCE_FROM_JUNCTION = 10

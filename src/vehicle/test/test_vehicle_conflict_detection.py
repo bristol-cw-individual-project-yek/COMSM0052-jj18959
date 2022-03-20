@@ -1,5 +1,5 @@
 import unittest
-from vehicle.vehicle_conflict_detection import ConflictDetection
+from src.vehicle.vehicle_conflict_detection import ConflictDetection
 
 class TestVehicleConflictDetection(unittest.TestCase):
 

@@ -1,4 +1,4 @@
-from vehicle.policy.policy import Policy
+from src.vehicle.policy.policy import Policy
 
 class CustomTestPolicy(Policy):
 

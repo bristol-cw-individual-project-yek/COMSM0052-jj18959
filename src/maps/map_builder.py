@@ -1,7 +1,7 @@
 import os
 from urllib.error import HTTPError
 import wget
-from maps.bounding_box import BoundingBox
+from src.maps.bounding_box import BoundingBox
 import ssl
 
 def build_map_from_osm(file_path:str, output_path:str = None):
