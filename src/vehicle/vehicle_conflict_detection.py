@@ -28,22 +28,30 @@ class ConflictDetection:
     # Detect other surrounding vehicles, including:
     # - Vehicles in the same lane
     # - Vehicles approaching the same junction
-    def detect_other_vehicles(self, vehicle, vehicles:dict) -> dict:
+    def detect_other_vehicles(self, vehicle, vehicles:dict, filters:list=None) -> dict:
         visible_vehicles = list(vehicles.values())    # TODO: change this
         result = {}
-        result["visible"] = visible_vehicles
-        try:
-            result["visible"].remove(vehicle)
-            pass
-        except:
-            pass
-        result["same_lane"] = self.get_vehicles_on_edge(vehicle.get_current_edge(), visible_vehicles)
+        if not filters or "visible" in filters:
+            result["visible"] = visible_vehicles
+            try:
+                result["visible"].remove(vehicle)
+                pass
+            except:
+                pass
+        if not filters or "same_lane" in filters:
+            result["same_lane"] = self.get_vehicles_on_edge(vehicle.get_current_edge(), visible_vehicles)
+            try:
+                result["same_lane"].remove(vehicle)
+                pass
+            except:
+                pass
         
-        next_junction = vehicle.nextJunction
-        incoming_edges = next_junction.getIncoming()
-        vehicles_approaching_same_junction = []
-        for edge in incoming_edges:
-            vehicles_approaching_same_junction.extend(self.get_vehicles_on_edge(edge, visible_vehicles))
-        result["same_junction"] = vehicles_approaching_same_junction
+        if not filters or "same_junction" in filters:
+            next_junction = vehicle.nextJunction
+            incoming_edges = next_junction.getIncoming()
+            vehicles_approaching_same_junction = []
+            for edge in incoming_edges:
+                vehicles_approaching_same_junction.extend(self.get_vehicles_on_edge(edge, visible_vehicles))
+            result["same_junction"] = vehicles_approaching_same_junction
         
         return result
