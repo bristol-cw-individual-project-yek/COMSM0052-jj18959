@@ -1,4 +1,5 @@
 python-dotenv
+scipy
 traci
 sumolib
 pyyaml

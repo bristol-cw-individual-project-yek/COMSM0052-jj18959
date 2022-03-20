@@ -13,6 +13,7 @@ from logger.logger import Logger
 from traci._simulation import Collision
 import maps.map_builder as map_builder
 from maps.bounding_box import BoundingBox
+from stats.fairness_calculator import FairnessCalculator
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -91,6 +92,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     step = 0
     data = {}
     collision_data = {}
+    num_of_collisions = 0
     while step < route_steps and len(shepherd.vehicles) > 0:
         data[step] = shepherd.update_vehicles()
         traci.simulationStep()
@@ -107,12 +109,22 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
                 "pos"           : collision.pos
             }
         if len(collisionDict) > 0:
+            # TODO: Handle duplicate collisions
             collision_data[step] = collisionDict
+            num_of_collisions += len(collisionDict)
         step += 1
     
     traci.close()
+
+    metrics = {
+        "fairness_metrics"  : FairnessCalculator.calculate(vehicles=shepherd.vehicles),
+        "num_of_collisions" : num_of_collisions
+    }
+
+    print(metrics)
+
     if log_data:
-        Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, vehicle_metadata=vehicle_metadata)
+        Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, vehicle_metadata=vehicle_metadata, metrics=metrics)
     shutil.rmtree("temp")
 
 
