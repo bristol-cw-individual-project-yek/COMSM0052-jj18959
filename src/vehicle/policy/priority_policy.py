@@ -2,6 +2,11 @@ from src.vehicle.policy.policy import Policy
 from src.vehicle.vehicle_state import VehicleState
 
 class PriorityPolicy(Policy):
+    """
+    Policy based on vehicle.priority values.
+
+    Lower vehicle.priority value means higher priority.
+    """ # TODO: Decide whether we should change this.
 
     def decide_state(self, vehicle, conflicting_vehicles:dict):
         next_junction = vehicle.nextJunction
