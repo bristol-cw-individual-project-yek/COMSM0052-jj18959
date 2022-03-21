@@ -49,6 +49,32 @@ class TestVehicle(unittest.TestCase):
         vehicle2.currentPosition = (6, 3)
         self.assertAlmostEqual(vehicle1.get_direction_to_vehicle(vehicle2), 95.2, 1)
         self.assertAlmostEqual(vehicle2.get_direction_to_vehicle(vehicle1), -84.8, 1)
+    
+
+    def test_get_vehicle_reward_no_waiting(self):
+        vehicle = Vehicle("a")
+        vehicle.timeSpentWaiting = 0
+        self.assertEqual(vehicle.get_reward(), 1)
+    
+
+    def test_get_vehicle_reward_waiting(self):
+        vehicle = Vehicle("a")
+        vehicle.timeSpentWaiting = 1
+        self.assertEqual(vehicle.get_reward(), 0.5)
+        vehicle.timeSpentWaiting = 2
+        self.assertAlmostEqual(vehicle.get_reward(), 0.333, 3)
+        vehicle.timeSpentWaiting = 10
+        self.assertAlmostEqual(vehicle.get_reward(), 0.091, 3)
+    
+
+    def test_get_vehicle_reward_error(self):
+        vehicle = Vehicle("a")
+        vehicle.timeSpentWaiting = -1
+        try:
+            reward = vehicle.get_reward()
+            self.fail("Vehicle.get_reward() failed to throw ZeroDivisionError where expected")
+        except ZeroDivisionError:
+            pass
         
 
 if __name__ == "__main__":
