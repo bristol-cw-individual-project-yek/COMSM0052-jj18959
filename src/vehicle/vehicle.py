@@ -23,8 +23,25 @@ class Vehicle:
         self.vehicleType = vehicleType
         self.speed = 1
         self.priority = -1
-        self.timeSpentWaiting = 0
+        self.timeSpentWaiting:int = 0
+        self.svo_angle:float = 0    # Vehicles are considered egoistic by default
         self.isActive = False
+    
+
+    def get_reward(self) -> float:
+        """
+        Get the reward of this agent, based on the time spent waiting.
+
+        Reward = 1/(t + 1), where t is the time spent waiting.
+        """
+        return 1/(float(self.timeSpentWaiting) + 1)
+
+
+    def get_social_orientation_value_utility(self, other_vehicle) -> float:
+        reward:float = self.get_reward()
+        other_reward:float = other_vehicle.get_reward()
+        utility:float = (reward * math.cos(self.svo_angle)) + (other_reward * math.sin(self.svo_angle))
+        return utility
     
 
     def set_vehicle_type(self, vehicle_type):
