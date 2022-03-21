@@ -23,6 +23,18 @@ class ConflictDetection:
             if vehicle.currentRoute[vehicle.currentRouteIndex] == edge_id:
                 valid_vehicles.append(vehicle)
         return valid_vehicles
+    
+
+    def get_vehicle_nearest_to_junction(self, junction, edge, vehicle_list:list):
+        vehicles_on_edge = self.get_vehicles_on_edge(edge, vehicle_list)
+        if len(vehicles_on_edge) > 0:
+            other_vehicle = None
+            for v in vehicles_on_edge:
+                if not other_vehicle or v.get_distance_to_junction(junction) < other_vehicle.get_distance_to_junction(junction):
+                    other_vehicle = v
+            return other_vehicle
+        else:
+            return None
 
 
     # Detect other surrounding vehicles, including:
@@ -46,12 +58,18 @@ class ConflictDetection:
             except:
                 pass
         
+        # Only checks vehicles closest to junction, excluding the lane of the current vehicle
         if not filters or "same_junction" in filters:
             next_junction = vehicle.nextJunction
             incoming_edges = next_junction.getIncoming()
             vehicles_approaching_same_junction = []
+            currentRoute = vehicle.currentRoute[vehicle.currentRouteIndex]
             for edge in incoming_edges:
-                vehicles_approaching_same_junction.extend(self.get_vehicles_on_edge(edge, visible_vehicles))
+                edge_id = edge.getID()
+                if edge_id != currentRoute:
+                    other_vehicle = self.get_vehicle_nearest_to_junction(next_junction, edge, visible_vehicles)
+                    if other_vehicle:
+                        vehicles_approaching_same_junction.append(other_vehicle)
             result["same_junction"] = vehicles_approaching_same_junction
         
         return result
