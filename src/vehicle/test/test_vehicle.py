@@ -76,81 +76,81 @@ class TestVehicle(unittest.TestCase):
             pass
     
 
-    def test_get_social_value_orientation_utility_egotistic_no_wait(self):
+    def test_get_social_value_orientation_utility_one_to_one_egotistic_no_wait(self):
         vehicle1 = Vehicle("1")
         vehicle2 = Vehicle("2")
         vehicle1.svo_angle = 0
         vehicle2.svo_angle = 0
         vehicle1.timeSpentWaiting = 0
         vehicle2.timeSpentWaiting = 0
-        self.assertEqual(vehicle1.get_social_value_orientation_utility(vehicle2), 1)
-        self.assertEqual(vehicle2.get_social_value_orientation_utility(vehicle1), 1)
+        self.assertEqual(vehicle1.get_social_value_orientation_utility_one_to_one(vehicle2), 1)
+        self.assertEqual(vehicle2.get_social_value_orientation_utility_one_to_one(vehicle1), 1)
 
 
-    def test_get_social_value_orientation_utility_egotistic_wait(self):
+    def test_get_social_value_orientation_utility_one_to_one_egotistic_wait(self):
         vehicle1 = Vehicle("1")
         vehicle2 = Vehicle("2")
         vehicle1.svo_angle = 0
         vehicle2.svo_angle = 0
         vehicle1.timeSpentWaiting = 10
         vehicle2.timeSpentWaiting = 0
-        self.assertAlmostEqual(vehicle1.get_social_value_orientation_utility(vehicle2), 0.091, 3)
-        self.assertEqual(vehicle2.get_social_value_orientation_utility(vehicle1), 1)
+        self.assertAlmostEqual(vehicle1.get_social_value_orientation_utility_one_to_one(vehicle2), 0.091, 3)
+        self.assertEqual(vehicle2.get_social_value_orientation_utility_one_to_one(vehicle1), 1)
 
 
-    def test_get_social_value_orientation_utility_prosocial_no_wait(self):
+    def test_get_social_value_orientation_utility_one_to_one_prosocial_no_wait(self):
         vehicle1 = Vehicle("1")
         vehicle2 = Vehicle("2")
         vehicle1.svo_angle = math.pi/4
         vehicle2.svo_angle = math.pi/4
         vehicle1.timeSpentWaiting = 0
         vehicle2.timeSpentWaiting = 0
-        self.assertAlmostEqual(vehicle1.get_social_value_orientation_utility(vehicle2), 1.414, 3)
-        self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility(vehicle1), 1.414, 3)
+        self.assertAlmostEqual(vehicle1.get_social_value_orientation_utility_one_to_one(vehicle2), 1.414, 3)
+        self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility_one_to_one(vehicle1), 1.414, 3)
     
 
-    def test_get_social_value_orientation_utility_prosocial_wait(self):
+    def test_get_social_value_orientation_utility_one_to_one_prosocial_wait(self):
         vehicle1 = Vehicle("1")
         vehicle2 = Vehicle("2")
         vehicle1.svo_angle = math.pi/4
         vehicle2.svo_angle = math.pi/4
         vehicle1.timeSpentWaiting = 10
         vehicle2.timeSpentWaiting = 0
-        self.assertAlmostEqual(vehicle1.get_social_value_orientation_utility(vehicle2), 0.771, 3)
-        self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility(vehicle1), 0.771, 3)
+        self.assertAlmostEqual(vehicle1.get_social_value_orientation_utility_one_to_one(vehicle2), 0.771, 3)
+        self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility_one_to_one(vehicle1), 0.771, 3)
     
 
-    def test_get_social_value_orientation_utility_mixed_no_wait(self):
+    def test_get_social_value_orientation_utility_one_to_one_mixed_no_wait(self):
         vehicle1 = Vehicle("1")
         vehicle2 = Vehicle("2")
         vehicle1.svo_angle = 0          # Egotistic
         vehicle2.svo_angle = math.pi/4  # Prosocial
         vehicle1.timeSpentWaiting = 0
         vehicle2.timeSpentWaiting = 0
-        self.assertEqual(vehicle1.get_social_value_orientation_utility(vehicle2), 1)
-        self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility(vehicle1), 1.414, 3)
+        self.assertEqual(vehicle1.get_social_value_orientation_utility_one_to_one(vehicle2), 1)
+        self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility_one_to_one(vehicle1), 1.414, 3)
     
 
-    def test_get_social_value_orientation_utility_mixed_wait_1(self):
+    def test_get_social_value_orientation_utility_one_to_one_mixed_wait_1(self):
         vehicle1 = Vehicle("1")
         vehicle2 = Vehicle("2")
         vehicle1.svo_angle = 0          # Egotistic
         vehicle2.svo_angle = math.pi/4  # Prosocial
         vehicle1.timeSpentWaiting = 10
         vehicle2.timeSpentWaiting = 0
-        self.assertAlmostEqual(vehicle1.get_social_value_orientation_utility(vehicle2), 0.091, 3)
-        self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility(vehicle1), 0.771, 3)
+        self.assertAlmostEqual(vehicle1.get_social_value_orientation_utility_one_to_one(vehicle2), 0.091, 3)
+        self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility_one_to_one(vehicle1), 0.771, 3)
     
 
-    def test_get_social_value_orientation_utility_mixed_wait_2(self):
+    def test_get_social_value_orientation_utility_one_to_one_mixed_wait_2(self):
         vehicle1 = Vehicle("1")
         vehicle2 = Vehicle("2")
         vehicle1.svo_angle = 0          # Egotistic
         vehicle2.svo_angle = math.pi/4  # Prosocial
         vehicle1.timeSpentWaiting = 0
         vehicle2.timeSpentWaiting = 10
-        self.assertEqual(vehicle1.get_social_value_orientation_utility(vehicle2), 1)
-        self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility(vehicle1), 0.771, 3)
+        self.assertEqual(vehicle1.get_social_value_orientation_utility_one_to_one(vehicle2), 1)
+        self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility_one_to_one(vehicle1), 0.771, 3)
         
 
 if __name__ == "__main__":

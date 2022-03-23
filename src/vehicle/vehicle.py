@@ -37,7 +37,7 @@ class Vehicle:
         return 1/(float(self.timeSpentWaiting) + 1)
 
 
-    def get_social_value_orientation_utility(self, other_vehicle) -> float:
+    def get_social_value_orientation_utility_one_to_one(self, other_vehicle) -> float:
         reward:float = self.get_reward()
         other_reward:float = other_vehicle.get_reward()
         utility:float = (reward * math.cos(self.svo_angle)) + (other_reward * math.sin(self.svo_angle))
