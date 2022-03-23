@@ -189,8 +189,8 @@ class TestVehicle(unittest.TestCase):
             v = Vehicle(str(i))
             v.timeSpentWaiting = other_waiting_times[i]
             other_vehicles.append(v)
-        weights = [1, 3, -5]
-        self.assertAlmostEqual(vehicle.get_social_value_orientation_utility_group_average(other_vehicles, weights), 0.314, 3)
+        weights = [1, 3, 5]
+        self.assertAlmostEqual(vehicle.get_social_value_orientation_utility_group_average(other_vehicles, weights), 0.969, 3)
 
 
     def test_get_social_value_orientation_utility_group_sum_weighted(self):
@@ -203,8 +203,8 @@ class TestVehicle(unittest.TestCase):
             v = Vehicle(str(i))
             v.timeSpentWaiting = other_waiting_times[i]
             other_vehicles.append(v)
-        weights = [1, 3, -5]
-        self.assertAlmostEqual(vehicle.get_social_value_orientation_utility_group_sum(other_vehicles, weights), -0.471, 3)
+        weights = [1, 3, 5]
+        self.assertAlmostEqual(vehicle.get_social_value_orientation_utility_group_sum(other_vehicles, weights), 3.064, 3)
         
 
 if __name__ == "__main__":

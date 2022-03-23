@@ -55,7 +55,10 @@ class Vehicle:
             if weights:
                 r *= weights[i]
             other_rewards += r
-        other_rewards /= len(other_vehicles)
+        if weights:
+            other_rewards /= sum(weights)
+        else:
+            other_rewards /= len(other_vehicles)
         utility:float = (reward * math.cos(self.svo_angle)) + (other_rewards * math.sin(self.svo_angle))
         return utility
     
