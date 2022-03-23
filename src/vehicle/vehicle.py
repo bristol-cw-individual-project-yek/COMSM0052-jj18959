@@ -44,31 +44,33 @@ class Vehicle:
         return utility
     
 
-    def get_social_value_orientation_utility_group_average(self, other_vehicles:list, weights:dict=None) -> float:
+    def get_social_value_orientation_utility_group_average(self, other_vehicles:list, weights:list=None) -> float:
         if weights:
             assert(len(other_vehicles) == len(weights))
         reward:float = self.get_reward()
         other_rewards:float = 0
-        for veh in other_vehicles:
-            reward = veh.get_reward()
+        for i in range(len(other_vehicles)):
+            veh = other_vehicles[i]
+            r = veh.get_reward()
             if weights:
-                reward *= weights[veh]
-            other_rewards += reward
+                r *= weights[i]
+            other_rewards += r
         other_rewards /= len(other_vehicles)
         utility:float = (reward * math.cos(self.svo_angle)) + (other_rewards * math.sin(self.svo_angle))
         return utility
     
 
-    def get_social_value_orientation_utility_group_sum(self, other_vehicles:list, weights:dict=None) -> float:
+    def get_social_value_orientation_utility_group_sum(self, other_vehicles:list, weights:list=None) -> float:
         if weights:
             assert(len(other_vehicles) == len(weights))
         reward:float = self.get_reward()
         other_rewards:float = 0
-        for veh in other_vehicles:
-            reward = veh.get_reward()
+        for i in range(len(other_vehicles)):
+            veh = other_vehicles[i]
+            r = veh.get_reward()
             if weights:
-                reward *= weights[veh]
-            other_rewards += reward
+                r *= weights[i]
+            other_rewards += r
         utility:float = (reward * math.cos(self.svo_angle)) + (other_rewards * math.sin(self.svo_angle))
         return utility
     

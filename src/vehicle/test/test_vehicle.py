@@ -151,6 +151,60 @@ class TestVehicle(unittest.TestCase):
         vehicle2.timeSpentWaiting = 10
         self.assertEqual(vehicle1.get_social_value_orientation_utility_one_to_one(vehicle2), 1)
         self.assertAlmostEqual(vehicle2.get_social_value_orientation_utility_one_to_one(vehicle1), 0.771, 3)
+    
+
+    def test_get_social_value_orientation_utility_group_average(self):
+        vehicle = Vehicle("a")
+        vehicle.svo_angle = math.pi/4
+        vehicle.timeSpentWaiting = 0
+        other_vehicles = []
+        other_waiting_times = [2, 5, 1]
+        for i in range(len(other_waiting_times)):
+            v = Vehicle(str(i))
+            v.timeSpentWaiting = other_waiting_times[i]
+            other_vehicles.append(v)
+        self.assertAlmostEqual(vehicle.get_social_value_orientation_utility_group_average(other_vehicles), 0.943, 3)
+
+
+    def test_get_social_value_orientation_utility_group_sum(self):
+        vehicle = Vehicle("a")
+        vehicle.svo_angle = math.pi/4
+        vehicle.timeSpentWaiting = 0
+        other_vehicles = []
+        other_waiting_times = [2, 5, 1]
+        for i in range(len(other_waiting_times)):
+            v = Vehicle(str(i))
+            v.timeSpentWaiting = other_waiting_times[i]
+            other_vehicles.append(v)
+        self.assertAlmostEqual(vehicle.get_social_value_orientation_utility_group_sum(other_vehicles), 1.414, 3)
+    
+
+    def test_get_social_value_orientation_utility_group_average_weighted(self):
+        vehicle = Vehicle("a")
+        vehicle.svo_angle = math.pi/4
+        vehicle.timeSpentWaiting = 0
+        other_vehicles = []
+        other_waiting_times = [2, 5, 1]
+        for i in range(len(other_waiting_times)):
+            v = Vehicle(str(i))
+            v.timeSpentWaiting = other_waiting_times[i]
+            other_vehicles.append(v)
+        weights = [1, 3, -5]
+        self.assertAlmostEqual(vehicle.get_social_value_orientation_utility_group_average(other_vehicles, weights), 0.314, 3)
+
+
+    def test_get_social_value_orientation_utility_group_sum_weighted(self):
+        vehicle = Vehicle("a")
+        vehicle.svo_angle = math.pi/4
+        vehicle.timeSpentWaiting = 0
+        other_vehicles = []
+        other_waiting_times = [2, 5, 1]
+        for i in range(len(other_waiting_times)):
+            v = Vehicle(str(i))
+            v.timeSpentWaiting = other_waiting_times[i]
+            other_vehicles.append(v)
+        weights = [1, 3, -5]
+        self.assertAlmostEqual(vehicle.get_social_value_orientation_utility_group_sum(other_vehicles, weights), -0.471, 3)
         
 
 if __name__ == "__main__":
