@@ -79,6 +79,13 @@ class VehicleShepherd:
                     except KeyError:
                         print(traceback.format_exc())
                     
+                    if "svo" in vehGroup:
+                        vehicle.svo_angle = vehGroup["svo"]
+                    elif "social-value-orientation" in vehGroup:
+                        vehicle.svo_angle = vehGroup["social-value-orientation"]
+                    elif "social_value_orientation" in vehGroup:
+                        vehicle.svo_angle = vehGroup["social_value_orientation"]
+                    
                     self.vehicles[vId] = vehicle
                     self.vehicleGroups[group][vId] = vehicle
                     routeIds.remove(routeId)
