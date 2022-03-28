@@ -23,8 +23,59 @@ class Vehicle:
         self.vehicleType = vehicleType
         self.speed = 1
         self.priority = -1
-        self.timeSpentWaiting = 0
+        self.timeSpentWaiting:int = 0
+        self.svo_angle:float = 0    # Vehicles are considered egoistic by default
         self.isActive = False
+    
+
+    def get_reward(self) -> float:
+        """
+        Get the reward of this agent, based on the time spent waiting.
+
+        Reward = 1/(t + 1), where t is the time spent waiting.
+        """
+        return 1/(float(self.timeSpentWaiting) + 1)
+
+
+    def get_social_value_orientation_utility_one_to_one(self, other_vehicle) -> float:
+        reward:float = self.get_reward()
+        other_reward:float = other_vehicle.get_reward()
+        utility:float = (reward * math.cos(self.svo_angle)) + (other_reward * math.sin(self.svo_angle))
+        return utility
+    
+
+    def get_social_value_orientation_utility_group_average(self, other_vehicles:list, weights:list=None) -> float:
+        if weights:
+            assert(len(other_vehicles) == len(weights))
+        reward:float = self.get_reward()
+        other_rewards:float = 0
+        for i in range(len(other_vehicles)):
+            veh = other_vehicles[i]
+            r = veh.get_reward()
+            if weights:
+                r *= weights[i]
+            other_rewards += r
+        if weights:
+            other_rewards /= sum(weights)
+        else:
+            other_rewards /= len(other_vehicles)
+        utility:float = (reward * math.cos(self.svo_angle)) + (other_rewards * math.sin(self.svo_angle))
+        return utility
+    
+
+    def get_social_value_orientation_utility_group_sum(self, other_vehicles:list, weights:list=None) -> float:
+        if weights:
+            assert(len(other_vehicles) == len(weights))
+        reward:float = self.get_reward()
+        other_rewards:float = 0
+        for i in range(len(other_vehicles)):
+            veh = other_vehicles[i]
+            r = veh.get_reward()
+            if weights:
+                r *= weights[i]
+            other_rewards += r
+        utility:float = (reward * math.cos(self.svo_angle)) + (other_rewards * math.sin(self.svo_angle))
+        return utility
     
 
     def set_vehicle_type(self, vehicle_type):
