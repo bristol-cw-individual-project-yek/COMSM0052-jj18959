@@ -132,6 +132,8 @@ class Vehicle:
         self.actBasedOnState()
         if self.currentState == VehicleState.WAITING:
             self.timeSpentWaiting += 1
+        else:
+            self.timeSpentWaiting = 0
     
 
     def actBasedOnState(self):
