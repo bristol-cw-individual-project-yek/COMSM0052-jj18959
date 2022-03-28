@@ -27,6 +27,7 @@ class Vehicle:
         self.currentTimeSpentWaiting:int = 0
         self.svo_angle:float = 0    # Vehicles are considered egoistic by default
         self.isActive = False
+        self.pastWaitTimesAtJunctions:list = []
     
 
     def get_reward(self) -> float:
@@ -135,6 +136,8 @@ class Vehicle:
             self.totalTimeSpentWaiting += 1
             self.currentTimeSpentWaiting += 1
         else:
+            if self.currentState == VehicleState.CROSSING:
+                self.pastWaitTimesAtJunctions.append(self.currentTimeSpentWaiting)
             self.currentTimeSpentWaiting = 0
     
 

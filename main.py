@@ -13,7 +13,7 @@ from src.logger.logger import Logger
 from traci._simulation import Collision
 import src.maps.map_builder as map_builder
 from src.maps.bounding_box import BoundingBox
-from src.stats.fairness_calculator import FairnessCalculator
+from src.stats.metric_calculator import MetricCalculator
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -67,6 +67,45 @@ def get_network():
     return network
 
 
+def display_metrics(metrics:dict):
+    print("\n------------RESULTS------------\n")
+    collision_str = "Number of collisions: " + str(metrics["num_of_collisions"])
+    total_wait_time_stats:dict = metrics["wait_time_metrics"]["total-wait-time"]
+    tw_mean = total_wait_time_stats["mean"]
+    tw_median = total_wait_time_stats["median"]
+    tw_min = total_wait_time_stats["min"]
+    tw_max = total_wait_time_stats["max"]
+    tw_skew = total_wait_time_stats["skew"]
+    tw_kurtosis = total_wait_time_stats["kurtosis"]
+    total_wait_time_str = f"""
+Total wait time stats:
+    Mean    :   {tw_mean}
+    Median  :   {tw_median} 
+    Min     :   {tw_min} 
+    Max     :   {tw_max} 
+    Skew    :   {tw_skew}
+    Kurtosis:   {tw_kurtosis}
+    """
+    wait_time_per_junction_stats:dict = metrics["wait_time_metrics"]["wait-times-per-junction"]
+    wt_mean = wait_time_per_junction_stats["mean"]
+    wt_median = wait_time_per_junction_stats["median"]
+    wt_min = wait_time_per_junction_stats["min"]
+    wt_max = wait_time_per_junction_stats["max"]
+    wt_skew = wait_time_per_junction_stats["skew"]
+    wt_kurtosis = wait_time_per_junction_stats["kurtosis"]
+    wait_time_per_junction_str = f"""
+Wait time per junction stats:
+    Mean    :   {wt_mean}
+    Median  :   {wt_median} 
+    Min     :   {wt_min} 
+    Max     :   {wt_max} 
+    Skew    :   {wt_skew} 
+    Kurtosis:   {wt_kurtosis} 
+    """
+    print(collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str)
+    print("-------------------------------")
+
+
 def run_simulation(has_gui:bool=False, log_data:bool=False):
     shutil.rmtree("temp", ignore_errors=True)
     temp_file_name = "tmp_" + str(round(time()))
@@ -117,11 +156,11 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     traci.close()
 
     metrics = {
-        "fairness_metrics"  : FairnessCalculator.calculate(vehicles=shepherd.vehicles),
+        "wait_time_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),
         "num_of_collisions" : num_of_collisions
     }
 
-    print(metrics)
+    display_metrics(metrics)
 
     if log_data:
         Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, vehicle_metadata=vehicle_metadata, metrics=metrics)
@@ -135,7 +174,7 @@ def test_osm_get():
 if __name__ == "__main__":
     # TODO: Replace w/ config(?)
     has_gui = False
-    log_data = True
+    log_data = False
     if "--gui" in sys.argv:
         has_gui = True
     if "--log" in sys.argv:
