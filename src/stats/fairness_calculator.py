@@ -6,7 +6,7 @@ class FairnessCalculator:
     def calculate(vehicles:dict) -> dict:
         waiting_times = []
         for vId in vehicles:
-            waiting_times.append(vehicles[vId].timeSpentWaiting)
+            waiting_times.append(vehicles[vId].totalTimeSpentWaiting)
         
         mean = np.mean(waiting_times)
         # Non-adjusted Fisher-Pearson coefficient of skewness

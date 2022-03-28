@@ -22,10 +22,10 @@ class FirstComeFirstServePolicy(Policy):
             else:
                 must_wait = False
                 if other_vehicle.get_distance_to_junction(next_junction) < distance_to_junction: 
-                    print(f"Conflict: {vehicle.vehicleId} and {other_vehicle.vehicleId} (time spent waiting)")
-                    must_wait = True
-                elif other_vehicle.get_distance_to_junction(next_junction) == distance_to_junction and other_vehicle.timeSpentWaiting > vehicle.timeSpentWaiting:
                     print(f"Conflict: {vehicle.vehicleId} and {other_vehicle.vehicleId} (distance)")
+                    must_wait = True
+                elif other_vehicle.get_distance_to_junction(next_junction) == distance_to_junction and other_vehicle.currentTimeSpentWaiting > vehicle.currentTimeSpentWaiting:
+                    print(f"Conflict: {vehicle.vehicleId} and {other_vehicle.vehicleId} (time spent waiting)")
                     must_wait = True
                 elif other_vehicle.currentState == VehicleState.CROSSING:
                     print(f"Conflict: {vehicle.vehicleId} and {other_vehicle.vehicleId} ({other_vehicle.vehicleId} crossing)")
