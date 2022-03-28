@@ -1,7 +1,7 @@
 from scipy import stats
 import numpy as np
 
-class FairnessCalculator:
+class MetricCalculator:
 
     def calculate(vehicles:dict) -> dict:
         waiting_times = []

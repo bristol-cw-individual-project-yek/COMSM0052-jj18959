@@ -13,7 +13,7 @@ from src.logger.logger import Logger
 from traci._simulation import Collision
 import src.maps.map_builder as map_builder
 from src.maps.bounding_box import BoundingBox
-from src.stats.fairness_calculator import FairnessCalculator
+from src.stats.metric_calculator import MetricCalculator
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -117,7 +117,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     traci.close()
 
     metrics = {
-        "fairness_metrics"  : FairnessCalculator.calculate(vehicles=shepherd.vehicles),
+        "fairness_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),
         "num_of_collisions" : num_of_collisions
     }
 
