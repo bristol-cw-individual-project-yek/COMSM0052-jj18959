@@ -173,10 +173,10 @@ def test_osm_get():
 
 if __name__ == "__main__":
     # TODO: Replace w/ config(?)
-    has_gui = False
-    log_data = False
-    if "--gui" in sys.argv:
-        has_gui = True
-    if "--log" in sys.argv:
-        log_data = True
+    has_gui = True
+    log_data = True
+    if "--no-gui" in sys.argv:
+        has_gui = False
+    if "--no-log" in sys.argv:
+        log_data = False
     run_simulation(has_gui=has_gui, log_data=log_data)
