@@ -111,7 +111,6 @@ class VehicleShepherd:
                     vehicle.update(self.vehicles, self.network)
                     group_data[vehicle.vehicleId] = vehicle.get_data_as_dict()
                 except traci.exceptions.TraCIException as e:
-                    print(e)
                     vehicle.isActive = False
                     vIds_to_be_removed.append(vId)
             # Stop tracking any vehicles that no longer exist
