@@ -23,18 +23,19 @@ class Vehicle:
         self.vehicleType = vehicleType
         self.speed = 1
         self.priority = -1
-        self.timeSpentWaiting:int = 0
+        self.totalTimeSpentWaiting:int = 0
+        self.currentTimeSpentWaiting:int = 0
         self.svo_angle:float = 0    # Vehicles are considered egoistic by default
         self.isActive = False
     
 
     def get_reward(self) -> float:
         """
-        Get the reward of this agent, based on the time spent waiting.
+        Get the reward of this agent, based on the total time spent waiting across the entire simulation.
 
         Reward = 1/(t + 1), where t is the time spent waiting.
         """
-        return 1/(float(self.timeSpentWaiting) + 1)
+        return 1/(float(self.totalTimeSpentWaiting) + 1)
 
 
     def get_social_value_orientation_utility_one_to_one(self, other_vehicle) -> float:
@@ -131,7 +132,10 @@ class Vehicle:
         #print("Vehicles that conflict with " + self.vehicleId + ": " + str(conflicting_vehicles))
         self.actBasedOnState()
         if self.currentState == VehicleState.WAITING:
-            self.timeSpentWaiting += 1
+            self.totalTimeSpentWaiting += 1
+            self.currentTimeSpentWaiting += 1
+        else:
+            self.currentTimeSpentWaiting = 0
     
 
     def actBasedOnState(self):
@@ -205,6 +209,6 @@ class Vehicle:
                 "next_junction"         : self.nextJunction.getID(),
                 "current_speed"         : self.speed,
                 "priority"              : self.priority,
-                "time_spent_waiting"    : self.timeSpentWaiting
+                "time_spent_waiting"    : self.totalTimeSpentWaiting
             })
         return result
