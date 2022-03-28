@@ -174,7 +174,7 @@ def test_osm_get():
 if __name__ == "__main__":
     # TODO: Replace w/ config(?)
     has_gui = False
-    log_data = True
+    log_data = False
     if "--gui" in sys.argv:
         has_gui = True
     if "--log" in sys.argv:
