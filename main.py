@@ -131,25 +131,52 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     step = 0
     data = {}
     collision_data = {}
+    ongoing_collisions = {}
+
     num_of_collisions = 0
     while step < route_steps and len(shepherd.vehicles) > 0:
         data[step] = shepherd.update_vehicles()
         traci.simulationStep()
-        # Print collisions that are currently happening
+
+        # Collect data on any collisions that are happening
         collisions = traci.simulation.getCollisions()
         collisionDict = {}
         for i in range(len(collisions)):
             collision: Collision = collisions[i]
-            collisionDict[i] = {
+            collisionId = collision.collider + "-" + collision.victim
+            collisionDict[collisionId] = {
                 "collider"      : collision.collider,
                 "victim"        : collision.victim,
                 "collisionType" : collision.type,
                 "lane"          : collision.lane,
                 "pos"           : collision.pos
             }
+
+        # Remove duplicate collisions
+        # This isn't perfect, but it gets rid of the majority of duplicate collisions
+        toBeRemoved = []
+        for collisionId in ongoing_collisions:
+            cId:str = collisionId
+            colliderAndVictim = cId.split("-")
+            cIdAlt = colliderAndVictim[1] + "-" + colliderAndVictim[0]
+            if cId in collisionDict:
+                collisionDict.pop(cId)
+            else:
+                toBeRemoved.append(cId)
+            if cIdAlt in collisionDict:
+                collisionDict.pop(cIdAlt)
+            else:
+                toBeRemoved.append(cIdAlt)
+        for c in toBeRemoved:
+            ongoing_collisions.pop(c, "")
+        
+        # If there are any collisions left, record them
         if len(collisionDict) > 0:
-            # TODO: Handle duplicate collisions
             collision_data[step] = collisionDict
+
+            # This is to remove duplicate collisions
+            ongoing_collisions.update(collisionDict)
+
             num_of_collisions += len(collisionDict)
         step += 1
     
