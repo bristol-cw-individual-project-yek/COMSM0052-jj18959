@@ -117,7 +117,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False):
     traci.close()
 
     metrics = {
-        "fairness_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),
+        "wait_time_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),
         "num_of_collisions" : num_of_collisions
     }
 
