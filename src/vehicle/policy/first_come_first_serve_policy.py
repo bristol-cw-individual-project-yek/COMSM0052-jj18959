@@ -19,9 +19,13 @@ class FirstComeFirstServePolicy(Policy):
     
 
     def is_conflicting_same_junction(self, vehicle, other_vehicle) -> bool:
+        next_junction = vehicle.nextJunction
+        distance_to_junction = vehicle.get_distance_to_junction(next_junction)
+        
+        # Always allow other vehicles that are already crossing to pass first
+        if other_vehicle.currentState == VehicleState.CROSSING and vehicle.get_distance_to_junction(next_junction) <= FirstComeFirstServePolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION:
+            return True
         if vehicle.currentState != VehicleState.CROSSING:
-            next_junction = vehicle.nextJunction
-            distance_to_junction = vehicle.get_distance_to_junction(next_junction)
             if other_vehicle in self.vehicles_ahead_of_queue:
                 if not self.can_get_priority(vehicle, other_vehicle):
                     return True
@@ -32,8 +36,6 @@ class FirstComeFirstServePolicy(Policy):
                 if other_vehicle.get_distance_to_junction(next_junction) < distance_to_junction: 
                     must_wait = True
                 elif other_vehicle.get_distance_to_junction(next_junction) == distance_to_junction and other_vehicle.currentTimeSpentWaiting > vehicle.currentTimeSpentWaiting:
-                    must_wait = True
-                elif other_vehicle.currentState == VehicleState.CROSSING:
                     must_wait = True
                 if must_wait and vehicle.get_distance_to_junction(next_junction) <= FirstComeFirstServePolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION:
                     if other_vehicle.currentState != VehicleState.CROSSING:
