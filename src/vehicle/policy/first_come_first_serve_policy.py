@@ -45,13 +45,7 @@ class FirstComeFirstServePolicy(Policy):
     
 
     def is_conflicting_same_lane(self, vehicle, other_vehicle) -> bool:
-        if vehicle.currentState != VehicleState.CROSSING:
-            next_junction = vehicle.nextJunction
-            distance_to_junction = vehicle.get_distance_to_junction()
-            if vehicle.get_distance_to_vehicle(other_vehicle) <= FirstComeFirstServePolicy.MIN_DISTANCE_FROM_VEHICLE_SAME_LANE and \
-                other_vehicle.get_distance_to_junction(next_junction) <= distance_to_junction:
-                return True
-        return False
+        return super().is_conflicting_same_lane(vehicle, other_vehicle)
     
 
     def is_conflicting_visible(self, vehicle, other_vehicle) -> bool:
@@ -60,8 +54,4 @@ class FirstComeFirstServePolicy(Policy):
 
     def decide_state_no_conflicts(self, vehicle) -> VehicleState:
         self.vehicles_ahead_of_queue = {}
-        distance_to_junction = vehicle.get_distance_to_junction()
-        if distance_to_junction <= FirstComeFirstServePolicy.MIN_CROSSING_DISTANCE_FROM_JUNCTION:
-            return VehicleState.CROSSING
-
-        return VehicleState.DRIVING
+        return super().decide_state_no_conflicts(vehicle)
