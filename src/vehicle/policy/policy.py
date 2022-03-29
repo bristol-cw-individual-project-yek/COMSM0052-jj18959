@@ -32,12 +32,18 @@ class Policy:
 
     
     def is_conflicting_same_junction(self, vehicle, other_vehicle) -> bool:
-        if other_vehicle.currentState == VehicleState.DRIVING:
+        if other_vehicle.currentState == VehicleState.CROSSING and vehicle.get_distance_to_junction() <= Policy.MIN_WAITING_DISTANCE_FROM_JUNCTION:
             return True
         return False
     
 
     def is_conflicting_same_lane(self, vehicle, other_vehicle) -> bool:
+        if vehicle.currentState != VehicleState.CROSSING:
+            next_junction = vehicle.nextJunction
+            distance_to_junction = vehicle.get_distance_to_junction()
+            if vehicle.get_distance_to_vehicle(other_vehicle) <= Policy.MIN_DISTANCE_FROM_VEHICLE_SAME_LANE and \
+                other_vehicle.get_distance_to_junction(next_junction) <= distance_to_junction:
+                return True
         return False
     
 
@@ -46,4 +52,8 @@ class Policy:
     
 
     def decide_state_no_conflicts(self, vehicle) -> VehicleState:
+        distance_to_junction = vehicle.get_distance_to_junction()
+        if distance_to_junction <= Policy.MIN_CROSSING_DISTANCE_FROM_JUNCTION:
+            return VehicleState.CROSSING
+
         return VehicleState.DRIVING
