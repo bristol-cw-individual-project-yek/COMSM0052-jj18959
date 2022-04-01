@@ -60,7 +60,7 @@ class VehicleShepherd:
 
                     self.set_policy(vehicle, vehGroup)
                     routeId = routeIds[random.randint(0, len(routeIds) - 1)]
-                    vehicle.add_to_route(routeId, self.network)
+                    vehicle.add_to_route(routeId, self.network.net)
 
                     if "vehicle-type" in vehGroup:
                         try:
@@ -108,7 +108,7 @@ class VehicleShepherd:
                 try:
                     vehicle:Vehicle = self.vehicles[vId]
                     vehicle.isActive = True
-                    vehicle.update(self.vehicles, self.network)
+                    vehicle.update(self.vehicles)
                     group_data[vehicle.vehicleId] = vehicle.get_data_as_dict()
                 except traci.exceptions.TraCIException as e:
                     vehicle.isActive = False

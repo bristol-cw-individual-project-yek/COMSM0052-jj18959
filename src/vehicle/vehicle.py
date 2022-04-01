@@ -6,6 +6,7 @@ from src.vehicle.policy.custom_policy import CustomPolicy
 import src.vehicle.grid as grid
 import traci
 import math
+import sumolib
 
 class Vehicle:
 
@@ -18,7 +19,7 @@ class Vehicle:
         self.currentGridPosition = (Infinity, Infinity)
         self.conflictDetectionAlgorithm = ConflictDetection()
         self.conflictResolutionPolicy = Policy()
-        self.nextJunction = None
+        self.nextJunction:sumolib.net.node.Node = None
         self.visibilityAngle = 60   # in degrees
         self.vehicleType = vehicleType
         self.speed = 1
@@ -28,6 +29,7 @@ class Vehicle:
         self.svo_angle:float = 0    # Vehicles are considered egoistic by default
         self.isActive = False
         self.pastWaitTimesAtJunctions:list = []
+        self.network:sumolib.net.Net = None
     
 
     def get_reward(self) -> float:
@@ -99,10 +101,11 @@ class Vehicle:
         print("Priority of ", self.vehicleId, ": ", self.priority)
     
 
-    def add_to_route(self, routeId, network):
+    def add_to_route(self, routeId, network:sumolib.net.Net):
         traci.vehicle.add(self.vehicleId, routeId, typeID=self.vehicleType)
         self.currentRoute = list(traci.route.getEdges(routeId))
-        self.nextJunction = self.get_next_junction(network)
+        self.network = network
+        self.nextJunction = self.get_next_junction()
         #print(self.currentRoute)
         #print(str(traci.junction.getIDList()))
         #print(str(traci.vehicle.getLaneID(self.vehicleId)))
@@ -118,11 +121,11 @@ class Vehicle:
         traci.vehicle.setDecel(self.vehicleId, 99999)
 
 
-    def update(self, vehicles:dict, network):
+    def update(self, vehicles:dict):
         self.currentRouteIndex = traci.vehicle.getRouteIndex(self.vehicleId)
         if self.currentRouteIndex < 0:
             self.currentRouteIndex = 0
-        self.nextJunction = self.get_next_junction(network)
+        self.nextJunction = self.get_next_junction()
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
         self.currentGridPosition = grid.position_to_grid_square(self.currentPosition)
         conflicting_vehicles = self.conflictDetectionAlgorithm.detect_other_vehicles(self, vehicles)
@@ -150,9 +153,9 @@ class Vehicle:
             traci.vehicle.setSpeed(self.vehicleId, self.speed)
     
 
-    def get_next_junction(self, network):
+    def get_next_junction(self) -> sumolib.net.node.Node:
         current_edge = self.currentRoute[self.currentRouteIndex]
-        next_junction = network.net.getEdge(current_edge).getToNode()
+        next_junction:sumolib.net.node.Node = self.network.getEdge(current_edge).getToNode()
         return next_junction
     
 
