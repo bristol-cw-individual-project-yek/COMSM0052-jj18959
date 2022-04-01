@@ -27,7 +27,7 @@ class Network:
         else:
             network_file_name = os.path.abspath(self.network_file_path)
         
-        self.net = sumolib.net.readNet(self.network_file_path)
+        self.net = sumolib.net.readNet(self.network_file_path, withInternal=True)
         
         self.generateRandomRoutes(self.network_file_path)
 
