@@ -11,43 +11,43 @@ class FCFS_CentralizedPolicy(Policy):
 
 
     def insert_into_queue(self, vehicle:Vehicle, junction_id:str) -> None:
-        queue = FCFS_CentralizedPolicy.junction_to_queue[junction_id]
+        queue:list = FCFS_CentralizedPolicy.junction_to_queue[junction_id]
         if not vehicle in queue:
-            index = len(queue)
+            index = len(queue) - 1
             found:bool = False
-            while index > 1 and not found:
+            while index > 0 and not found:
                 other_veh:Vehicle = queue[index]
                 if vehicle.get_distance_to_junction() < other_veh.get_distance_to_junction():
                     index -= 1
-                elif vehicle.get_distance_to_junction() == other_veh.get_distance_to_junction() and vehicle.currentTimeSpentWaiting < other_veh.currentTimeSpentWaiting:
+                elif vehicle.get_distance_to_junction() == other_veh.get_distance_to_junction() and vehicle.currentTimeSpentWaiting > other_veh.currentTimeSpentWaiting:
                     index -= 1
                 else:
                     found = True
             queue.insert(index, vehicle)
 
 
-    def request_state(self, vehicle:Vehicle, vehicles:list, junction_id:str) -> VehicleState:
-        current_time = traci.simulation.getCurrentTime()
+    def request_state_at_junction(self, vehicle:Vehicle, vehicles:list, junction_id:str) -> VehicleState:
+        current_time = traci.simulation.getTime()
         if not junction_id in FCFS_CentralizedPolicy.junction_to_queue:
             FCFS_CentralizedPolicy.junction_to_queue[junction_id] = []
         if not junction_id in FCFS_CentralizedPolicy.junction_to_last_update_time or FCFS_CentralizedPolicy.junction_to_last_update_time[junction_id] < current_time:
             FCFS_CentralizedPolicy.junction_to_last_update_time[junction_id] = current_time
             for v in vehicles:
                 self.insert_into_queue(v, junction_id)
+        if not FCFS_CentralizedPolicy.junction_to_queue[junction_id][0] in vehicles:
+            FCFS_CentralizedPolicy.junction_to_queue[junction_id].pop(0)
         if FCFS_CentralizedPolicy.junction_to_queue[junction_id][0] == vehicle:
             return VehicleState.CROSSING
-        return VehicleState.WAITING
-        
-        
+        return VehicleState.WAITING    
 
 
     def decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
-        if vehicle.get_distance_to_junction() <= FCFS_CentralizedPolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION:
-            if len(conflicting_vehicles["same_junction"]) > 0:
-                junction_id = vehicle.get_next_junction().getID()
-                vehicles = copy.copy(conflicting_vehicles)
-                vehicles.append(vehicle)
-                return self.request_state(vehicle, vehicles, junction_id)
+        if vehicle.get_distance_to_junction() <= FCFS_CentralizedPolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION and vehicle.currentState != VehicleState.CROSSING:
+            #if len(conflicting_vehicles["same_junction"]) > 0:
+            junction_id = vehicle.get_next_junction().getID()
+            vehicles = copy.copy(conflicting_vehicles["same_junction"])
+            vehicles.append(vehicle)
+            return self.request_state_at_junction(vehicle, vehicles, junction_id)
         
         for other_vehicle in conflicting_vehicles["same_lane"]:
             if self.is_conflicting_same_lane(vehicle, other_vehicle):
