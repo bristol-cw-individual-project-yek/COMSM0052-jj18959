@@ -141,7 +141,7 @@ class Vehicle:
         else:
             if self.currentState == VehicleState.CROSSING:
                 self.pastWaitTimesAtJunctions.append(self.currentTimeSpentWaiting)
-            self.currentTimeSpentWaiting = 0
+                self.currentTimeSpentWaiting = 0
     
 
     def actBasedOnState(self):
