@@ -15,7 +15,7 @@ class FCFS_CentralizedPolicy(Policy):
         if not vehicle in queue:
             index = len(queue) - 1
             found:bool = False
-            while index > 0 and not found:
+            while index >= 0 and not found:
                 other_veh:Vehicle = queue[index]
                 if vehicle.get_distance_to_junction() < other_veh.get_distance_to_junction():
                     index -= 1
@@ -23,7 +23,7 @@ class FCFS_CentralizedPolicy(Policy):
                     index -= 1
                 else:
                     found = True
-            queue.insert(index, vehicle)
+            queue.insert(index + 1, vehicle)
 
 
     def request_state_at_junction(self, vehicle:Vehicle, vehicles:list, junction_id:str) -> VehicleState:
