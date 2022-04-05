@@ -10,11 +10,10 @@ class FCFS_CentralizedPolicy(Policy):
     junction_to_last_update_time:dict   = {}
 
 
-    def can_swap(self, vehicle: Vehicle, queue:list, index:int) -> bool:
-        other_veh:Vehicle = queue[index]
-        if vehicle.get_distance_to_junction() < other_veh.get_distance_to_junction():
+    def can_swap(self, vehicle: Vehicle, other_vehicle:Vehicle) -> bool:
+        if vehicle.get_distance_to_junction() < other_vehicle.get_distance_to_junction():
             return True
-        elif vehicle.get_distance_to_junction() == other_veh.get_distance_to_junction() and vehicle.currentTimeSpentWaiting > other_veh.currentTimeSpentWaiting:
+        elif vehicle.get_distance_to_junction() == other_vehicle.get_distance_to_junction() and vehicle.currentTimeSpentWaiting > other_vehicle.currentTimeSpentWaiting:
             return True
         else:
             return False
@@ -26,7 +25,8 @@ class FCFS_CentralizedPolicy(Policy):
             index = len(queue) - 1
             found:bool = False
             while index >= 0 and not found:
-                if self.can_swap(vehicle, queue, index):
+                other_veh:Vehicle = queue[index]
+                if self.can_swap(vehicle, other_veh):
                     index -= 1
                 else:
                     found = True
