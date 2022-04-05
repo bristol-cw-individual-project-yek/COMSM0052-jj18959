@@ -14,6 +14,8 @@ class Network:
         self.net:sumolib.net.Net = None
         self.route_seed:int = route_seed
         self.network_file_path = network_file_path
+        self.internal_lane_data:dict = {}
+        self.connection_data:dict = {}
 
 
     def generateFile(self, output_file_name:str):
@@ -28,6 +30,30 @@ class Network:
             network_file_name = os.path.abspath(self.network_file_path)
         
         self.net = sumolib.net.readNet(self.network_file_path, withInternal=True)
+
+        # Store info about internal edge lengths
+        net_tree = ET.ElementTree()
+        net_tree.parse(self.network_file_path)
+        root = net_tree.getroot()
+        edges = root.findall("edge")
+        for edge in edges:
+            if "function" in edge.attrib and edge.attrib["function"] == "internal":
+                for lane in edge.findall("lane"):
+                    lane_id = lane.attrib["id"]
+                    self.internal_lane_data[lane_id] = {}
+                    self.internal_lane_data[lane_id]["length"] = lane.attrib["length"]
+        connections = root.findall("connection")
+        for con in connections:
+            if "via" in con.attrib:
+                connection_id = con.attrib["from"] + "-" + con.attrib["to"]
+                self.connection_data[connection_id] = {}
+                self.connection_data[connection_id]["internal"] = con.attrib["via"]
+        print(self.internal_lane_data)
+        print(self.connection_data)
+        #        root.remove(child)
+        #    elif child.tag == "route":
+        #        self.routeIds.append(child.attrib["id"])
+
         
         self.generateRandomRoutes(self.network_file_path)
 
