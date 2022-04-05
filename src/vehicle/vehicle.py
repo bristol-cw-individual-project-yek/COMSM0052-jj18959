@@ -29,7 +29,7 @@ class Vehicle:
         self.svo_angle:float = 0    # Vehicles are considered egoistic by default
         self.isActive = False
         self.pastWaitTimesAtJunctions:list = []
-        self.network:sumolib.net.Net = None
+        self.network = None
     
 
     def get_reward(self) -> float:
@@ -101,7 +101,7 @@ class Vehicle:
         print("Priority of ", self.vehicleId, ": ", self.priority)
     
 
-    def add_to_route(self, routeId, network:sumolib.net.Net):
+    def add_to_route(self, routeId, network):
         traci.vehicle.add(self.vehicleId, routeId, typeID=self.vehicleType)
         self.currentRoute = list(traci.route.getEdges(routeId))
         self.network = network
@@ -155,8 +155,18 @@ class Vehicle:
 
     def get_next_junction(self) -> sumolib.net.node.Node:
         current_edge = self.currentRoute[self.currentRouteIndex]
-        next_junction:sumolib.net.node.Node = self.network.getEdge(current_edge).getToNode()
+        next_junction:sumolib.net.node.Node = self.network.net.getEdge(current_edge).getToNode()
         return next_junction
+    
+
+    def get_next_crossing_internal_length(self) -> float:
+        current_edge = self.currentRoute[self.currentRouteIndex]
+        try:
+            next_edge = self.currentRoute[self.currentRouteIndex + 1]
+            return self.network.getConnectionLength(current_edge, next_edge)
+        except IndexError as e:
+            print(str(e))
+            return 0
     
 
     def get_distance_to_junction(self, junction=None):
