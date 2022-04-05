@@ -169,7 +169,16 @@ class Vehicle:
             return 0
     
 
-    def get_distance_to_junction(self, junction=None):
+    def get_time_to_next_lane_at_full_speed(self):
+        """
+        Returns the estimated time it would take for this vehicle to reach the next lane at full speed.
+        """
+        distance_to_next_lane = self.get_distance_to_junction() + self.get_next_crossing_internal_length()
+        speed = self.speed
+        return distance_to_next_lane / speed
+    
+
+    def get_distance_to_junction(self, junction=None) -> float:
         if junction:
             junction_pos = junction.getCoord()
         else:
@@ -186,7 +195,7 @@ class Vehicle:
         return self.nextJunction.getCoord()
     
 
-    def get_distance(vector1:tuple, vector2:tuple):
+    def get_distance(vector1:tuple, vector2:tuple) -> float:
         distance_x = abs(vector1[0] - vector2[0])
         distance_y = abs(vector1[1] - vector2[1])
         return (distance_x ** 2 + distance_y ** 2) ** 0.5

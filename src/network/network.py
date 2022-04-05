@@ -18,11 +18,11 @@ class Network:
         self.connection_data:dict = {}
 
 
-    def getConnectionLength(self, fromEdgeId: str, toEdgeId: str):
+    def getConnectionLength(self, fromEdgeId: str, toEdgeId: str) -> float:
         connectionId = fromEdgeId + "-" + toEdgeId
         laneId = self.connection_data[connectionId]["internal"]
         length = self.internal_lane_data[laneId]["length"]
-        return length
+        return float(length)
 
 
     def generateFile(self, output_file_name:str):
