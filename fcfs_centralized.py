@@ -10,16 +10,23 @@ class FCFS_CentralizedPolicy(Policy):
     junction_to_last_update_time:dict   = {}
 
 
+    def can_swap(self, vehicle: Vehicle, queue:list, index:int) -> bool:
+        other_veh:Vehicle = queue[index]
+        if vehicle.get_distance_to_junction() < other_veh.get_distance_to_junction():
+            return True
+        elif vehicle.get_distance_to_junction() == other_veh.get_distance_to_junction() and vehicle.currentTimeSpentWaiting > other_veh.currentTimeSpentWaiting:
+            return True
+        else:
+            return False
+
+
     def insert_into_queue(self, vehicle:Vehicle, junction_id:str) -> None:
         queue:list = FCFS_CentralizedPolicy.junction_to_queue[junction_id]
         if not vehicle in queue:
             index = len(queue) - 1
             found:bool = False
             while index >= 0 and not found:
-                other_veh:Vehicle = queue[index]
-                if vehicle.get_distance_to_junction() < other_veh.get_distance_to_junction():
-                    index -= 1
-                elif vehicle.get_distance_to_junction() == other_veh.get_distance_to_junction() and vehicle.currentTimeSpentWaiting > other_veh.currentTimeSpentWaiting:
+                if self.can_swap(vehicle, queue, index):
                     index -= 1
                 else:
                     found = True
