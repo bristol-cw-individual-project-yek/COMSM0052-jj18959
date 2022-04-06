@@ -7,9 +7,6 @@ import copy
 import math
 
 class FCFS_CentralizedPolicy(Policy):
-
-    #junction_to_queue:dict              = {}
-    #junction_to_last_update_time:dict   = {}
     junction_to_vehicles:dict = {}
     reserved_times:dict = {}
     arrival_times:dict = {}
@@ -73,36 +70,21 @@ class FCFS_CentralizedPolicy(Policy):
                             FCFS_CentralizedPolicy.arrival_times[other_vehicle] = FCFS_CentralizedPolicy.arrival_times[vehicle]
                             FCFS_CentralizedPolicy.reserved_times[vehicle] = temp_reserved_time
                             FCFS_CentralizedPolicy.arrival_times[vehicle] = temp_arrival_time
-                            print("Updated time of " + other_vehicle.vehicleId + ": " + str(FCFS_CentralizedPolicy.reserved_times[other_vehicle]))
                         except:
                             pass
                 else:
-                    if FCFS_CentralizedPolicy.arrival_times[other_vehicle] <= current_time:
-                        pass
-                        #to_be_removed.append(other_vehicle)
+                    if FCFS_CentralizedPolicy.arrival_times[other_vehicle] < current_time:
+                        to_be_removed.append(other_vehicle)
             for v in to_be_removed:
                 FCFS_CentralizedPolicy.junction_to_vehicles[junction_id].remove(v)
                 FCFS_CentralizedPolicy.reserved_times.pop(v) 
             FCFS_CentralizedPolicy.reserved_times[vehicle] = reserved_time
             FCFS_CentralizedPolicy.arrival_times[vehicle] =  reserved_time + vehicle.get_time_to_cross_next_junction()
             FCFS_CentralizedPolicy.junction_to_vehicles[junction_id].append(vehicle)
-            print("Reserved time of " + vehicle.vehicleId + ": " + str(reserved_time))
             if is_clear:
                 return VehicleState.CROSSING
             else:
-                return VehicleState.WAITING
-
-        #if not junction_id in FCFS_CentralizedPolicy.junction_to_queue:
-        #    FCFS_CentralizedPolicy.junction_to_queue[junction_id] = []
-        #if not junction_id in FCFS_CentralizedPolicy.junction_to_last_update_time or FCFS_CentralizedPolicy.junction_to_last_update_time[junction_id] < current_time:
-        #    FCFS_CentralizedPolicy.junction_to_last_update_time[junction_id] = current_time
-        #    for v in vehicles:
-        #        self.insert_into_queue(v, junction_id)
-        #if not FCFS_CentralizedPolicy.junction_to_queue[junction_id][0] in vehicles:
-        #    FCFS_CentralizedPolicy.junction_to_queue[junction_id].pop(0)
-        #if FCFS_CentralizedPolicy.junction_to_queue[junction_id][0] == vehicle:
-        #    return VehicleState.CROSSING
-        #return VehicleState.WAITING    
+                return VehicleState.WAITING  
 
 
     def decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
