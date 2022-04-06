@@ -14,7 +14,7 @@ class CustomPolicy(Policy):
         self.module_path = module_path
 
         for name, obj in inspect.getmembers(self.module, inspect.isclass):
-            if issubclass(obj, Policy):
+            if issubclass(obj, Policy) and obj != Policy:
                 self.name = name
                 self.policy : Policy = obj()
                 break

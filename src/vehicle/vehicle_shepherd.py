@@ -108,7 +108,7 @@ class VehicleShepherd:
                 try:
                     vehicle:Vehicle = self.vehicles[vId]
                     vehicle.isActive = True
-                    vehicle.update(self.vehicles, self.network)
+                    vehicle.update(self.vehicles)
                     group_data[vehicle.vehicleId] = vehicle.get_data_as_dict()
                 except traci.exceptions.TraCIException as e:
                     vehicle.isActive = False

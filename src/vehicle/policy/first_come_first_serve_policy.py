@@ -13,8 +13,6 @@ class FirstComeFirstServePolicy(Policy):
     
 
     def can_get_priority(self, vehicle, other_vehicle) -> bool:
-        if other_vehicle.currentTimeSpentWaiting < vehicle.currentTimeSpentWaiting:
-            return True
         return False
     
 

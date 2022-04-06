@@ -6,6 +6,7 @@ from src.vehicle.policy.custom_policy import CustomPolicy
 import src.vehicle.grid as grid
 import traci
 import math
+import sumolib
 
 class Vehicle:
 
@@ -18,7 +19,7 @@ class Vehicle:
         self.currentGridPosition = (Infinity, Infinity)
         self.conflictDetectionAlgorithm = ConflictDetection()
         self.conflictResolutionPolicy = Policy()
-        self.nextJunction = None
+        self.nextJunction:sumolib.net.node.Node = None
         self.visibilityAngle = 60   # in degrees
         self.vehicleType = vehicleType
         self.speed = 1
@@ -28,20 +29,27 @@ class Vehicle:
         self.svo_angle:float = 0    # Vehicles are considered egoistic by default
         self.isActive = False
         self.pastWaitTimesAtJunctions:list = []
+        self.network = None
     
 
-    def get_reward(self) -> float:
+    def get_reward(self, reserved_time:float=None) -> float:
         """
         Get the reward of this agent, based on the total time spent waiting across the entire simulation.
 
-        Reward = 1/(t + 1), where t is the time spent waiting.
+        By default, the reward = -t, where t is the total time spent waiting throughout the simulation.
+
+        If the "reserved_time" parameter is passed in, t = reserved_time - current time in the simulation instead.
         """
-        return 1/(float(self.totalTimeSpentWaiting) + 1)
+        if (reserved_time):
+            waiting_time = reserved_time - traci.simulation.getTime()
+        else:
+            waiting_time = self.totalTimeSpentWaiting
+        return -waiting_time
 
 
-    def get_social_value_orientation_utility_one_to_one(self, other_vehicle) -> float:
-        reward:float = self.get_reward()
-        other_reward:float = other_vehicle.get_reward()
+    def get_social_value_orientation_utility_one_to_one(self, other_vehicle, reserved_time:float=None, other_reserved_time:float=None) -> float:
+        reward:float = self.get_reward(reserved_time)
+        other_reward:float = other_vehicle.get_reward(other_reserved_time)
         utility:float = (reward * math.cos(self.svo_angle)) + (other_reward * math.sin(self.svo_angle))
         return utility
     
@@ -102,7 +110,8 @@ class Vehicle:
     def add_to_route(self, routeId, network):
         traci.vehicle.add(self.vehicleId, routeId, typeID=self.vehicleType)
         self.currentRoute = list(traci.route.getEdges(routeId))
-        self.nextJunction = self.get_next_junction(network)
+        self.network = network
+        self.nextJunction = self.get_next_junction()
         #print(self.currentRoute)
         #print(str(traci.junction.getIDList()))
         #print(str(traci.vehicle.getLaneID(self.vehicleId)))
@@ -118,11 +127,11 @@ class Vehicle:
         traci.vehicle.setDecel(self.vehicleId, 99999)
 
 
-    def update(self, vehicles:dict, network):
+    def update(self, vehicles:dict):
         self.currentRouteIndex = traci.vehicle.getRouteIndex(self.vehicleId)
         if self.currentRouteIndex < 0:
             self.currentRouteIndex = 0
-        self.nextJunction = self.get_next_junction(network)
+        self.nextJunction = self.get_next_junction()
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
         self.currentGridPosition = grid.position_to_grid_square(self.currentPosition)
         conflicting_vehicles = self.conflictDetectionAlgorithm.detect_other_vehicles(self, vehicles)
@@ -138,7 +147,7 @@ class Vehicle:
         else:
             if self.currentState == VehicleState.CROSSING:
                 self.pastWaitTimesAtJunctions.append(self.currentTimeSpentWaiting)
-            self.currentTimeSpentWaiting = 0
+                self.currentTimeSpentWaiting = 0
     
 
     def actBasedOnState(self):
@@ -150,13 +159,38 @@ class Vehicle:
             traci.vehicle.setSpeed(self.vehicleId, self.speed)
     
 
-    def get_next_junction(self, network):
+    def get_next_junction(self) -> sumolib.net.node.Node:
         current_edge = self.currentRoute[self.currentRouteIndex]
-        next_junction = network.net.getEdge(current_edge).getToNode()
+        next_junction:sumolib.net.node.Node = self.network.net.getEdge(current_edge).getToNode()
         return next_junction
     
 
-    def get_distance_to_junction(self, junction=None):
+    def get_next_crossing_internal_length(self) -> float:
+        current_edge = self.currentRoute[self.currentRouteIndex]
+        try:
+            next_edge = self.currentRoute[self.currentRouteIndex + 1]
+            return self.network.getConnectionLength(current_edge, next_edge)
+        except IndexError as e:
+            print(str(e))
+            return 0
+    
+
+    def get_time_to_cross_next_junction(self) -> float:
+        distance_to_next_lane = self.get_next_crossing_internal_length()
+        speed = self.speed
+        return distance_to_next_lane / speed
+    
+
+    def get_time_to_next_lane_at_full_speed(self):
+        """
+        Returns the estimated time it would take for this vehicle to reach the next lane at full speed.
+        """
+        distance_to_next_lane = self.get_distance_to_junction() + (self.get_next_crossing_internal_length() / 2)
+        speed = self.speed
+        return distance_to_next_lane / speed
+    
+
+    def get_distance_to_junction(self, junction=None) -> float:
         if junction:
             junction_pos = junction.getCoord()
         else:
@@ -173,7 +207,7 @@ class Vehicle:
         return self.nextJunction.getCoord()
     
 
-    def get_distance(vector1:tuple, vector2:tuple):
+    def get_distance(vector1:tuple, vector2:tuple) -> float:
         distance_x = abs(vector1[0] - vector2[0])
         distance_y = abs(vector1[1] - vector2[1])
         return (distance_x ** 2 + distance_y ** 2) ** 0.5
