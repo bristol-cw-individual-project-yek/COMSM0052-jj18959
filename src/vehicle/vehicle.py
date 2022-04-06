@@ -169,11 +169,17 @@ class Vehicle:
             return 0
     
 
+    def get_time_to_cross_next_junction(self) -> float:
+        distance_to_next_lane = self.get_next_crossing_internal_length()
+        speed = self.speed
+        return distance_to_next_lane / speed
+    
+
     def get_time_to_next_lane_at_full_speed(self):
         """
         Returns the estimated time it would take for this vehicle to reach the next lane at full speed.
         """
-        distance_to_next_lane = self.get_distance_to_junction() + self.get_next_crossing_internal_length()
+        distance_to_next_lane = self.get_distance_to_junction() + (self.get_next_crossing_internal_length() / 2)
         speed = self.speed
         return distance_to_next_lane / speed
     
