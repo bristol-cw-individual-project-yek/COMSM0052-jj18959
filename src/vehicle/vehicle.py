@@ -32,18 +32,24 @@ class Vehicle:
         self.network = None
     
 
-    def get_reward(self) -> float:
+    def get_reward(self, reserved_time:float=None) -> float:
         """
         Get the reward of this agent, based on the total time spent waiting across the entire simulation.
 
-        Reward = 1/(t + 1), where t is the time spent waiting.
+        By default, the reward = 1/(t + 1), where t is the total time spent waiting throughout the simulation.
+
+        If the "reserved_time" parameter is passed in, t = reserved_time - current time in the simulation instead.
         """
-        return 1/(float(self.totalTimeSpentWaiting) + 1)
+        if (reserved_time):
+            waiting_time = reserved_time - traci.simulation.getTime()
+        else:
+            waiting_time = self.totalTimeSpentWaiting
+        return 1/(float(waiting_time) + 1)
 
 
-    def get_social_value_orientation_utility_one_to_one(self, other_vehicle) -> float:
-        reward:float = self.get_reward()
-        other_reward:float = other_vehicle.get_reward()
+    def get_social_value_orientation_utility_one_to_one(self, other_vehicle, reserved_time:float=None, other_reserved_time:float=None) -> float:
+        reward:float = self.get_reward(reserved_time)
+        other_reward:float = other_vehicle.get_reward(other_reserved_time)
         utility:float = (reward * math.cos(self.svo_angle)) + (other_reward * math.sin(self.svo_angle))
         return utility
     
