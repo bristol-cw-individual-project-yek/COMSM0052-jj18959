@@ -36,7 +36,7 @@ class Vehicle:
         """
         Get the reward of this agent, based on the total time spent waiting across the entire simulation.
 
-        By default, the reward = 1/(t + 1), where t is the total time spent waiting throughout the simulation.
+        By default, the reward = -t, where t is the total time spent waiting throughout the simulation.
 
         If the "reserved_time" parameter is passed in, t = reserved_time - current time in the simulation instead.
         """
@@ -44,7 +44,7 @@ class Vehicle:
             waiting_time = reserved_time - traci.simulation.getTime()
         else:
             waiting_time = self.totalTimeSpentWaiting
-        return 1/(float(waiting_time) + 1)
+        return -waiting_time
 
 
     def get_social_value_orientation_utility_one_to_one(self, other_vehicle, reserved_time:float=None, other_reserved_time:float=None) -> float:
