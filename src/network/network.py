@@ -8,11 +8,11 @@ class Network:
 
     TEMP_FILE_DIRECTORY = "temp"
 
-    def __init__(self, settings:dict, route_seed:int, network_file_path:str = None):
+    def __init__(self, settings:dict, seed:int, network_file_path:str = None):
         self.routeIds:list = []
         self.settings:dict = settings
         self.net:sumolib.net.Net = None
-        self.route_seed:int = route_seed
+        self.seed:int = seed
         self.network_file_path = network_file_path
         self.internal_lane_data:dict = {}
         self.connection_data:dict = {}
@@ -55,12 +55,6 @@ class Network:
                 connection_id = con.attrib["from"] + "-" + con.attrib["to"]
                 self.connection_data[connection_id] = {}
                 self.connection_data[connection_id]["internal"] = con.attrib["via"]
-        print(self.internal_lane_data)
-        print(self.connection_data)
-        #        root.remove(child)
-        #    elif child.tag == "route":
-        #        self.routeIds.append(child.attrib["id"])
-
         
         self.generateRandomRoutes(self.network_file_path)
 
@@ -85,7 +79,7 @@ class Network:
         trip_args = []
         trip_args.append("-n=" + network_file_path)
         trip_args.append("-o=" + trip_file_path)
-        trip_args.append("--seed=" + str(self.route_seed))
+        trip_args.append("--seed=" + str(self.seed))
         randomTrips.main(randomTrips.get_options(args=trip_args))
         route_file_path = network_file_path.replace(".net", ".rou")
         routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + route_file_path + " --named-routes=true --route-steps=" + str(route_steps)
@@ -118,7 +112,7 @@ class Network:
     def getData(self) -> dict:
         data = {
             "settings"      : self.settings,
-            "route_seed"    : self.route_seed
+            "seed"    : self.seed
         }
         return data
         

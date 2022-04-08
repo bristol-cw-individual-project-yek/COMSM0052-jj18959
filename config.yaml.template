@@ -1,5 +1,5 @@
 network-type: "random"
-route-seed: 0
+seed: 0
 
 # Map settings for non-random generated maps
 network-file-path: ""

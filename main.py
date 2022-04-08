@@ -33,12 +33,12 @@ except:
 
 def get_network():
     try:
-        route_seed = CONFIG["route-seed"]
+        seed = CONFIG["seed"]
     except KeyError:
-        route_seed = 0
+        seed = 0
     try:
         if CONFIG["network-type"] == "local":
-            network = ntwk.Network({}, route_seed=route_seed, network_file_path=CONFIG["network-file-path"])
+            network = ntwk.Network({}, seed=seed, network_file_path=CONFIG["network-file-path"])
         elif CONFIG["network-type"] == "osm":
             osm_settings = CONFIG["osm-area-settings"]
             origin_lat = osm_settings["origin-latitude"]
@@ -52,13 +52,13 @@ def get_network():
                 os.makedirs(ntwk.Network.TEMP_FILE_DIRECTORY)
             osm_path = map_builder.get_osm_area(bbox, f"{ntwk.Network.TEMP_FILE_DIRECTORY}/results")
             file_path = map_builder.build_map_from_osm(osm_path)
-            network = ntwk.Network({}, route_seed=route_seed, network_file_path=file_path)
+            network = ntwk.Network({}, seed=seed, network_file_path=file_path)
         elif CONFIG["network-type"] == "random":
-            network = ntwk.Network(CONFIG["random-settings"], route_seed=route_seed)
+            network = ntwk.Network(CONFIG["random-settings"], seed=seed)
         elif CONFIG["network-type"] == "grid":
-            network = grid.GridNetwork(CONFIG["grid-settings"], route_seed=route_seed)
+            network = grid.GridNetwork(CONFIG["grid-settings"], seed=seed)
         elif CONFIG["network-type"] == "spider":
-            network = spider.SpiderNetwork(CONFIG["spider-settings"], route_seed=route_seed)
+            network = spider.SpiderNetwork(CONFIG["spider-settings"], seed=seed)
     except KeyError as e:
         print("Key missing from config.yaml: " + str(e))
         raise(e)
