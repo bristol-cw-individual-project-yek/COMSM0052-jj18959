@@ -4,15 +4,37 @@ from datetime import datetime
 import src.network.network as ntwk
 
 class Logger:
-    def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.Network, collision_data:dict, vehicle_metadata:dict={}, metrics:dict={}, entry_folder_name="", simulation_number:int=0) -> None:
-        log_directory_name = "logs"
-        data_directory_name = "simulations"
-        if not os.path.exists(log_directory_name):
-            os.makedirs(log_directory_name)
+    LOG_DIRECTORY_NAME:str = "logs"
+    DATA_DIRECTORY_NAME:str = "simulations"
+
+    def create_data_folder(entry_folder_name:str="") -> str:
+        """
+        Create a folder for new data entries.
+
+        Returns the name of the folder created.
+        """
+        
+        if not os.path.exists(Logger.LOG_DIRECTORY_NAME):
+            os.makedirs(Logger.LOG_DIRECTORY_NAME)
         if entry_folder_name == "":
-            entry_folder_name = datetime.today().isoformat().replace(":", "-", -1).split(".")[0]
-        os.makedirs(log_directory_name + "/" + entry_folder_name)
-        os.makedirs(log_directory_name + "/" + entry_folder_name + "/" + data_directory_name)
+            entry_folder_name:str = datetime.today().isoformat().replace(":", "-", -1).split(".")[0]
+        
+        log_entry_directory_path = Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name
+        os.makedirs(log_entry_directory_path)
+        simulation_directory_path = Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/" + Logger.DATA_DIRECTORY_NAME
+        os.makedirs(simulation_directory_path)
+        return entry_folder_name
+
+
+    def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.Network, collision_data:dict, entry_folder_name:str, vehicle_metadata:dict={}, metrics:dict={},simulation_number:int=0) -> None:
+        #log_directory_name = "logs"
+        #data_directory_name = "simulations"
+        #if not os.path.exists(log_directory_name):
+        #    os.makedirs(log_directory_name)
+        #if entry_folder_name == "":
+        #    entry_folder_name:str = datetime.today().isoformat().replace(":", "-", -1).split(".")[0]
+        #os.makedirs(log_directory_name + "/" + entry_folder_name)
+        #os.makedirs(log_directory_name + "/" + entry_folder_name + "/" + data_directory_name)
 
         network_data = network.getData()
         vehicle_group_data = config_data["vehicle-groups"]
@@ -24,8 +46,11 @@ class Logger:
             if group["policy-type"] == "custom" and "policy-path" in group:
                 custom_policies[groupId] = group["policy-path"]
         
-        # Record custom policies
-        Logger.record_custom_policies(custom_policies, log_directory_name, entry_folder_name)
+        # Record custom policies if necessary
+        try:
+            Logger.record_custom_policies(custom_policies, Logger.LOG_DIRECTORY_NAME, entry_folder_name)
+        except FileExistsError:
+            pass
 
         # Replace paths with the relative file path of the records
         for groupId in custom_policies:
@@ -44,7 +69,7 @@ class Logger:
         }
         data["network_data"]["network_type"] = config_data["network-type"]
         
-        with open(log_directory_name + "/" + entry_folder_name + "/" + data_directory_name + "/" + "sim_" + str(simulation_number), "w") as f:
+        with open(Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/" + Logger.DATA_DIRECTORY_NAME + "/" + "sim_" + str(simulation_number) + ".json", "w") as f:
             f.write(json.dumps(data, indent=4))
             f.close()
     

@@ -106,13 +106,15 @@ Wait time per junction stats:
     print("-------------------------------")
 
 
-def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1):
+def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1, entry_name:str=""):
     shutil.rmtree("temp", ignore_errors=True)
     temp_file_name = "tmp_" + str(round(time()))
     road_network:ntwk.Network = get_network()
     route_steps = CONFIG["steps"]
 
-    for run_number in range(number_of_runs):
+    folder_name = Logger.create_data_folder(entry_name)
+
+    for simulation_number in range(number_of_runs):
         path = road_network.generateFile(temp_file_name)
         if not has_gui or number_of_runs > 1:
             sumoBinary = sumolib.checkBinary("sumo")
@@ -190,7 +192,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
 
         display_metrics(metrics)
         if log_data:
-            Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, vehicle_metadata=vehicle_metadata, metrics=metrics)
+            Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, entry_folder_name=folder_name, vehicle_metadata=vehicle_metadata, metrics=metrics, simulation_number=simulation_number)
     shutil.rmtree("temp")
 
 
