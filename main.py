@@ -111,86 +111,86 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
     temp_file_name = "tmp_" + str(round(time()))
     road_network:ntwk.Network = get_network()
     route_steps = CONFIG["steps"]
-    path = road_network.generateFile(temp_file_name)
-    if not has_gui:
-        sumoBinary = sumolib.checkBinary("sumo")
-    else:
-        sumoBinary = sumolib.checkBinary("sumo-gui")
-    sumoCmd = [sumoBinary, "-c", path, "--collision.check-junctions", "--collision.action", "warn"]
 
-    print(sumoCmd)
+    for run_number in range(number_of_runs):
+        path = road_network.generateFile(temp_file_name)
+        if not has_gui or number_of_runs > 1:
+            sumoBinary = sumolib.checkBinary("sumo")
+        else:
+            sumoBinary = sumolib.checkBinary("sumo-gui")
+        sumoCmd = [sumoBinary, "-c", path, "--collision.check-junctions", "--collision.action", "warn"]
+        print(sumoCmd)
 
-    traci.start(sumoCmd)
+        traci.start(sumoCmd)
 
-    shepherd = vehicle_shepherd.VehicleShepherd(road_network)
-    shepherd.add_vehicle_types(CONFIG["vehicle-types"])
-    shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
+        shepherd = vehicle_shepherd.VehicleShepherd(road_network)
+        shepherd.add_vehicle_types(CONFIG["vehicle-types"])
+        shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
 
-    vehicle_metadata = shepherd.get_vehicle_metadata()
-    
-    step = 0
-    data = {}
-    collision_data = {}
-    ongoing_collisions = {}
-
-    num_of_collisions = 0
-    while step < route_steps and len(shepherd.vehicles) > 0:
-        data[step] = shepherd.update_vehicles()
-        traci.simulationStep()
-
-        # Collect data on any collisions that are happening
-        collisions = traci.simulation.getCollisions()
-        collisionDict = {}
-        for i in range(len(collisions)):
-            collision: Collision = collisions[i]
-            collisionId = collision.collider + "-" + collision.victim
-            collisionDict[collisionId] = {
-                "collider"      : collision.collider,
-                "victim"        : collision.victim,
-                "collisionType" : collision.type,
-                "lane"          : collision.lane,
-                "pos"           : collision.pos
-            }
-
-        # Remove duplicate collisions
-        # This isn't perfect, but it gets rid of the majority of duplicate collisions
-        toBeRemoved = []
-        for collisionId in ongoing_collisions:
-            cId:str = collisionId
-            colliderAndVictim = cId.split("-")
-            cIdAlt = colliderAndVictim[1] + "-" + colliderAndVictim[0]
-            if cId in collisionDict:
-                collisionDict.pop(cId)
-            else:
-                toBeRemoved.append(cId)
-            if cIdAlt in collisionDict:
-                collisionDict.pop(cIdAlt)
-            else:
-                toBeRemoved.append(cIdAlt)
-        for c in toBeRemoved:
-            ongoing_collisions.pop(c, "")
+        vehicle_metadata = shepherd.get_vehicle_metadata()
         
-        # If there are any collisions left, record them
-        if len(collisionDict) > 0:
-            collision_data[step] = collisionDict
+        step = 0
+        data = {}
+        collision_data = {}
+        ongoing_collisions = {}
 
-            # This is to remove duplicate collisions
-            ongoing_collisions.update(collisionDict)
+        num_of_collisions = 0
+        while step < route_steps and len(shepherd.vehicles) > 0:
+            data[step] = shepherd.update_vehicles()
+            traci.simulationStep()
 
-            num_of_collisions += len(collisionDict)
-        step += 1
-    
-    traci.close()
+            # Collect data on any collisions that are happening
+            collisions = traci.simulation.getCollisions()
+            collisionDict = {}
+            for i in range(len(collisions)):
+                collision: Collision = collisions[i]
+                collisionId = collision.collider + "-" + collision.victim
+                collisionDict[collisionId] = {
+                    "collider"      : collision.collider,
+                    "victim"        : collision.victim,
+                    "collisionType" : collision.type,
+                    "lane"          : collision.lane,
+                    "pos"           : collision.pos
+                }
 
-    metrics = {
-        "wait_time_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),
-        "num_of_collisions" : num_of_collisions
-    }
+            # Remove duplicate collisions
+            # This isn't perfect, but it gets rid of the majority of duplicate collisions
+            toBeRemoved = []
+            for collisionId in ongoing_collisions:
+                cId:str = collisionId
+                colliderAndVictim = cId.split("-")
+                cIdAlt = colliderAndVictim[1] + "-" + colliderAndVictim[0]
+                if cId in collisionDict:
+                    collisionDict.pop(cId)
+                else:
+                    toBeRemoved.append(cId)
+                if cIdAlt in collisionDict:
+                    collisionDict.pop(cIdAlt)
+                else:
+                    toBeRemoved.append(cIdAlt)
+            for c in toBeRemoved:
+                ongoing_collisions.pop(c, "")
+            
+            # If there are any collisions left, record them
+            if len(collisionDict) > 0:
+                collision_data[step] = collisionDict
 
-    display_metrics(metrics)
+                # This is to remove duplicate collisions
+                ongoing_collisions.update(collisionDict)
 
-    if log_data:
-        Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, vehicle_metadata=vehicle_metadata, metrics=metrics)
+                num_of_collisions += len(collisionDict)
+            step += 1
+        
+        traci.close()
+
+        metrics = {
+            "wait_time_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),
+            "num_of_collisions" : num_of_collisions
+        }
+
+        display_metrics(metrics)
+        if log_data:
+            Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, vehicle_metadata=vehicle_metadata, metrics=metrics)
     shutil.rmtree("temp")
 
 
