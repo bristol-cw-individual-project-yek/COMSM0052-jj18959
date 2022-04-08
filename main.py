@@ -1,4 +1,5 @@
 import os, sys
+import random
 import shutil
 from time import time
 import dotenv
@@ -31,11 +32,15 @@ except:
     pass
 
 
-def get_network():
+def get_random_seed():
     try:
-        seed = CONFIG["seed"]
+        return int(CONFIG["seed"])
     except KeyError:
-        seed = 0
+        return 0
+
+
+def get_network():
+    seed = get_random_seed()
     try:
         if CONFIG["network-type"] == "local":
             network = ntwk.Network({}, seed=seed, network_file_path=CONFIG["network-file-path"])
@@ -67,8 +72,9 @@ def get_network():
     return network
 
 
-def display_metrics(metrics:dict):
+def display_metrics(metrics:dict, route_seed:int):
     print("\n------------RESULTS------------\n")
+    seed_str = f"Random seed used: {route_seed}\n\n"
     collision_str = "Number of collisions: " + str(metrics["num_of_collisions"])
     total_wait_time_stats:dict = metrics["wait_time_metrics"]["total-wait-time"]
     tw_mean = total_wait_time_stats["mean"]
@@ -102,7 +108,7 @@ Wait time per junction stats:
     Skew    :   {wt_skew} 
     Kurtosis:   {wt_kurtosis} 
     """
-    print(collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str)
+    print(seed_str + collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str)
     print("-------------------------------")
 
 
@@ -111,11 +117,18 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
     temp_file_name = "tmp_" + str(round(time()))
     road_network:ntwk.Network = get_network()
     route_steps = CONFIG["steps"]
-
-    folder_name = Logger.create_data_folder(entry_name)
+    seed:int = get_random_seed()
+    rng:random.Random = random.Random()
+    rng.seed(seed)
+    folder_name:str = Logger.create_data_folder(entry_name)
+    used_seeds:list = []
 
     for simulation_number in range(number_of_runs):
-        path = road_network.generateFile(temp_file_name)
+        if number_of_runs > 1:
+            route_seed = rng.randint(0, 1000000000)
+        else:
+            route_seed = seed
+        path = road_network.generateFile(temp_file_name, route_seed=route_seed)
         if not has_gui or number_of_runs > 1:
             sumoBinary = sumolib.checkBinary("sumo")
         else:
@@ -190,10 +203,13 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
             "num_of_collisions" : num_of_collisions
         }
 
-        display_metrics(metrics)
+        display_metrics(metrics, route_seed=route_seed)
+        used_seeds.append(route_seed)
         if log_data:
             Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, entry_folder_name=folder_name, vehicle_metadata=vehicle_metadata, metrics=metrics, simulation_number=simulation_number)
     shutil.rmtree("temp")
+    print("Seeds used:")
+    print(str(used_seeds))
 
 
 def test_osm_get():

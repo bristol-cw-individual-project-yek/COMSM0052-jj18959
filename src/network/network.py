@@ -25,7 +25,7 @@ class Network:
         return float(length)
 
 
-    def generateFile(self, output_file_name:str):
+    def generateFile(self, output_file_name:str, route_seed:int=None):
         if not os.path.exists(Network.TEMP_FILE_DIRECTORY):
             os.makedirs(Network.TEMP_FILE_DIRECTORY)
         
@@ -56,7 +56,7 @@ class Network:
                 self.connection_data[connection_id] = {}
                 self.connection_data[connection_id]["internal"] = con.attrib["via"]
         
-        self.generateRandomRoutes(self.network_file_path)
+        self.generateRandomRoutes(self.network_file_path, route_seed=route_seed)
 
         sumo_cfg_file_name = output_file_name + ".sumocfg"
         sumo_root = ET.Element("configuration")
@@ -74,12 +74,15 @@ class Network:
         return sumo_path
 
 
-    def generateRandomRoutes(self, network_file_path:str, route_steps:int=100):
+    def generateRandomRoutes(self, network_file_path:str, route_steps:int=100, route_seed:int=None):
         trip_file_path = network_file_path.replace(".net", "_trips.rou")
         trip_args = []
         trip_args.append("-n=" + network_file_path)
         trip_args.append("-o=" + trip_file_path)
-        trip_args.append("--seed=" + str(self.seed))
+        if route_seed:
+            trip_args.append("--seed=" + str(route_seed))
+        else:
+            trip_args.append("--seed=" + str(self.seed))
         randomTrips.main(randomTrips.get_options(args=trip_args))
         route_file_path = network_file_path.replace(".net", ".rou")
         routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + route_file_path + " --named-routes=true --route-steps=" + str(route_steps)
