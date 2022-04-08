@@ -101,9 +101,13 @@ class Network:
 
     def generateNetwork(self, network_file_path:str):
         netgen_cmd = "netgenerate --rand" + " --output-file=" + network_file_path
-        settings_cmd = " --bidi-probability=" + str(self.settings["bidi-probability"])
+        settings_cmd = ""
         for key in self.settings:
-            if not key == "bidi-probability":
+            if key == "bidi-probability":
+                settings_cmd += " --bidi-probability=" + str(self.settings[key])
+            elif key == "seed":
+                settings_cmd += " --seed=" + str(self.settings[key])
+            else:
                 settings_cmd += " --rand." + str(key) + "=" + str(self.settings[key])
         netgen_cmd += settings_cmd
         os.system(netgen_cmd)

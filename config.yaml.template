@@ -18,6 +18,7 @@ random-settings:
   min-angle: 45
   num-tries: 50
   connectivity: 0.95
+  seed: 19087
 
 # Settings specific to the "grid" map type
 grid-settings:
