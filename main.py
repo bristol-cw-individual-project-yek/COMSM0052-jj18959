@@ -106,7 +106,7 @@ Wait time per junction stats:
     print("-------------------------------")
 
 
-def run_simulation(has_gui:bool=False, log_data:bool=False):
+def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1):
     shutil.rmtree("temp", ignore_errors=True)
     temp_file_name = "tmp_" + str(round(time()))
     road_network:ntwk.Network = get_network()
@@ -202,8 +202,20 @@ if __name__ == "__main__":
     # TODO: Replace w/ config(?)
     has_gui = True
     log_data = True
-    if "--no-gui" in sys.argv:
-        has_gui = False
-    if "--no-log" in sys.argv:
-        log_data = False
-    run_simulation(has_gui=has_gui, log_data=log_data)
+    number_of_runs = 1
+    
+    for arg in sys.argv:
+        if arg == "--no-gui":
+            has_gui = False
+        elif arg == "--no-log":
+            log_data = False
+        elif arg.startswith("-n=") or arg.startswith("--number="):
+            try:
+                arg_elems = arg.split("=")
+                assert(len(arg_elems) == 2)
+                number_of_runs = int(arg_elems[1])
+            except Exception as e:
+                raise e
+        elif arg != "python" and arg != "main.py":
+            raise ValueError(f"Unknown argument: {arg}")
+    run_simulation(has_gui=has_gui, log_data=log_data, number_of_runs=number_of_runs)
