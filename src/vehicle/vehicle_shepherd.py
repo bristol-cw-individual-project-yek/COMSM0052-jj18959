@@ -101,19 +101,33 @@ class VehicleShepherd:
     def update_vehicles(self):
         vehicle_data = {}
 
+        vehicles_to_be_updated = []
         # Update all active vehicles
+        for vId in self.vehicles:
+            vehicle:Vehicle = self.vehicles[vId]
+            vehicles_to_be_updated.append(vehicle)
+        
+        while len(vehicles_to_be_updated) > 0:
+            # Randomize order in which vehicles are updated - they won't necessarily be updated in order in real life!
+            index = self.rng.randint(0, len(vehicles_to_be_updated) - 1)
+            try:
+                vehicle:Vehicle = vehicles_to_be_updated[index]
+                vehicle.isActive = True
+                vehicle.update(self.vehicles)
+            except traci.exceptions.TraCIException as e:
+                vehicle.isActive = False
+            vehicles_to_be_updated.remove(vehicle)
+
+        # Log data
         for group in self.vehicleGroups:
             vIds_to_be_removed = []
             vehGroup = self.vehicleGroups[group]
             group_data = {}
             for vId in vehGroup:
-                try:
-                    vehicle:Vehicle = self.vehicles[vId]
-                    vehicle.isActive = True
-                    vehicle.update(self.vehicles)
+                vehicle:Vehicle = self.vehicles[vId]
+                if vehicle.isActive:
                     group_data[vehicle.vehicleId] = vehicle.get_data_as_dict()
-                except traci.exceptions.TraCIException as e:
-                    vehicle.isActive = False
+                else:
                     vIds_to_be_removed.append(vId)
             # Stop tracking any vehicles that no longer exist
             for vId in vIds_to_be_removed:
