@@ -98,6 +98,13 @@ class VehicleShepherd:
             print(f"Vehicles not created: {missed_vehicles}")
     
 
+    def has_active_vehicles(self):
+        result = False
+        for vId in self.vehicles:
+            result = result or self.vehicles[vId].isActive
+        return result
+
+
     def update_vehicles(self):
         vehicle_data = {}
 

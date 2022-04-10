@@ -144,13 +144,16 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
 
         vehicle_metadata = shepherd.get_vehicle_metadata()
         
-        step = 0
         data = {}
         collision_data = {}
         ongoing_collisions = {}
-
         num_of_collisions = 0
-        while step < route_steps and len(shepherd.vehicles) > 0:
+
+        # Perform at least one step in the simulation
+        step = 1
+        data[step] = shepherd.update_vehicles()
+        traci.simulationStep()
+        while step < route_steps and shepherd.has_active_vehicles():
             data[step] = shepherd.update_vehicles()
             traci.simulationStep()
 
