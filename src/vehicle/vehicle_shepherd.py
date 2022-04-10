@@ -10,11 +10,13 @@ from src.network.network import Network
 
 class VehicleShepherd:
 
-    def __init__(self, network:Network):
+    def __init__(self, network:Network, seed:int):
         self.vehicles:dict = {}
         self.vehicleTypes:dict = {}
         self.vehicleGroups:dict = {}
         self.network:Network = network
+        self.seed = seed
+        self.rng:random.Random = random.Random(self.seed)
     
 
     def add_vehicle_types(self, vehicleTypes:dict):
@@ -59,7 +61,7 @@ class VehicleShepherd:
                     vehicle:Vehicle = Vehicle(vId)
 
                     self.set_policy(vehicle, vehGroup)
-                    routeId = routeIds[random.randint(0, len(routeIds) - 1)]
+                    routeId = routeIds[self.rng.randint(0, len(routeIds) - 1)]
                     vehicle.add_to_route(routeId, self.network)
 
                     if "vehicle-type" in vehGroup:

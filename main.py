@@ -138,7 +138,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
 
         traci.start(sumoCmd)
 
-        shepherd = vehicle_shepherd.VehicleShepherd(road_network)
+        shepherd = vehicle_shepherd.VehicleShepherd(road_network, seed=seed)
         shepherd.add_vehicle_types(CONFIG["vehicle-types"])
         shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
 
