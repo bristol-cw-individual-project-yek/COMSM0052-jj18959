@@ -24,18 +24,15 @@ class Logger:
         simulation_directory_path = Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/" + Logger.DATA_DIRECTORY_NAME
         os.makedirs(simulation_directory_path)
         return entry_folder_name
+    
+
+    def log_overview(overview_data:str, entry_folder_name:str):
+        with open(Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/overview.txt", "w") as f:
+            f.write(overview_data)
+            f.close()
 
 
-    def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.Network, collision_data:dict, entry_folder_name:str, vehicle_metadata:dict={}, metrics:dict={},simulation_number:int=0) -> None:
-        #log_directory_name = "logs"
-        #data_directory_name = "simulations"
-        #if not os.path.exists(log_directory_name):
-        #    os.makedirs(log_directory_name)
-        #if entry_folder_name == "":
-        #    entry_folder_name:str = datetime.today().isoformat().replace(":", "-", -1).split(".")[0]
-        #os.makedirs(log_directory_name + "/" + entry_folder_name)
-        #os.makedirs(log_directory_name + "/" + entry_folder_name + "/" + data_directory_name)
-
+    def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.Network, collision_data:dict, entry_folder_name:str, vehicle_metadata:dict={}, metrics:dict={}, simulation_number:int=0) -> None:
         network_data = network.getData()
         vehicle_group_data = config_data["vehicle-groups"]
         custom_policies = {}

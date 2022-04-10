@@ -72,9 +72,9 @@ def get_network():
     return network
 
 
-def display_metrics(metrics:dict, route_seed:int):
-    print("\n------------RESULTS------------\n")
-    seed_str = f"Random seed used: {route_seed}\n\n"
+def get_overview_string(metrics:dict, seeds:list) -> str:
+    result = "\n------------RESULTS------------\n"
+    seed_str = f"Seeds used: {str(seeds)}\n\n"
     collision_str = "Number of collisions: " + str(metrics["num_of_collisions"])
     total_wait_time_stats:dict = metrics["wait_time_metrics"]["total-wait-time"]
     tw_mean = total_wait_time_stats["mean"]
@@ -108,8 +108,9 @@ Wait time per junction stats:
     Skew    :   {wt_skew} 
     Kurtosis:   {wt_kurtosis} 
     """
-    print(seed_str + collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str)
-    print("-------------------------------")
+    result += seed_str + collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str
+    result += "\n-------------------------------\n"
+    return result
 
 
 def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1, entry_name:str=""):
@@ -122,6 +123,9 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
     rng.seed(seed)
     folder_name:str = Logger.create_data_folder(entry_name)
     used_seeds:list = []
+
+    all_metrics_list = []
+    total_collisions = 0
 
     for simulation_number in range(number_of_runs):
         if number_of_runs > 1:
@@ -205,14 +209,21 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
             "wait_time_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),
             "num_of_collisions" : num_of_collisions
         }
+        total_collisions += num_of_collisions
 
-        display_metrics(metrics, route_seed=route_seed)
+        all_metrics_list.append(metrics)
+        get_overview_string(metrics, seeds=route_seed)
         used_seeds.append(route_seed)
         if log_data:
             Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, entry_folder_name=folder_name, vehicle_metadata=vehicle_metadata, metrics=metrics, simulation_number=simulation_number)
     shutil.rmtree("temp")
-    print("Seeds used:")
-    print(str(used_seeds))
+    metrics_entire_set = {
+        "wait_time_metrics"  : MetricCalculator.calculate_multiple_runs(all_metrics_list),
+        "num_of_collisions" : total_collisions
+    }
+    overview:str = get_overview_string(metrics_entire_set, str(used_seeds))
+    print(overview)
+    Logger.log_overview(overview, folder_name)
 
 
 def test_osm_get():
