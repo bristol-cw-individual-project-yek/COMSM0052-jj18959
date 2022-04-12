@@ -223,7 +223,8 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
     }
     overview:str = get_overview_string(metrics_entire_set, str(used_seeds))
     print(overview)
-    Logger.log_overview(overview, folder_name)
+    if log_data:
+        Logger.log_overview(overview, folder_name)
 
 
 def test_osm_get():
@@ -235,6 +236,7 @@ if __name__ == "__main__":
     has_gui = True
     log_data = True
     number_of_runs = 1
+    entry_name = ""
     
     for arg in sys.argv:
         if arg == "--no-gui":
@@ -248,6 +250,13 @@ if __name__ == "__main__":
                 number_of_runs = int(arg_elems[1])
             except Exception as e:
                 raise e
+        elif arg.startswith("-o=") or arg.startswith("--output_folder_name="):
+            try:
+                arg_elems = arg.split("=")
+                assert(len(arg_elems) == 2)
+                entry_name = str(arg_elems[1])
+            except Exception as e:
+                raise e
         elif arg != "python" and arg != "main.py":
             raise ValueError(f"Unknown argument: {arg}")
-    run_simulation(has_gui=has_gui, log_data=log_data, number_of_runs=number_of_runs)
+    run_simulation(has_gui=has_gui, log_data=log_data, number_of_runs=number_of_runs, entry_name=entry_name)

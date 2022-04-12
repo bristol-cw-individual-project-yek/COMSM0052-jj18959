@@ -20,9 +20,11 @@ class Logger:
             entry_folder_name:str = datetime.today().isoformat().replace(":", "-", -1).split(".")[0]
         
         log_entry_directory_path = Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name
-        os.makedirs(log_entry_directory_path)
+        if not os.path.exists(log_entry_directory_path):
+            os.makedirs(log_entry_directory_path)
         simulation_directory_path = Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/" + Logger.DATA_DIRECTORY_NAME
-        os.makedirs(simulation_directory_path)
+        if not os.path.exists(simulation_directory_path):
+            os.makedirs(simulation_directory_path)
         return entry_folder_name
     
 
