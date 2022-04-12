@@ -112,14 +112,14 @@ class VehicleShepherd:
         # Update all active vehicles
         for vId in self.vehicles:
             vehicle:Vehicle = self.vehicles[vId]
-            vehicles_to_be_updated.append(vehicle)
+            if vehicle.isActive:
+                vehicles_to_be_updated.append(vehicle)
         
         while len(vehicles_to_be_updated) > 0:
             # Randomize order in which vehicles are updated - they won't necessarily be updated in order in real life!
             index = self.rng.randint(0, len(vehicles_to_be_updated) - 1)
             try:
                 vehicle:Vehicle = vehicles_to_be_updated[index]
-                vehicle.isActive = True
                 vehicle.update(self.vehicles)
             except traci.exceptions.TraCIException as e:
                 vehicle.isActive = False

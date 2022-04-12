@@ -27,7 +27,7 @@ class Vehicle:
         self.totalTimeSpentWaiting:int = 0
         self.currentTimeSpentWaiting:int = 0
         self.svo_angle:float = 0    # Vehicles are considered egoistic by default
-        self.isActive = False
+        self.isActive = True
         self.pastWaitTimesAtJunctions:list = []
         self.network = None
     
