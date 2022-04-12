@@ -8,11 +8,11 @@ class Network:
 
     TEMP_FILE_DIRECTORY = "temp"
 
-    def __init__(self, settings:dict, route_seed:int, network_file_path:str = None):
+    def __init__(self, settings:dict, seed:int, network_file_path:str = None):
         self.routeIds:list = []
         self.settings:dict = settings
         self.net:sumolib.net.Net = None
-        self.route_seed:int = route_seed
+        self.seed:int = seed
         self.network_file_path = network_file_path
         self.internal_lane_data:dict = {}
         self.connection_data:dict = {}
@@ -33,7 +33,7 @@ class Network:
             return 0
 
 
-    def generateFile(self, output_file_name:str):
+    def generateFile(self, output_file_name:str, route_seed:int=None):
         if not os.path.exists(Network.TEMP_FILE_DIRECTORY):
             os.makedirs(Network.TEMP_FILE_DIRECTORY)
         
@@ -83,12 +83,15 @@ class Network:
         return sumo_path
 
 
-    def generateRandomRoutes(self, network_file_path:str, route_steps:int=100):
+    def generateRandomRoutes(self, network_file_path:str, route_steps:int=100, route_seed:int=None):
         trip_file_path = network_file_path.replace(".net", "_trips.rou")
         trip_args = []
         trip_args.append("-n=" + network_file_path)
         trip_args.append("-o=" + trip_file_path)
-        trip_args.append("--seed=" + str(self.route_seed))
+        if route_seed:
+            trip_args.append("--seed=" + str(route_seed))
+        else:
+            trip_args.append("--seed=" + str(self.seed))
         randomTrips.main(randomTrips.get_options(args=trip_args))
         route_file_path = network_file_path.replace(".net", ".rou")
         routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + route_file_path + " --named-routes=true --route-steps=" + str(route_steps)
@@ -110,9 +113,13 @@ class Network:
 
     def generateNetwork(self, network_file_path:str):
         netgen_cmd = "netgenerate --rand" + " --output-file=" + network_file_path
-        settings_cmd = " --bidi-probability=" + str(self.settings["bidi-probability"])
+        settings_cmd = ""
         for key in self.settings:
-            if not key == "bidi-probability":
+            if key == "bidi-probability":
+                settings_cmd += " --bidi-probability=" + str(self.settings[key])
+            elif key == "seed":
+                settings_cmd += " --seed=" + str(self.settings[key])
+            else:
                 settings_cmd += " --rand." + str(key) + "=" + str(self.settings[key])
         netgen_cmd += settings_cmd
         os.system(netgen_cmd)
@@ -121,7 +128,7 @@ class Network:
     def getData(self) -> dict:
         data = {
             "settings"      : self.settings,
-            "route_seed"    : self.route_seed
+            "seed"    : self.seed
         }
         return data
         

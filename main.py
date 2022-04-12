@@ -1,4 +1,5 @@
 import os, sys
+import random
 import shutil
 from time import time
 import dotenv
@@ -31,14 +32,18 @@ except:
     pass
 
 
-def get_network():
+def get_random_seed():
     try:
-        route_seed = CONFIG["route-seed"]
+        return int(CONFIG["seed"])
     except KeyError:
-        route_seed = 0
+        return 0
+
+
+def get_network():
+    seed = get_random_seed()
     try:
         if CONFIG["network-type"] == "local":
-            network = ntwk.Network({}, route_seed=route_seed, network_file_path=CONFIG["network-file-path"])
+            network = ntwk.Network({}, seed=seed, network_file_path=CONFIG["network-file-path"])
         elif CONFIG["network-type"] == "osm":
             osm_settings = CONFIG["osm-area-settings"]
             origin_lat = osm_settings["origin-latitude"]
@@ -52,13 +57,13 @@ def get_network():
                 os.makedirs(ntwk.Network.TEMP_FILE_DIRECTORY)
             osm_path = map_builder.get_osm_area(bbox, f"{ntwk.Network.TEMP_FILE_DIRECTORY}/results")
             file_path = map_builder.build_map_from_osm(osm_path)
-            network = ntwk.Network({}, route_seed=route_seed, network_file_path=file_path)
+            network = ntwk.Network({}, seed=seed, network_file_path=file_path)
         elif CONFIG["network-type"] == "random":
-            network = ntwk.Network(CONFIG["random-settings"], route_seed=route_seed)
+            network = ntwk.Network(CONFIG["random-settings"], seed=seed)
         elif CONFIG["network-type"] == "grid":
-            network = grid.GridNetwork(CONFIG["grid-settings"], route_seed=route_seed)
+            network = grid.GridNetwork(CONFIG["grid-settings"], seed=seed)
         elif CONFIG["network-type"] == "spider":
-            network = spider.SpiderNetwork(CONFIG["spider-settings"], route_seed=route_seed)
+            network = spider.SpiderNetwork(CONFIG["spider-settings"], seed=seed)
     except KeyError as e:
         print("Key missing from config.yaml: " + str(e))
         raise(e)
@@ -67,8 +72,9 @@ def get_network():
     return network
 
 
-def display_metrics(metrics:dict):
-    print("\n------------RESULTS------------\n")
+def get_overview_string(metrics:dict, seeds:list) -> str:
+    result = "\n------------RESULTS------------\n"
+    seed_str = f"Seeds used: {str(seeds)}\n\n"
     collision_str = "Number of collisions: " + str(metrics["num_of_collisions"])
     total_wait_time_stats:dict = metrics["wait_time_metrics"]["total-wait-time"]
     tw_mean = total_wait_time_stats["mean"]
@@ -102,96 +108,122 @@ Wait time per junction stats:
     Skew    :   {wt_skew} 
     Kurtosis:   {wt_kurtosis} 
     """
-    print(collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str)
-    print("-------------------------------")
+    result += seed_str + collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str
+    result += "\n-------------------------------\n"
+    return result
 
 
-def run_simulation(has_gui:bool=False, log_data:bool=False):
+def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1, entry_name:str=""):
     shutil.rmtree("temp", ignore_errors=True)
     temp_file_name = "tmp_" + str(round(time()))
     road_network:ntwk.Network = get_network()
     route_steps = CONFIG["steps"]
-    path = road_network.generateFile(temp_file_name)
-    if not has_gui:
-        sumoBinary = sumolib.checkBinary("sumo")
-    else:
-        sumoBinary = sumolib.checkBinary("sumo-gui")
-    sumoCmd = [sumoBinary, "-c", path, "--collision.check-junctions", "--collision.action", "warn"]
+    seed:int = get_random_seed()
+    rng:random.Random = random.Random()
+    rng.seed(seed)
+    folder_name:str = Logger.create_data_folder(entry_name)
+    used_seeds:list = []
 
-    print(sumoCmd)
+    all_metrics_list = []
+    total_collisions = 0
 
-    traci.start(sumoCmd)
+    for simulation_number in range(number_of_runs):
+        if number_of_runs > 1:
+            route_seed = rng.randint(0, 1000000000)
+        else:
+            route_seed = seed
+        path = road_network.generateFile(temp_file_name, route_seed=route_seed)
+        if not has_gui or number_of_runs > 1:
+            sumoBinary = sumolib.checkBinary("sumo")
+        else:
+            sumoBinary = sumolib.checkBinary("sumo-gui")
+        sumoCmd = [sumoBinary, "-c", path, "--collision.check-junctions", "--collision.action", "warn"]
+        print(sumoCmd)
 
-    shepherd = vehicle_shepherd.VehicleShepherd(road_network)
-    shepherd.add_vehicle_types(CONFIG["vehicle-types"])
-    shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
+        traci.start(sumoCmd)
 
-    vehicle_metadata = shepherd.get_vehicle_metadata()
-    
-    step = 0
-    data = {}
-    collision_data = {}
-    ongoing_collisions = {}
+        shepherd = vehicle_shepherd.VehicleShepherd(road_network, seed=seed)
+        shepherd.add_vehicle_types(CONFIG["vehicle-types"])
+        shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
 
-    num_of_collisions = 0
-    while step < route_steps and len(shepherd.vehicles) > 0:
+        vehicle_metadata = shepherd.get_vehicle_metadata()
+        
+        data = {}
+        collision_data = {}
+        ongoing_collisions = {}
+        num_of_collisions = 0
+
+        # Perform at least one step in the simulation
+        step = 1
         data[step] = shepherd.update_vehicles()
         traci.simulationStep()
+        while step < route_steps and shepherd.has_active_vehicles():
+            data[step] = shepherd.update_vehicles()
+            traci.simulationStep()
 
-        # Collect data on any collisions that are happening
-        collisions = traci.simulation.getCollisions()
-        collisionDict = {}
-        for i in range(len(collisions)):
-            collision: Collision = collisions[i]
-            collisionId = collision.collider + "-" + collision.victim
-            collisionDict[collisionId] = {
-                "collider"      : collision.collider,
-                "victim"        : collision.victim,
-                "collisionType" : collision.type,
-                "lane"          : collision.lane,
-                "pos"           : collision.pos
-            }
+            # Collect data on any collisions that are happening
+            collisions = traci.simulation.getCollisions()
+            collisionDict = {}
+            for i in range(len(collisions)):
+                collision: Collision = collisions[i]
+                collisionId = collision.collider + "-" + collision.victim
+                collisionDict[collisionId] = {
+                    "collider"      : collision.collider,
+                    "victim"        : collision.victim,
+                    "collisionType" : collision.type,
+                    "lane"          : collision.lane,
+                    "pos"           : collision.pos
+                }
 
-        # Remove duplicate collisions
-        # This isn't perfect, but it gets rid of the majority of duplicate collisions
-        toBeRemoved = []
-        for collisionId in ongoing_collisions:
-            cId:str = collisionId
-            colliderAndVictim = cId.split("-")
-            cIdAlt = colliderAndVictim[1] + "-" + colliderAndVictim[0]
-            if cId in collisionDict:
-                collisionDict.pop(cId)
-            else:
-                toBeRemoved.append(cId)
-            if cIdAlt in collisionDict:
-                collisionDict.pop(cIdAlt)
-            else:
-                toBeRemoved.append(cIdAlt)
-        for c in toBeRemoved:
-            ongoing_collisions.pop(c, "")
+            # Remove duplicate collisions
+            # This isn't perfect, but it gets rid of the majority of duplicate collisions
+            toBeRemoved = []
+            for collisionId in ongoing_collisions:
+                cId:str = collisionId
+                colliderAndVictim = cId.split("-")
+                cIdAlt = colliderAndVictim[1] + "-" + colliderAndVictim[0]
+                if cId in collisionDict:
+                    collisionDict.pop(cId)
+                else:
+                    toBeRemoved.append(cId)
+                if cIdAlt in collisionDict:
+                    collisionDict.pop(cIdAlt)
+                else:
+                    toBeRemoved.append(cIdAlt)
+            for c in toBeRemoved:
+                ongoing_collisions.pop(c, "")
+            
+            # If there are any collisions left, record them
+            if len(collisionDict) > 0:
+                collision_data[step] = collisionDict
+
+                # This is to remove duplicate collisions
+                ongoing_collisions.update(collisionDict)
+
+                num_of_collisions += len(collisionDict)
+            step += 1
         
-        # If there are any collisions left, record them
-        if len(collisionDict) > 0:
-            collision_data[step] = collisionDict
+        traci.close()
 
-            # This is to remove duplicate collisions
-            ongoing_collisions.update(collisionDict)
+        metrics = {
+            "wait_time_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),
+            "num_of_collisions" : num_of_collisions
+        }
+        total_collisions += num_of_collisions
 
-            num_of_collisions += len(collisionDict)
-        step += 1
-    
-    traci.close()
-
-    metrics = {
-        "wait_time_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),
-        "num_of_collisions" : num_of_collisions
-    }
-
-    display_metrics(metrics)
-
-    if log_data:
-        Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, vehicle_metadata=vehicle_metadata, metrics=metrics)
+        all_metrics_list.append(metrics)
+        get_overview_string(metrics, seeds=route_seed)
+        used_seeds.append(route_seed)
+        if log_data:
+            Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, entry_folder_name=folder_name, vehicle_metadata=vehicle_metadata, metrics=metrics, simulation_number=simulation_number)
     shutil.rmtree("temp")
+    metrics_entire_set = {
+        "wait_time_metrics"  : MetricCalculator.calculate_multiple_runs(all_metrics_list),
+        "num_of_collisions" : total_collisions
+    }
+    overview:str = get_overview_string(metrics_entire_set, str(used_seeds))
+    print(overview)
+    Logger.log_overview(overview, folder_name)
 
 
 def test_osm_get():
@@ -202,8 +234,20 @@ if __name__ == "__main__":
     # TODO: Replace w/ config(?)
     has_gui = True
     log_data = True
-    if "--no-gui" in sys.argv:
-        has_gui = False
-    if "--no-log" in sys.argv:
-        log_data = False
-    run_simulation(has_gui=has_gui, log_data=log_data)
+    number_of_runs = 1
+    
+    for arg in sys.argv:
+        if arg == "--no-gui":
+            has_gui = False
+        elif arg == "--no-log":
+            log_data = False
+        elif arg.startswith("-n=") or arg.startswith("--number="):
+            try:
+                arg_elems = arg.split("=")
+                assert(len(arg_elems) == 2)
+                number_of_runs = int(arg_elems[1])
+            except Exception as e:
+                raise e
+        elif arg != "python" and arg != "main.py":
+            raise ValueError(f"Unknown argument: {arg}")
+    run_simulation(has_gui=has_gui, log_data=log_data, number_of_runs=number_of_runs)
