@@ -19,10 +19,18 @@ class Network:
 
 
     def getConnectionLength(self, fromEdgeId: str, toEdgeId: str) -> float:
-        connectionId = fromEdgeId + "-" + toEdgeId
-        laneId = self.connection_data[connectionId]["internal"]
-        length = self.internal_lane_data[laneId]["length"]
-        return float(length)
+        try:
+            connectionId = fromEdgeId + "-" + toEdgeId
+            internal_lane_id:str = self.connection_data[connectionId]["internal"]
+            internal_lane_data:dict = self.internal_lane_data[internal_lane_id]
+            length:float = float(internal_lane_data["length"])
+            internal_from_edge_list = internal_lane_id.split("_")
+            internal_from_edge_list.pop()
+            internal_from_edge_id = "_".join(internal_from_edge_list)
+            length += self.getConnectionLength(internal_from_edge_id, toEdgeId)
+            return length
+        except KeyError:
+            return 0
 
 
     def generateFile(self, output_file_name:str, route_seed:int=None):
@@ -51,12 +59,13 @@ class Network:
                     self.internal_lane_data[lane_id]["length"] = lane.attrib["length"]
         connections = root.findall("connection")
         for con in connections:
-            if "via" in con.attrib:
-                connection_id = con.attrib["from"] + "-" + con.attrib["to"]
-                self.connection_data[connection_id] = {}
+            connection_id = con.attrib["from"] + "-" + con.attrib["to"]
+            self.connection_data[connection_id] = {}
+            try:
                 self.connection_data[connection_id]["internal"] = con.attrib["via"]
-        
-        self.generateRandomRoutes(self.network_file_path, route_seed=route_seed)
+            except:
+                pass
+        self.generateRandomRoutes(self.network_file_path)
 
         sumo_cfg_file_name = output_file_name + ".sumocfg"
         sumo_root = ET.Element("configuration")
