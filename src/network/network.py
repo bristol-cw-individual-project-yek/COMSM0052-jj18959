@@ -6,14 +6,15 @@ import sumolib
 
 class Network:
 
-    TEMP_FILE_DIRECTORY = "temp"
+    TEMP_FILE_DIRECTORY:str = "temp"
 
-    def __init__(self, settings:dict, seed:int, network_file_path:str = None):
+    def __init__(self, settings:dict, seed:int, network_file_path:str = None, route_file_path:str = None):
         self.routeIds:list = []
         self.settings:dict = settings
         self.net:sumolib.net.Net = None
         self.seed:int = seed
         self.network_file_path = network_file_path
+        self.route_file_path = route_file_path
         self.internal_lane_data:dict = {}
         self.connection_data:dict = {}
 
@@ -65,8 +66,11 @@ class Network:
                 self.connection_data[connection_id]["internal"] = con.attrib["via"]
             except:
                 pass
-        self.generateRandomRoutes(self.network_file_path)
-
+        
+        if self.route_file_path:
+            pass
+        else:
+            self.route_file_path = self.generateRandomRoutes(self.network_file_path)
         sumo_cfg_file_name = output_file_name + ".sumocfg"
         sumo_root = ET.Element("configuration")
         sumo_tree = ET.ElementTree(sumo_root)
@@ -74,7 +78,7 @@ class Network:
         sumo_network_elem = ET.SubElement(sumo_input, "net-file")
         sumo_network_elem.set("value",network_file_name)
         sumo_route_elem = ET.SubElement(sumo_input, "route-files")
-        sumo_route_elem.set("value", network_file_name.replace(".net", ".rou"))
+        sumo_route_elem.set("value", self.route_file_path.replace(Network.TEMP_FILE_DIRECTORY + "\\", ""))
         sumo_path = os.path.join(Network.TEMP_FILE_DIRECTORY, sumo_cfg_file_name)
         sumo_tree.write(sumo_path, encoding="utf-8")
 
@@ -83,7 +87,7 @@ class Network:
         return sumo_path
 
 
-    def generateRandomRoutes(self, network_file_path:str, route_steps:int=100, route_seed:int=None):
+    def generateRandomRoutes(self, network_file_path:str, route_steps:int=100, route_seed:int=None) -> str:
         trip_file_path = network_file_path.replace(".net", "_trips.rou")
         trip_args = []
         trip_args.append("-n=" + network_file_path)
@@ -109,6 +113,7 @@ class Network:
             elif child.tag == "route":
                 self.routeIds.append(child.attrib["id"])
         route_tree.write(route_file_path, "utf-8")
+        return route_file_path
 
 
     def generateNetwork(self, network_file_path:str):
