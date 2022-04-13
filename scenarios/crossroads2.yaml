@@ -18,5 +18,7 @@ network:
       location        : [50, 50]
 
     - id              : west
-      connections     : [center]
+      connections     :
+        - toNode: center
+          lanes: 1
       location        : [-50, 50]
