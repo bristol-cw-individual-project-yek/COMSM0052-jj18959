@@ -29,7 +29,9 @@ try:
         CONFIG = yaml.safe_load(stream)
         stream.close()
 except:
-    pass
+    raise
+
+SCENARIO_FOLDER_PATH = "scenarios"
 
 
 def get_random_seed():
@@ -42,7 +44,15 @@ def get_random_seed():
 def get_network():
     seed = get_random_seed()
     try:
-        if CONFIG["network-type"] == "local":
+        if CONFIG["network-type"] == "scenario":
+            try:
+                scenario_name:str = CONFIG["scenario-name"]
+                if not scenario_name.endswith(".yaml"):
+                    scenario_name += ".yaml"
+            except KeyError:
+                raise
+            network = ntwk.Network({}, seed=seed, scenario_file_path=SCENARIO_FOLDER_PATH + "\\" + scenario_name)
+        elif CONFIG["network-type"] == "local":
             try:
                 network_file_path = CONFIG["network-file-path"]
             except KeyError:
@@ -140,6 +150,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
             route_seed = rng.randint(0, 1000000000)
         else:
             route_seed = seed
+        road_network.create_network_from_yaml(road_network.scenario_file_path)
         path = road_network.generateFile(temp_file_name, route_seed=route_seed)
         if not has_gui or number_of_runs > 1:
             sumoBinary = sumolib.checkBinary("sumo")

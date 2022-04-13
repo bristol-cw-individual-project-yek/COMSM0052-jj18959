@@ -1,6 +1,7 @@
 import os
 import shutil
 import xml.etree.ElementTree as ET
+import yaml
 
 import randomTrips
 import sumolib
@@ -9,7 +10,7 @@ class Network:
 
     TEMP_FILE_DIRECTORY:str = "temp"
 
-    def __init__(self, settings:dict, seed:int, network_file_path:str = None, route_file_path:str = None):
+    def __init__(self, settings:dict, seed:int, network_file_path:str = None, route_file_path:str = None, scenario_file_path:str=None):
         self.routeIds:list = []
         self.settings:dict = settings
         self.net:sumolib.net.Net = None
@@ -18,6 +19,59 @@ class Network:
         self.route_file_path = route_file_path
         self.internal_lane_data:dict = {}
         self.connection_data:dict = {}
+        self.scenario_file_path:str = scenario_file_path
+        print(scenario_file_path)
+
+
+    def create_edge_id(self, from_edge_id:str, to_edge_id:str) -> str:
+        return from_edge_id + "->" + to_edge_id
+
+
+    def create_network_from_yaml(self, yaml_file_path:str):
+        new_network:sumolib.net.Net = sumolib.net.Net()
+        try: 
+            with open(yaml_file_path, "r") as stream:
+                scenario_data = yaml.safe_load(stream)
+                stream.close()
+        except FileNotFoundError as e:
+            raise e
+        network_data = scenario_data["network"]
+        nodes = network_data["nodes"]
+        node_ids_to_connections:dict = {}
+
+        # Add nodes
+        for node in nodes:
+            node_id:str = node["id"]
+            to_nodes:list = node["connections"]
+            node_ids_to_connections[node_id] = to_nodes
+            location:tuple = tuple(node["location"])
+            try:
+                node_type:str = node["type"]
+            except KeyError:
+                node_type = "priority"
+            new_network.addNode(id=node_id, type=node_type, coord=location)
+        
+        # Add edges and lanes
+        for node_id in node_ids_to_connections:
+            for other_node_info in node_ids_to_connections[node_id]:
+                if type(other_node_info) == str:
+                    other_node_id = other_node_info
+                    num_of_lanes = 1
+                elif type(other_node_info) == dict:
+                    other_node_id = other_node_info["toNode"]
+                    num_of_lanes = other_node_info["lanes"]
+                edge_id = self.create_edge_id(node_id, other_node_id)
+                edge = new_network.addEdge(id=edge_id, fromID=node_id, toID= other_node_id, prio=-1, function=None, name=None)
+                for i in range(num_of_lanes):
+                    lane = new_network.addLane(edge=edge, speed=None, length=None, width=None)
+                print(lane.getID())
+        
+        # Create connections between edges and lanes
+
+        print(new_network)
+
+        print(new_network.getEdges(withInternal=True))
+
 
 
     def getConnectionLength(self, fromEdgeId: str, toEdgeId: str) -> float:
