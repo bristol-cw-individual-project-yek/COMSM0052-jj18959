@@ -21,4 +21,5 @@ network:
       connections     :
         - toNode: center
           lanes: 1
+          canUTurn: false
       location        : [-50, 50]
