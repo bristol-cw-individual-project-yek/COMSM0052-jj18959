@@ -75,6 +75,7 @@ class Network:
             shutil.copy(os.path.abspath(self.route_file_path), temp_route_file_path)
         else:
             self.route_file_path = self.generateRandomRoutes(temp_network_file_path, dest=temp_route_file_path)
+        self.prepare_route_file(temp_route_file_path)
         
         sumo_cfg_file_name = output_file_name + ".sumocfg"
         sumo_root = ET.Element("configuration")
@@ -109,6 +110,10 @@ class Network:
         routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + route_file_path + " --named-routes=true --route-steps=" + str(route_steps)
         os.system(routes_cmd)
 
+        return route_file_path
+    
+
+    def prepare_route_file(self, route_file_path:str):
         # Remove any generated vehicles from the file - we will define those ourselves.
         route_tree = ET.ElementTree()
         route_tree.parse(route_file_path)
@@ -121,7 +126,7 @@ class Network:
             elif child.tag == "route":
                 self.routeIds.append(child.attrib["id"])
         route_tree.write(route_file_path, "utf-8")
-        return route_file_path
+        
 
 
     def generateNetwork(self, network_file_path:str):
