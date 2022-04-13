@@ -2,6 +2,8 @@ import os
 import shutil
 import xml.etree.ElementTree as ET
 import yaml
+from typing import Union
+from xml.dom import minidom
 
 import randomTrips
 import sumolib
@@ -24,11 +26,21 @@ class Network:
 
 
     def create_edge_id(self, from_edge_id:str, to_edge_id:str) -> str:
-        return from_edge_id + "->" + to_edge_id
+        return from_edge_id + "-" + to_edge_id
+
+
+    def get_to_node_info(self, to_node_info:Union[str, dict]) -> dict:
+        if type(to_node_info) == str:
+            return {
+                "toNode"    : to_node_info,
+                "lanes"     : 1,
+                "canUTurn"  : False,
+            }
+        elif type(to_node_info) == dict:
+            return to_node_info
 
 
     def create_network_from_yaml(self, yaml_file_path:str):
-        new_network:sumolib.net.Net = sumolib.net.Net()
         try: 
             with open(yaml_file_path, "r") as stream:
                 scenario_data = yaml.safe_load(stream)
@@ -38,39 +50,81 @@ class Network:
         network_data = scenario_data["network"]
         nodes = network_data["nodes"]
         node_ids_to_connections:dict = {}
+        node_ids_to_incoming_lane_ids:dict = {}
 
-        # Add nodes
+        edge_root = ET.Element("edges")
+        edge_elem_tree = ET.ElementTree(edge_root)
+        node_root = ET.Element("nodes")
+
+        # Record nodes and connections
         for node in nodes:
             node_id:str = node["id"]
             to_nodes:list = node["connections"]
             node_ids_to_connections[node_id] = to_nodes
+            
+        
+        # Add edges and lanes
+        for node_id in node_ids_to_connections:
+            for to_node_info in node_ids_to_connections[node_id]:
+                data = self.get_to_node_info(to_node_info)
+                to_node_id = data["toNode"]
+                num_of_lanes = data["lanes"]
+                edge_id = self.create_edge_id(node_id, to_node_id)
+                edge_attrib = {
+                    "id"        : edge_id,
+                    "from"      : node_id,
+                    "to"        : to_node_id,
+                    "priority"  : "-1",
+                    "numLanes"  : str(num_of_lanes)
+                }
+                edge_elem = ET.Element("edge", attrib=edge_attrib)
+                edge_root.append(edge_elem)
+                if not to_node_id in node_ids_to_incoming_lane_ids:
+                    node_ids_to_incoming_lane_ids[to_node_id] = []
+                #for i in range(num_of_lanes):
+                #    lane_id = edge_id + "_" + str(i)
+                #    lane_attrib = {
+                #        "id"        : lane_id,
+                #        "index"     : str(i)
+                #    }
+                #    lane_elem = ET.Element("lane", attrib=lane_attrib)
+                #    edge_elem.append(lane_elem)
+                #    node_ids_to_incoming_lane_ids[to_node_id].append(lane_id)
+        
+        # Actually add nodes
+        for node in nodes:
+            node_id:str = node["id"]
+            to_nodes:list = node["connections"]
             location:tuple = tuple(node["location"])
+            #inc_lanes = node_ids_to_incoming_lane_ids[node_id]
+            #inc_lanes_str = ""
+            #for lane_id in inc_lanes:
+            #    inc_lanes_str += lane_id + " "
+            #inc_lanes_str = inc_lanes_str.strip()
             try:
                 node_type:str = node["type"]
             except KeyError:
                 node_type = "priority"
-            new_network.addNode(id=node_id, type=node_type, coord=location)
-        
-        # Add edges and lanes
-        for node_id in node_ids_to_connections:
-            for other_node_info in node_ids_to_connections[node_id]:
-                if type(other_node_info) == str:
-                    other_node_id = other_node_info
-                    num_of_lanes = 1
-                elif type(other_node_info) == dict:
-                    other_node_id = other_node_info["toNode"]
-                    num_of_lanes = other_node_info["lanes"]
-                edge_id = self.create_edge_id(node_id, other_node_id)
-                edge = new_network.addEdge(id=edge_id, fromID=node_id, toID= other_node_id, prio=-1, function=None, name=None)
-                for i in range(num_of_lanes):
-                    lane = new_network.addLane(edge=edge, speed=None, length=None, width=None)
-                print(lane.getID())
-        
-        # Create connections between edges and lanes
+            node_attrib = {
+                "id"        : node_id,
+                "x"         : str(location[0]),
+                "y"         : str(location[1]),
+                #"incLanes"  : inc_lanes_str
+            }
+            node_elem = ET.Element("node", node_attrib)
+            node_root.append(node_elem)
 
-        print(new_network)
-
-        print(new_network.getEdges(withInternal=True))
+        xmlstr = minidom.parseString(ET.tostring(edge_root)).toprettyxml(indent="   ")
+        edge_file_name = "test.edg.xml"
+        with open(edge_file_name, "w") as f:
+            f.write(xmlstr)
+        xmlstr = minidom.parseString(ET.tostring(node_root)).toprettyxml(indent="   ")
+        node_file_name = "test.nod.xml"
+        with open(node_file_name, "w") as f:
+            f.write(xmlstr)
+        output_file_name = "test.net.xml"
+        os.system(f"netconvert --node-files={node_file_name} --edge-files={edge_file_name} --output-file={output_file_name}")
+        
 
 
 
