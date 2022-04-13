@@ -69,10 +69,13 @@ class Network:
             except:
                 pass
         
+        route_file_name = output_file_name + ".rou.xml"
+        temp_route_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, route_file_name)
         if self.route_file_path:
-            pass
+            shutil.copy(os.path.abspath(self.route_file_path), temp_route_file_path)
         else:
-            self.route_file_path = self.generateRandomRoutes(temp_network_file_path)
+            self.route_file_path = self.generateRandomRoutes(temp_network_file_path, dest=temp_route_file_path)
+        
         sumo_cfg_file_name = output_file_name + ".sumocfg"
         sumo_root = ET.Element("configuration")
         sumo_tree = ET.ElementTree(sumo_root)
@@ -80,7 +83,7 @@ class Network:
         sumo_network_elem = ET.SubElement(sumo_input, "net-file")
         sumo_network_elem.set("value",network_file_name)
         sumo_route_elem = ET.SubElement(sumo_input, "route-files")
-        sumo_route_elem.set("value", self.route_file_path.replace(Network.TEMP_FILE_DIRECTORY + "\\", ""))
+        sumo_route_elem.set("value", route_file_name)
         sumo_path = os.path.join(Network.TEMP_FILE_DIRECTORY, sumo_cfg_file_name)
         sumo_tree.write(sumo_path, encoding="utf-8")
 
@@ -89,7 +92,7 @@ class Network:
         return sumo_path
 
 
-    def generateRandomRoutes(self, network_file_path:str, route_steps:int=100, route_seed:int=None) -> str:
+    def generateRandomRoutes(self, network_file_path:str, dest:str=None, route_steps:int=100, route_seed:int=None) -> str:
         trip_file_path = network_file_path.replace(".net", "_trips.rou")
         trip_args = []
         trip_args.append("-n=" + network_file_path)
@@ -99,7 +102,10 @@ class Network:
         else:
             trip_args.append("--seed=" + str(self.seed))
         randomTrips.main(randomTrips.get_options(args=trip_args))
-        route_file_path = network_file_path.replace(".net", ".rou")
+        if dest:
+            route_file_path = dest
+        else:
+            route_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, os.path.basename(network_file_path.replace(".net", ".rou")))
         routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + route_file_path + " --named-routes=true --route-steps=" + str(route_steps)
         os.system(routes_cmd)
 
