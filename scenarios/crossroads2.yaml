@@ -1,0 +1,22 @@
+network:
+  nodes:
+    - id              : center
+      connections     : [north, south, east, west]
+      location        : [0, 50]
+      type            : priority
+
+    - id              : north
+      connections     : [center]
+      location        : [0, 100]
+    
+    - id              : south
+      connections     : [center]
+      location        : [0, 0]
+    
+    - id              : east
+      connections     : [center]
+      location        : [50, 50]
+
+    - id              : west
+      connections     : [center]
+      location        : [-50, 50]
