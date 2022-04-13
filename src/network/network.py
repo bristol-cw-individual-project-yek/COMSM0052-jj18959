@@ -22,7 +22,7 @@ class Network:
         self.internal_lane_data:dict = {}
         self.connection_data:dict = {}
         self.scenario_file_path:str = scenario_file_path
-        print(scenario_file_path)
+        self.route_probability_weights:list = []
 
 
     def create_edge_id(self, from_edge_id:str, to_edge_id:str) -> str:
@@ -112,6 +112,42 @@ class Network:
         return network_output_file_path
 
 
+    def create_routes_from_yaml(self, output_file_name:str, yaml_file_path:str) -> str:
+        try: 
+            with open(yaml_file_path, "r") as stream:
+                scenario_data = yaml.safe_load(stream)
+                stream.close()
+        except FileNotFoundError as e:
+            raise e
+        route_data = scenario_data["routes"]
+        route_root = ET.Element("routes")
+        route_elem_tree = ET.ElementTree(route_root)
+
+        route_num = 0
+        for route_dict in route_data:
+            path = route_dict["path"]
+            edges_str = ""
+            for index in range(len(path) - 1):
+                edges_str += self.create_edge_id(path[index], path[index+1]) + " "
+            edges_str = edges_str.strip()
+            route_id = str(route_num)
+            route_attrib = {
+                "id"    : route_id,
+                "edges" : edges_str
+            }
+            route_elem = ET.Element("route", attrib=route_attrib)
+            route_root.append(route_elem)
+            if "probabilityWeight" in route_dict:
+                route_and_weight:tuple = (route_id, route_dict["probabilityWeight"])
+            else:
+                route_and_weight:tuple = (route_id, 1.0)
+            self.route_probability_weights.append(route_and_weight)
+            route_num += 1
+        route_output_file_path = Network.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".rou.xml"
+        route_elem_tree.write(route_output_file_path)
+        
+        return route_output_file_path
+
 
     def getConnectionLength(self, fromEdgeId: str, toEdgeId: str) -> float:
         try:
@@ -144,28 +180,38 @@ class Network:
             else:
                 shutil.copy(os.path.abspath(self.network_file_path), temp_network_file_path)
             
-            self.net = sumolib.net.readNet(self.network_file_path, withInternal=True)
+        self.net = sumolib.net.readNet(temp_network_file_path, withInternal=True)
 
-            # Store info about internal edge lengths
-            net_tree = ET.ElementTree()
-            net_tree.parse(self.network_file_path)
-            root = net_tree.getroot()
-            edges = root.findall("edge")
-            for edge in edges:
-                if "function" in edge.attrib and edge.attrib["function"] == "internal":
-                    for lane in edge.findall("lane"):
-                        lane_id = lane.attrib["id"]
-                        self.internal_lane_data[lane_id] = {}
-                        self.internal_lane_data[lane_id]["length"] = lane.attrib["length"]
-            connections = root.findall("connection")
-            for con in connections:
-                connection_id = con.attrib["from"] + "-" + con.attrib["to"]
-                self.connection_data[connection_id] = {}
-                try:
-                    self.connection_data[connection_id]["internal"] = con.attrib["via"]
-                except:
-                    pass
-            
+        # Store info about internal edge lengths
+        net_tree = ET.ElementTree()
+        net_tree.parse(temp_network_file_path)
+        root = net_tree.getroot()
+        edges = root.findall("edge")
+        for edge in edges:
+            if "function" in edge.attrib and edge.attrib["function"] == "internal":
+                for lane in edge.findall("lane"):
+                    lane_id = lane.attrib["id"]
+                    self.internal_lane_data[lane_id] = {}
+                    self.internal_lane_data[lane_id]["length"] = lane.attrib["length"]
+        connections = root.findall("connection")
+        for con in connections:
+            connection_id = con.attrib["from"] + "-" + con.attrib["to"]
+            self.connection_data[connection_id] = {}
+            try:
+                self.connection_data[connection_id]["internal"] = con.attrib["via"]
+            except:
+                pass
+        
+        has_routes = False
+        if self.scenario_file_path:
+            try:
+                temp_route_file_path = self.create_routes_from_yaml(output_file_name, self.scenario_file_path)
+                route_file_name = os.path.basename(temp_route_file_path)
+                self.prepare_route_file(temp_route_file_path)
+                has_routes = True
+            except KeyError:
+                pass
+        if not has_routes:
             route_file_name = output_file_name + ".rou.xml"
             temp_route_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, route_file_name)
             if self.route_file_path:
