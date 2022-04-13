@@ -81,26 +81,12 @@ class Network:
                 edge_root.append(edge_elem)
                 if not to_node_id in node_ids_to_incoming_lane_ids:
                     node_ids_to_incoming_lane_ids[to_node_id] = []
-                #for i in range(num_of_lanes):
-                #    lane_id = edge_id + "_" + str(i)
-                #    lane_attrib = {
-                #        "id"        : lane_id,
-                #        "index"     : str(i)
-                #    }
-                #    lane_elem = ET.Element("lane", attrib=lane_attrib)
-                #    edge_elem.append(lane_elem)
-                #    node_ids_to_incoming_lane_ids[to_node_id].append(lane_id)
         
         # Actually add nodes
         for node in nodes:
             node_id:str = node["id"]
             to_nodes:list = node["connections"]
             location:tuple = tuple(node["location"])
-            #inc_lanes = node_ids_to_incoming_lane_ids[node_id]
-            #inc_lanes_str = ""
-            #for lane_id in inc_lanes:
-            #    inc_lanes_str += lane_id + " "
-            #inc_lanes_str = inc_lanes_str.strip()
             try:
                 node_type:str = node["type"]
             except KeyError:
@@ -109,7 +95,7 @@ class Network:
                 "id"        : node_id,
                 "x"         : str(location[0]),
                 "y"         : str(location[1]),
-                #"incLanes"  : inc_lanes_str
+                "type"      : node_type
             }
             node_elem = ET.Element("node", node_attrib)
             node_root.append(node_elem)
@@ -123,7 +109,7 @@ class Network:
         with open(node_file_name, "w") as f:
             f.write(xmlstr)
         output_file_name = "test.net.xml"
-        os.system(f"netconvert --node-files={node_file_name} --edge-files={edge_file_name} --output-file={output_file_name}")
+        os.system(f"netconvert --node-files={node_file_name} --edge-files={edge_file_name} --output-file={output_file_name} --lefthand=true")
         
 
 
