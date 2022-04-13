@@ -43,7 +43,15 @@ def get_network():
     seed = get_random_seed()
     try:
         if CONFIG["network-type"] == "local":
-            network = ntwk.Network({}, seed=seed, network_file_path=CONFIG["network-file-path"])
+            try:
+                network_file_path = CONFIG["network-file-path"]
+            except KeyError:
+                raise
+            try:
+                route_file_path = CONFIG["route-file-path"]
+                network = ntwk.Network({}, seed=seed, network_file_path=network_file_path, route_file_path=route_file_path)
+            except KeyError:
+                network = ntwk.Network({}, seed=seed, network_file_path=network_file_path)
         elif CONFIG["network-type"] == "osm":
             osm_settings = CONFIG["osm-area-settings"]
             origin_lat = osm_settings["origin-latitude"]

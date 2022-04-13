@@ -1,4 +1,5 @@
 import os
+import shutil
 import xml.etree.ElementTree as ET
 
 import randomTrips
@@ -39,11 +40,12 @@ class Network:
             os.makedirs(Network.TEMP_FILE_DIRECTORY)
         
         network_file_name = output_file_name + ".net.xml"
+        temp_network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
         if not self.network_file_path:
-            self.network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
+            self.network_file_path = temp_network_file_path
             self.generateNetwork(self.network_file_path)
         else:
-            network_file_name = os.path.abspath(self.network_file_path)
+            shutil.copy(os.path.abspath(self.network_file_path), temp_network_file_path)
         
         self.net = sumolib.net.readNet(self.network_file_path, withInternal=True)
 
@@ -70,7 +72,7 @@ class Network:
         if self.route_file_path:
             pass
         else:
-            self.route_file_path = self.generateRandomRoutes(self.network_file_path)
+            self.route_file_path = self.generateRandomRoutes(temp_network_file_path)
         sumo_cfg_file_name = output_file_name + ".sumocfg"
         sumo_root = ET.Element("configuration")
         sumo_tree = ET.ElementTree(sumo_root)
