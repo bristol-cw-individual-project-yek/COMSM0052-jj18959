@@ -23,3 +23,29 @@ network:
           lanes: 1
           canUTurn: false
       location        : [-50, 50]
+
+routes:
+  - path              : [north, center, south]
+    probabilityWeight : 1.0
+  - path              : [north, center, east]
+    probabilityWeight : 1.0
+  - path              : [north, center, west]
+    probabilityWeight : 1.0
+  - path              : [south, center, north]
+    probabilityWeight : 1.0
+  - path              : [south, center, east]
+    probabilityWeight : 1.0
+  - path              : [south, center, west]
+    probabilityWeight : 1.0
+  - path              : [east, center, north]
+    probabilityWeight : 1.0
+  - path              : [east, center, south]
+    probabilityWeight : 1.0
+  - path              : [east, center, west]
+    probabilityWeight : 1.0
+  - path              : [west, center, north]
+    probabilityWeight : 1.0
+  - path              : [west, center, south]
+    probabilityWeight : 1.0
+  - path              : [west, center, east]
+    probabilityWeight : 1.0
