@@ -150,7 +150,6 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
             route_seed = rng.randint(0, 1000000000)
         else:
             route_seed = seed
-        road_network.create_network_from_yaml(road_network.scenario_file_path)
         path = road_network.generateFile(temp_file_name, route_seed=route_seed)
         if not has_gui or number_of_runs > 1:
             sumoBinary = sumolib.checkBinary("sumo")

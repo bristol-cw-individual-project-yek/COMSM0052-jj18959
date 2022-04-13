@@ -40,7 +40,7 @@ class Network:
             return to_node_info
 
 
-    def create_network_from_yaml(self, yaml_file_path:str):
+    def create_network_from_yaml(self, output_file_name:str, yaml_file_path:str) -> str:
         try: 
             with open(yaml_file_path, "r") as stream:
                 scenario_data = yaml.safe_load(stream)
@@ -55,6 +55,7 @@ class Network:
         edge_root = ET.Element("edges")
         edge_elem_tree = ET.ElementTree(edge_root)
         node_root = ET.Element("nodes")
+        node_elem_tree = ET.ElementTree(node_root)
 
         # Record nodes and connections
         for node in nodes:
@@ -99,18 +100,16 @@ class Network:
             }
             node_elem = ET.Element("node", node_attrib)
             node_root.append(node_elem)
-
-        xmlstr = minidom.parseString(ET.tostring(edge_root)).toprettyxml(indent="   ")
-        edge_file_name = "test.edg.xml"
-        with open(edge_file_name, "w") as f:
-            f.write(xmlstr)
-        xmlstr = minidom.parseString(ET.tostring(node_root)).toprettyxml(indent="   ")
-        node_file_name = "test.nod.xml"
-        with open(node_file_name, "w") as f:
-            f.write(xmlstr)
-        output_file_name = "test.net.xml"
-        os.system(f"netconvert --node-files={node_file_name} --edge-files={edge_file_name} --output-file={output_file_name} --lefthand=true")
         
+        edge_file_name = Network.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".edg.xml"
+        edge_elem_tree.write(edge_file_name)
+
+        node_file_name = Network.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".nod.xml"
+        node_elem_tree.write(node_file_name)
+
+        network_output_file_path = Network.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".net.xml"
+        os.system(f"netconvert --node-files={node_file_name} --edge-files={edge_file_name} --output-file={network_output_file_path} --lefthand=true")
+        return network_output_file_path
 
 
 
@@ -133,44 +132,48 @@ class Network:
         if not os.path.exists(Network.TEMP_FILE_DIRECTORY):
             os.makedirs(Network.TEMP_FILE_DIRECTORY)
         
-        network_file_name = output_file_name + ".net.xml"
-        temp_network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
-        if not self.network_file_path:
-            self.network_file_path = temp_network_file_path
-            self.generateNetwork(self.network_file_path)
+        if self.scenario_file_path:
+            temp_network_file_path = self.create_network_from_yaml(output_file_name, self.scenario_file_path)
+            network_file_name = os.path.basename(temp_network_file_path)
         else:
-            shutil.copy(os.path.abspath(self.network_file_path), temp_network_file_path)
-        
-        self.net = sumolib.net.readNet(self.network_file_path, withInternal=True)
+            network_file_name = output_file_name + ".net.xml"
+            temp_network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
+            if not self.network_file_path:
+                self.network_file_path = temp_network_file_path
+                self.generateNetwork(self.network_file_path)
+            else:
+                shutil.copy(os.path.abspath(self.network_file_path), temp_network_file_path)
+            
+            self.net = sumolib.net.readNet(self.network_file_path, withInternal=True)
 
-        # Store info about internal edge lengths
-        net_tree = ET.ElementTree()
-        net_tree.parse(self.network_file_path)
-        root = net_tree.getroot()
-        edges = root.findall("edge")
-        for edge in edges:
-            if "function" in edge.attrib and edge.attrib["function"] == "internal":
-                for lane in edge.findall("lane"):
-                    lane_id = lane.attrib["id"]
-                    self.internal_lane_data[lane_id] = {}
-                    self.internal_lane_data[lane_id]["length"] = lane.attrib["length"]
-        connections = root.findall("connection")
-        for con in connections:
-            connection_id = con.attrib["from"] + "-" + con.attrib["to"]
-            self.connection_data[connection_id] = {}
-            try:
-                self.connection_data[connection_id]["internal"] = con.attrib["via"]
-            except:
-                pass
-        
-        route_file_name = output_file_name + ".rou.xml"
-        temp_route_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, route_file_name)
-        if self.route_file_path:
-            shutil.copy(os.path.abspath(self.route_file_path), temp_route_file_path)
-        else:
-            self.route_file_path = self.generateRandomRoutes(temp_network_file_path, dest=temp_route_file_path)
-        self.prepare_route_file(temp_route_file_path)
-        
+            # Store info about internal edge lengths
+            net_tree = ET.ElementTree()
+            net_tree.parse(self.network_file_path)
+            root = net_tree.getroot()
+            edges = root.findall("edge")
+            for edge in edges:
+                if "function" in edge.attrib and edge.attrib["function"] == "internal":
+                    for lane in edge.findall("lane"):
+                        lane_id = lane.attrib["id"]
+                        self.internal_lane_data[lane_id] = {}
+                        self.internal_lane_data[lane_id]["length"] = lane.attrib["length"]
+            connections = root.findall("connection")
+            for con in connections:
+                connection_id = con.attrib["from"] + "-" + con.attrib["to"]
+                self.connection_data[connection_id] = {}
+                try:
+                    self.connection_data[connection_id]["internal"] = con.attrib["via"]
+                except:
+                    pass
+            
+            route_file_name = output_file_name + ".rou.xml"
+            temp_route_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, route_file_name)
+            if self.route_file_path:
+                shutil.copy(os.path.abspath(self.route_file_path), temp_route_file_path)
+            else:
+                self.route_file_path = self.generateRandomRoutes(temp_network_file_path, dest=temp_route_file_path)
+            self.prepare_route_file(temp_route_file_path)
+            
         sumo_cfg_file_name = output_file_name + ".sumocfg"
         sumo_root = ET.Element("configuration")
         sumo_tree = ET.ElementTree(sumo_root)
