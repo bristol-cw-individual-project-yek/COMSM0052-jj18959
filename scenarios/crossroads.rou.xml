@@ -5,5 +5,19 @@
 
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
     <route edges="E4 E5" color="yellow" id="route_0"/>
-    <route edges="E2 E3" color="yellow" id="route_1"/>
+    <route edges="E4 E3" color="yellow" id="route_1"/>
+    <route edges="E4 -E2" color="yellow" id="route_2"/>
+    <route edges="E4 -E4" color="yellow" id="route_3"/>
+    <route edges="E2 E3" color="yellow" id="route_4"/>
+    <route edges="E2 -E4" color="yellow" id="route_5"/>
+    <route edges="E2 E5" color="yellow" id="route_6"/>
+    <route edges="E2 -E2" color="yellow" id="route_7"/>
+    <route edges="-E3 -E2" color="yellow" id="route_8"/>
+    <route edges="-E3 -E4" color="yellow" id="route_9"/>
+    <route edges="-E3 E5" color="yellow" id="route_10"/>
+    <route edges="-E3 E2" color="yellow" id="route_11"/>
+    <route edges="-E5 -E4" color="yellow" id="route_12"/>
+    <route edges="-E5 E3" color="yellow" id="route_13"/>
+    <route edges="-E5 -E2" color="yellow" id="route_14"/>
+    <route edges="-E5 E5" color="yellow" id="route_15"/>
 </routes>
