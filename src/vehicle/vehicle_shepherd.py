@@ -49,53 +49,44 @@ class VehicleShepherd:
     
 
     # TODO: Write test for this
-    def add_vehicles(self, vehicleGroups:dict, routeIds: list):
+    def add_vehicles(self, vehicleGroups:dict):
         for group in vehicleGroups:
             vehGroup = vehicleGroups[group]
             self.vehicleGroups[group] = {}
-            missed_vehicles = 0
             for i in range(vehGroup["num"]):
-                
-                if len(routeIds) > 0:
-                    vId = group + "-" + str(i)
-                    vehicle:Vehicle = Vehicle(vId)
+                vId = group + "-" + str(i)
+                vehicle:Vehicle = Vehicle(vId)
 
-                    self.set_policy(vehicle, vehGroup)
-                    routeId = routeIds[self.rng.randint(0, len(routeIds) - 1)]
-                    vehicle.add_to_route(routeId, self.network)
+                self.set_policy(vehicle, vehGroup)
+                routeId = self.network.get_random_route_id()
+                vehicle.add_to_route(routeId, self.network)
 
-                    if "vehicle-type" in vehGroup:
-                        try:
-                            vehType = vehGroup["vehicle-type"]
-                            vehicle.set_vehicle_type(vehType)
-                        except KeyError:
-                            print(traceback.format_exc())
-                        except traci.exceptions.TraCIException:
-                            print(traceback.format_exc())
-                        try:
-                            vehicle.set_speed(self.vehicleTypes[vehType]["speed"])
-                        except KeyError:
-                            print(traceback.format_exc())
+                if "vehicle-type" in vehGroup:
                     try:
-                        vehicle.set_priority(vehGroup["priority"])
+                        vehType = vehGroup["vehicle-type"]
+                        vehicle.set_vehicle_type(vehType)
                     except KeyError:
                         print(traceback.format_exc())
-                    
-                    if "svo" in vehGroup:
-                        vehicle.svo_angle = vehGroup["svo"]
-                    elif "social-value-orientation" in vehGroup:
-                        vehicle.svo_angle = vehGroup["social-value-orientation"]
-                    elif "social_value_orientation" in vehGroup:
-                        vehicle.svo_angle = vehGroup["social_value_orientation"]
-                    
-                    self.vehicles[vId] = vehicle
-                    self.vehicleGroups[group][vId] = vehicle
-                    routeIds.remove(routeId)
-                else:
-                    missed_vehicles += 1
-        if missed_vehicles > 0:
-            # TODO: Do something with missed vehicles
-            print(f"Vehicles not created: {missed_vehicles}")
+                    except traci.exceptions.TraCIException:
+                        print(traceback.format_exc())
+                    try:
+                        vehicle.set_speed(self.vehicleTypes[vehType]["speed"])
+                    except KeyError:
+                        print(traceback.format_exc())
+                try:
+                    vehicle.set_priority(vehGroup["priority"])
+                except KeyError:
+                    print(traceback.format_exc())
+                
+                if "svo" in vehGroup:
+                    vehicle.svo_angle = vehGroup["svo"]
+                elif "social-value-orientation" in vehGroup:
+                    vehicle.svo_angle = vehGroup["social-value-orientation"]
+                elif "social_value_orientation" in vehGroup:
+                    vehicle.svo_angle = vehGroup["social_value_orientation"]
+                
+                self.vehicles[vId] = vehicle
+                self.vehicleGroups[group][vId] = vehicle
     
 
     def has_active_vehicles(self):

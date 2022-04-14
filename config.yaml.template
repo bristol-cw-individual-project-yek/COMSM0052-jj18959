@@ -2,7 +2,8 @@ network-type: "random"
 seed: 0
 
 # Map settings for non-random generated maps
-network-file-path: ""
+network-file-path: "scenarios/crossroads.net.xml"
+route-file-path: "scenarios/crossroads.rou.xml"
 osm-area-settings:
   origin-latitude: 51.5
   origin-longitude: -2.6

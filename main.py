@@ -29,7 +29,9 @@ try:
         CONFIG = yaml.safe_load(stream)
         stream.close()
 except:
-    pass
+    raise
+
+SCENARIO_FOLDER_PATH = "scenarios"
 
 
 def get_random_seed():
@@ -42,8 +44,24 @@ def get_random_seed():
 def get_network():
     seed = get_random_seed()
     try:
-        if CONFIG["network-type"] == "local":
-            network = ntwk.Network({}, seed=seed, network_file_path=CONFIG["network-file-path"])
+        if CONFIG["network-type"] == "scenario":
+            try:
+                scenario_name:str = CONFIG["scenario-name"]
+                if not scenario_name.endswith(".yaml"):
+                    scenario_name += ".yaml"
+            except KeyError:
+                raise
+            network = ntwk.Network({}, seed=seed, scenario_file_path=SCENARIO_FOLDER_PATH + "\\" + scenario_name)
+        elif CONFIG["network-type"] == "local":
+            try:
+                network_file_path = CONFIG["network-file-path"]
+            except KeyError:
+                raise
+            try:
+                route_file_path = CONFIG["route-file-path"]
+                network = ntwk.Network({}, seed=seed, network_file_path=network_file_path, route_file_path=route_file_path)
+            except KeyError:
+                network = ntwk.Network({}, seed=seed, network_file_path=network_file_path)
         elif CONFIG["network-type"] == "osm":
             osm_settings = CONFIG["osm-area-settings"]
             origin_lat = osm_settings["origin-latitude"]
@@ -144,7 +162,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
 
         shepherd = vehicle_shepherd.VehicleShepherd(road_network, seed=seed)
         shepherd.add_vehicle_types(CONFIG["vehicle-types"])
-        shepherd.add_vehicles(CONFIG["vehicle-groups"], road_network.routeIds)
+        shepherd.add_vehicles(CONFIG["vehicle-groups"])
 
         vehicle_metadata = shepherd.get_vehicle_metadata()
         
