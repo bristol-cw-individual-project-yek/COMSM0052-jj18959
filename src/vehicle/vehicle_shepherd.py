@@ -58,7 +58,8 @@ class VehicleShepherd:
                 vehicle:Vehicle = Vehicle(vId)
 
                 self.set_policy(vehicle, vehGroup)
-                routeId = routeIds[self.rng.randint(0, len(routeIds) - 1)]
+                #routeId = routeIds[self.rng.randint(0, len(routeIds) - 1)]
+                routeId = self.network.get_random_route_id()
                 vehicle.add_to_route(routeId, self.network)
 
                 if "vehicle-type" in vehGroup:

@@ -1,4 +1,5 @@
 import os
+import random
 import shutil
 import xml.etree.ElementTree as ET
 import yaml
@@ -22,7 +23,22 @@ class Network:
         self.internal_lane_data:dict = {}
         self.connection_data:dict = {}
         self.scenario_file_path:str = scenario_file_path
-        self.route_probability_weights:list = []
+        self.route_probability_thresholds:list = []
+        self.total_route_probability_weights:float = 0.0
+        self.rng:random.Random = random.Random(seed)
+
+
+    def get_random_route_id(self) -> str:
+        rand_num = self.rng.random() * self.total_route_probability_weights
+        found = False
+        index = 0
+        while index < len(self.route_probability_thresholds) and not found:
+            route_and_threshold:tuple = self.route_probability_thresholds[index]
+            if rand_num < route_and_threshold[1]:
+                found = True
+            index += 1
+        index -= 1
+        return self.route_probability_thresholds[index][0]
 
 
     def create_edge_id(self, from_edge_id:str, to_edge_id:str) -> str:
@@ -138,11 +154,14 @@ class Network:
             route_elem = ET.Element("route", attrib=route_attrib)
             route_root.append(route_elem)
             if "probabilityWeight" in route_dict:
-                route_and_weight:tuple = (route_id, route_dict["probabilityWeight"])
+                weight: float = route_dict["probabilityWeight"]
             else:
-                route_and_weight:tuple = (route_id, 1.0)
-            self.route_probability_weights.append(route_and_weight)
+                weight: float = 1.0
+            route_and_threshold:tuple = (route_id, self.total_route_probability_weights + weight)
+            self.route_probability_thresholds.append(route_and_threshold)
+            self.total_route_probability_weights += weight
             route_num += 1
+        print(self.route_probability_thresholds)
         route_output_file_path = Network.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".rou.xml"
         route_elem_tree.write(route_output_file_path)
         
@@ -252,6 +271,15 @@ class Network:
             route_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, os.path.basename(network_file_path.replace(".net", ".rou")))
         routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + route_file_path + " --named-routes=true --route-steps=" + str(route_steps)
         os.system(routes_cmd)
+
+        route_tree = ET.ElementTree()
+        route_tree.parse(route_file_path)
+        route_root = route_tree.getroot()
+        for child in route_root:
+            if child.tag == "route":
+                route_id = child.attrib["id"]
+                self.route_probability_thresholds.append(tuple([route_id, self.total_route_probability_weights + 1.0]))
+                self.total_route_probability_weights += 1.0
 
         return route_file_path
     
