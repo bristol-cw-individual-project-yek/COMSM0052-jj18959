@@ -49,7 +49,7 @@ class VehicleShepherd:
     
 
     # TODO: Write test for this
-    def add_vehicles(self, vehicleGroups:dict, routeIds: list):
+    def add_vehicles(self, vehicleGroups:dict):
         for group in vehicleGroups:
             vehGroup = vehicleGroups[group]
             self.vehicleGroups[group] = {}
@@ -58,7 +58,6 @@ class VehicleShepherd:
                 vehicle:Vehicle = Vehicle(vId)
 
                 self.set_policy(vehicle, vehGroup)
-                #routeId = routeIds[self.rng.randint(0, len(routeIds) - 1)]
                 routeId = self.network.get_random_route_id()
                 vehicle.add_to_route(routeId, self.network)
 
