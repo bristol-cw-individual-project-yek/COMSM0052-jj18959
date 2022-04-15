@@ -12,7 +12,10 @@ class FirstComeFirstServePolicy(Policy):
         return super().decide_state(vehicle, conflicting_vehicles)
     
 
-    def can_get_priority(self, vehicle, other_vehicle) -> bool:
+    def can_remove_from_queue(self, vehicle, other_vehicle) -> bool:
+        # TODO: Change this to check if vehicle is within junction bounds
+        if (other_vehicle.get_next_junction() != vehicle.get_next_junction()) and other_vehicle.currentState != VehicleState.CROSSING:
+            return True
         return False
     
 
@@ -25,7 +28,7 @@ class FirstComeFirstServePolicy(Policy):
             return True
         if vehicle.currentState != VehicleState.CROSSING:
             if other_vehicle in self.vehicles_ahead_of_queue:
-                if not self.can_get_priority(vehicle, other_vehicle):
+                if not self.can_remove_from_queue(vehicle, other_vehicle):
                     return True
                 else:
                     self.vehicles_ahead_of_queue.pop(other_vehicle)
