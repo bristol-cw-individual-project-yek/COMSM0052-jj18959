@@ -24,8 +24,8 @@ class FirstComeFirstServePolicy(Policy):
         distance_to_junction = vehicle.get_distance_to_junction(next_junction)
         
         # Always allow other vehicles that are already crossing to pass first
-        if other_vehicle.currentState == VehicleState.CROSSING and vehicle.get_distance_to_junction(next_junction) <= FirstComeFirstServePolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION:
-            return True
+        #if other_vehicle.currentState == VehicleState.CROSSING and vehicle.get_distance_to_junction(next_junction) <= FirstComeFirstServePolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION:
+        #    return True
         if vehicle.currentState != VehicleState.CROSSING:
             if other_vehicle in self.vehicles_ahead_of_queue:
                 if not self.can_remove_from_queue(vehicle, other_vehicle):
