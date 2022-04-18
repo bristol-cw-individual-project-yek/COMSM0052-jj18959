@@ -1,5 +1,6 @@
 from src.vehicle.policy.policy import Policy
 from src.vehicle.vehicle_state import VehicleState
+import src.vehicle.policy.utils as utils
 
 class FirstComeFirstServePolicy(Policy):
 
@@ -13,8 +14,7 @@ class FirstComeFirstServePolicy(Policy):
     
 
     def can_remove_from_queue(self, vehicle, other_vehicle) -> bool:
-        # TODO: Change this to check if vehicle is within junction bounds
-        if (other_vehicle.get_next_junction() != vehicle.get_next_junction()) and other_vehicle.currentState != VehicleState.CROSSING:
+        if not utils.is_in_junction(other_vehicle, vehicle.get_next_junction()):
             return True
         return False
     
