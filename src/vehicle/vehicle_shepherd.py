@@ -153,9 +153,9 @@ class VehicleShepherd:
             path = vehGroup["policy-path"]
             policy = CustomPolicy(path)
         elif policyType == "first-come-first-serve" or policyType == "fcfs":
-            policy = FirstComeFirstServePolicy()
+            policy = FirstComeFirstServePolicy(vehicle)
         elif policyType == "priority":
-            policy = PriorityPolicy()
+            policy = PriorityPolicy(vehicle)
         else:
-            policy = Policy()
+            policy = Policy(vehicle)
         vehicle.set_conflict_resolution_policy(policy)

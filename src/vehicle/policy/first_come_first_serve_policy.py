@@ -1,12 +1,25 @@
-from src.vehicle.policy.policy import Policy
+import src.vehicle.policy.policy as policy
 from src.vehicle.vehicle_state import VehicleState
 import src.vehicle.policy.utils as utils
 
-class FirstComeFirstServePolicy(Policy):
+class FirstComeFirstServePolicy(policy.Policy):
 
-    def __init__(self) -> None:
+    def __init__(self, vehicle) -> None:
         self.vehicles_ahead_of_queue:dict = {}     # Queue containing other vehicles that go first
-        super().__init__()
+        super().__init__(vehicle)
+
+
+    def receive_message_from_vehicle(self, message:policy.VehicleMessage):
+        if type(message) == policy.ReserveJunctionMessage:
+            if self.vehicle.currentState == VehicleState.CROSSING:
+                confirm_or_deny = policy.DenyMessage(self.vehicle)
+                #print("Crossing")
+            else:
+                confirm_or_deny = policy.ConfirmMessage(self.vehicle)
+                self.received_messages.append(message)
+                #print("ok")
+            message.sender.conflictResolutionPolicy.receive_message_from_vehicle(confirm_or_deny)
+            
 
 
     def decide_state(self, vehicle, conflicting_vehicles:dict):
@@ -38,7 +51,7 @@ class FirstComeFirstServePolicy(Policy):
                     must_wait = True
                 elif other_vehicle.get_distance_to_junction(next_junction) == distance_to_junction and other_vehicle.currentTimeSpentWaiting > vehicle.currentTimeSpentWaiting:
                     must_wait = True
-                if must_wait and vehicle.get_distance_to_junction(next_junction) <= FirstComeFirstServePolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION:
+                if must_wait and vehicle.get_distance_to_junction(next_junction) <= type(self).MIN_WAITING_DISTANCE_FROM_JUNCTION:
                     if other_vehicle.currentState != VehicleState.CROSSING:
                         self.vehicles_ahead_of_queue[other_vehicle] = True
                     return True
@@ -52,6 +65,19 @@ class FirstComeFirstServePolicy(Policy):
     def is_conflicting_visible(self, vehicle, other_vehicle) -> bool:
         return super().is_conflicting_visible(vehicle, other_vehicle)
     
+
+    def confirm_no_conflicts(self, vehicle, new_state, conflicting_vehicles: dict):
+        if new_state == VehicleState.CROSSING:
+            reserve_junction_message = policy.ReserveJunctionMessage(vehicle, vehicle.nextJunction.getID())
+            for other_vehicle in conflicting_vehicles["same_junction"]:
+                # TODO: Make this a straight call to the other vehicle
+                other_vehicle.conflictResolutionPolicy.receive_message_from_vehicle(reserve_junction_message)
+            while len(self.received_messages) > 0:
+                message:policy.VehicleMessage = self.received_messages.pop(0)
+                if type(message) == policy.DenyMessage:
+                    return False
+        return True
+
 
     def decide_state_no_conflicts(self, vehicle) -> VehicleState:
         self.vehicles_ahead_of_queue = {}

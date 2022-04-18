@@ -18,7 +18,7 @@ class Vehicle:
         self.currentPosition = (Infinity, Infinity)
         self.currentGridPosition = (Infinity, Infinity)
         self.conflictDetectionAlgorithm = ConflictDetection()
-        self.conflictResolutionPolicy = Policy()
+        self.conflictResolutionPolicy = Policy(self)
         self.nextJunction:sumolib.net.node.Node = None
         self.visibilityAngle = 60   # in degrees
         self.vehicleType = vehicleType
