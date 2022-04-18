@@ -2,6 +2,7 @@ from src.vehicle.policy.policy import Policy
 from src.vehicle.vehicle import Vehicle
 from src.vehicle.vehicle_state import VehicleState
 import copy
+import src.vehicle.policy.utils as utils
 
 class SVOGroupPolicy(Policy):
 
@@ -18,7 +19,7 @@ class SVOGroupPolicy(Policy):
             svo_utility = vehicle.get_social_value_orientation_utility_group_average(other_vehicles_at_junction)
             for other_vehicle in other_vehicles_at_junction:
                 ov:Vehicle = other_vehicle
-                if other_vehicle.currentState == VehicleState.CROSSING: # TODO: Change this to check if vehicle is within junction bounds
+                if utils.is_in_junction(other_vehicle, vehicle.get_next_junction()):
                     return VehicleState.WAITING
                 others:list = copy.copy(other_vehicles_at_junction)
                 others.append(vehicle)
@@ -26,7 +27,7 @@ class SVOGroupPolicy(Policy):
                 if len(others) > 0:
                     other_svo_utility = ov.get_social_value_orientation_utility_group_average(others)
                     print(f"{vehicle.vehicleId} is comparing {svo_utility} with {other_svo_utility}")
-                    if svo_utility < other_svo_utility:
+                    if svo_utility <= other_svo_utility:
                         return VehicleState.WAITING
         
         for other_vehicle in conflicting_vehicles["visible"]:
