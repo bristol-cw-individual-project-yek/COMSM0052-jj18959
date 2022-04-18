@@ -27,8 +27,6 @@ class FirstComeFirstServePolicy(policy.Policy):
     
 
     def can_remove_from_queue(self, vehicle, other_vehicle) -> bool:
-        #if not utils.is_in_junction(other_vehicle, vehicle.get_next_junction()):
-        #    return True
         message = policy.QueryMessage(self.vehicle.vehicleId, "")
         policy.SharedNetwork.send_message(other_vehicle.vehicleId, message)
         data = self.message_buffer.pop(-1).data
@@ -41,9 +39,6 @@ class FirstComeFirstServePolicy(policy.Policy):
         next_junction = vehicle.nextJunction
         distance_to_junction = vehicle.get_distance_to_junction(next_junction)
         
-        # Always allow other vehicles that are already crossing to pass first
-        #if other_vehicle.currentState == VehicleState.CROSSING and vehicle.get_distance_to_junction(next_junction) <= FirstComeFirstServePolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION:
-        #    return True
         if vehicle.currentState != VehicleState.CROSSING:
             if other_vehicle in self.vehicles_ahead_of_queue:
                 if not self.can_remove_from_queue(vehicle, other_vehicle):
@@ -57,18 +52,9 @@ class FirstComeFirstServePolicy(policy.Policy):
                 data = self.message_buffer.pop(-1).data
                 if other_vehicle.get_distance_to_junction(next_junction) < distance_to_junction: 
                     must_wait = True
-                #elif other_vehicle.get_distance_to_junction(next_junction) == distance_to_junction and other_vehicle.currentTimeSpentWaiting > vehicle.currentTimeSpentWaiting:
-                #    must_wait = True
                 elif other_vehicle.get_distance_to_junction(next_junction) == distance_to_junction and data["time_spent_waiting"] > self.time_spent_waiting:
                     must_wait = True
-                #else:
-                #    reserve_junction_message = policy.ReserveJunctionMessage(vehicle.vehicleId, vehicle.nextJunction.getID())
-                #    policy.SharedNetwork.send_message(other_vehicle.vehicleId, reserve_junction_message)
-                #    message:policy.VehicleMessage = self.message_buffer.pop(-1)
-                #    if type(message) == policy.DenyMessage:
-                #        must_wait = True
                 if must_wait and vehicle.get_distance_to_junction(next_junction) <= type(self).MIN_WAITING_DISTANCE_FROM_JUNCTION:
-                    #if other_vehicle.currentState != VehicleState.CROSSING:
                     self.vehicles_ahead_of_queue[other_vehicle] = True
                     return True
         return False
