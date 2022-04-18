@@ -7,25 +7,32 @@ class FirstComeFirstServePolicy(policy.Policy):
     def __init__(self, vehicle) -> None:
         self.vehicles_ahead_of_queue:dict = {}     # Queue containing other vehicles that go first
         super().__init__(vehicle)
+        self.time_spent_waiting = 0
 
 
-    def receive_message_from_vehicle(self, message:policy.VehicleMessage):
-        if type(message) == policy.ReserveJunctionMessage:
-            if self.vehicle.currentState == VehicleState.CROSSING:
-                confirm_or_deny = policy.DenyMessage(self.vehicle.vehicleId)
-            else:
-                confirm_or_deny = policy.ConfirmMessage(self.vehicle.vehicleId)
-                self.received_messages.append(message)
-            #message.sender.conflictResolutionPolicy.receive_message_from_vehicle(confirm_or_deny)
-            policy.SharedNetwork.send_message(message.senderID, confirm_or_deny)
+    def process_query_data(self, _):
+        response_data:dict = {
+            "time_spent_waiting"  : self.time_spent_waiting
+        }
+        return response_data
             
 
     def decide_state(self, vehicle, conflicting_vehicles:dict):
-        return super().decide_state(vehicle, conflicting_vehicles)
+        state = super().decide_state(vehicle, conflicting_vehicles)
+        if state == VehicleState.WAITING:
+            self.time_spent_waiting += 1
+        else:
+            self.time_spent_waiting = 0
+        return state
     
 
     def can_remove_from_queue(self, vehicle, other_vehicle) -> bool:
-        if not utils.is_in_junction(other_vehicle, vehicle.get_next_junction()):
+        #if not utils.is_in_junction(other_vehicle, vehicle.get_next_junction()):
+        #    return True
+        message = policy.QueryMessage(self.vehicle.vehicleId, "")
+        policy.SharedNetwork.send_message(other_vehicle.vehicleId, message)
+        data = self.message_buffer.pop(-1).data
+        if data["time_spent_waiting"] <= self.time_spent_waiting:
             return True
         return False
     
@@ -45,13 +52,24 @@ class FirstComeFirstServePolicy(policy.Policy):
                     self.vehicles_ahead_of_queue.pop(other_vehicle)
             else:
                 must_wait = False
+                message = policy.QueryMessage(self.vehicle.vehicleId, "")
+                policy.SharedNetwork.send_message(other_vehicle.vehicleId, message)
+                data = self.message_buffer.pop(-1).data
                 if other_vehicle.get_distance_to_junction(next_junction) < distance_to_junction: 
                     must_wait = True
-                elif other_vehicle.get_distance_to_junction(next_junction) == distance_to_junction and other_vehicle.currentTimeSpentWaiting > vehicle.currentTimeSpentWaiting:
+                #elif other_vehicle.get_distance_to_junction(next_junction) == distance_to_junction and other_vehicle.currentTimeSpentWaiting > vehicle.currentTimeSpentWaiting:
+                #    must_wait = True
+                elif other_vehicle.get_distance_to_junction(next_junction) == distance_to_junction and data["time_spent_waiting"] > self.time_spent_waiting:
                     must_wait = True
+                #else:
+                #    reserve_junction_message = policy.ReserveJunctionMessage(vehicle.vehicleId, vehicle.nextJunction.getID())
+                #    policy.SharedNetwork.send_message(other_vehicle.vehicleId, reserve_junction_message)
+                #    message:policy.VehicleMessage = self.message_buffer.pop(-1)
+                #    if type(message) == policy.DenyMessage:
+                #        must_wait = True
                 if must_wait and vehicle.get_distance_to_junction(next_junction) <= type(self).MIN_WAITING_DISTANCE_FROM_JUNCTION:
-                    if other_vehicle.currentState != VehicleState.CROSSING:
-                        self.vehicles_ahead_of_queue[other_vehicle] = True
+                    #if other_vehicle.currentState != VehicleState.CROSSING:
+                    self.vehicles_ahead_of_queue[other_vehicle] = True
                     return True
         return False
     
@@ -69,8 +87,8 @@ class FirstComeFirstServePolicy(policy.Policy):
             reserve_junction_message = policy.ReserveJunctionMessage(vehicle.vehicleId, vehicle.nextJunction.getID())
             for other_vehicle in conflicting_vehicles["same_junction"]:
                 policy.SharedNetwork.send_message(other_vehicle.vehicleId, reserve_junction_message)
-            while len(self.received_messages) > 0:
-                message:policy.VehicleMessage = self.received_messages.pop(0)
+            while len(self.message_buffer) > 0:
+                message:policy.VehicleMessage = self.message_buffer.pop(0)
                 if type(message) == policy.DenyMessage:
                     return False
         return True
