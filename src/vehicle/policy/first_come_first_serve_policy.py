@@ -12,15 +12,13 @@ class FirstComeFirstServePolicy(policy.Policy):
     def receive_message_from_vehicle(self, message:policy.VehicleMessage):
         if type(message) == policy.ReserveJunctionMessage:
             if self.vehicle.currentState == VehicleState.CROSSING:
-                confirm_or_deny = policy.DenyMessage(self.vehicle)
-                #print("Crossing")
+                confirm_or_deny = policy.DenyMessage(self.vehicle.vehicleId)
             else:
-                confirm_or_deny = policy.ConfirmMessage(self.vehicle)
+                confirm_or_deny = policy.ConfirmMessage(self.vehicle.vehicleId)
                 self.received_messages.append(message)
-                #print("ok")
-            message.sender.conflictResolutionPolicy.receive_message_from_vehicle(confirm_or_deny)
+            #message.sender.conflictResolutionPolicy.receive_message_from_vehicle(confirm_or_deny)
+            policy.SharedNetwork.send_message(message.senderID, confirm_or_deny)
             
-
 
     def decide_state(self, vehicle, conflicting_vehicles:dict):
         return super().decide_state(vehicle, conflicting_vehicles)
@@ -68,10 +66,9 @@ class FirstComeFirstServePolicy(policy.Policy):
 
     def confirm_no_conflicts(self, vehicle, new_state, conflicting_vehicles: dict):
         if new_state == VehicleState.CROSSING:
-            reserve_junction_message = policy.ReserveJunctionMessage(vehicle, vehicle.nextJunction.getID())
+            reserve_junction_message = policy.ReserveJunctionMessage(vehicle.vehicleId, vehicle.nextJunction.getID())
             for other_vehicle in conflicting_vehicles["same_junction"]:
-                # TODO: Make this a straight call to the other vehicle
-                other_vehicle.conflictResolutionPolicy.receive_message_from_vehicle(reserve_junction_message)
+                policy.SharedNetwork.send_message(other_vehicle.vehicleId, reserve_junction_message)
             while len(self.received_messages) > 0:
                 message:policy.VehicleMessage = self.received_messages.pop(0)
                 if type(message) == policy.DenyMessage:

@@ -2,26 +2,38 @@ from src.vehicle.vehicle_state import VehicleState
 from enum import Enum
 import src.vehicle.policy.utils as utils
 
-# TODO: Move all these vehicle messages to new file
+# TODO: Move all this communication stuff to new file
 class VehicleMessage():
-    def __init__(self, sender) -> None:
-        self.sender = sender
+    def __init__(self, senderID:str) -> None:
+        self.senderID:str = senderID
 
 
 class ReserveJunctionMessage(VehicleMessage):
-    def __init__(self, sender, junctionID:str) -> None:
-        super().__init__(sender)
+    def __init__(self, senderID:str, junctionID:str) -> None:
+        super().__init__(senderID)
         self.junctionID:str = junctionID
 
 
 class ConfirmMessage(VehicleMessage):
-    def __init__(self, sender) -> None:
-        super().__init__(sender)
+    def __init__(self, senderID:str) -> None:
+        super().__init__(senderID)
 
 
 class DenyMessage(VehicleMessage):
-    def __init__(self, sender) -> None:
-        super().__init__(sender)
+    def __init__(self, senderID:str) -> None:
+        super().__init__(senderID)
+
+
+class SharedNetwork():
+    id_to_policy:dict = {}
+
+    def send_message(recipient_id:str, message:VehicleMessage):
+        try:
+            recipient_policy = SharedNetwork.id_to_policy[recipient_id]
+            recipient_policy.receive_message_from_vehicle(message)
+        except KeyError:
+            print(f"Failed to send message to {recipient_id}")
+            raise
 
 
 class Policy:
@@ -40,6 +52,7 @@ class Policy:
     def __init__(self, vehicle):
         self.vehicle = vehicle
         self.received_messages:list = []
+        SharedNetwork.id_to_policy[vehicle.vehicleId] = self
 
 
     def receive_message_from_vehicle(self, message:VehicleMessage):
