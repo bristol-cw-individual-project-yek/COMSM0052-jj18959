@@ -63,11 +63,22 @@ class FCFS_CentralizedPolicy(Policy):
                 type(self).arrival_times.pop(v)
 
 
+
+    def get_arrival_time(self, reserved_time, vehicle):
+        return reserved_time + (vehicle.get_time_to_cross_next_junction() * 1.2)
+
+
     def request_state_at_junction(self, vehicle:Vehicle, vehicles:list, junction_id:str) -> VehicleState:
         current_time = traci.simulation.getTime()
         if type(self).last_recorded_time != current_time:
             type(self).last_recorded_time = current_time
             self.update_junction_data(current_time)
+            print(f"---------Step: {current_time}---------")
+            print("Reserved:")
+            self.print_schedule(FCFS_CentralizedPolicy.reserved_times)
+            print("Arrival:")
+            self.print_schedule(FCFS_CentralizedPolicy.arrival_times)
+            print("--------------------------------------")
         if vehicle in type(self).reserved_times:
             if type(self).reserved_times[vehicle] > current_time:
                 return VehicleState.WAITING
@@ -75,7 +86,7 @@ class FCFS_CentralizedPolicy(Policy):
                 return VehicleState.CROSSING
         else:
             reserved_time = self.get_initial_reserve_time(vehicle, junction_id, current_time)
-            arrival_time = reserved_time + (vehicle.get_time_to_cross_next_junction() * 1.2)
+            arrival_time = self.get_arrival_time(reserved_time, vehicle)
             type(self).reserved_times[vehicle] = reserved_time
             type(self).arrival_times[vehicle] =  arrival_time
             for other_vehicle in type(self).junction_to_vehicles[junction_id]:
@@ -84,13 +95,12 @@ class FCFS_CentralizedPolicy(Policy):
                         pass
                     else:
                         try:
-                            temp_reserved_time = type(self).arrival_times[other_vehicle]
-                            type(self).reserved_times[other_vehicle] = reserved_time
-                            type(self).arrival_times[other_vehicle] = reserved_time + other_vehicle.get_time_to_cross_next_junction()
-                            reserved_time = temp_reserved_time
-                            arrival_time = reserved_time + vehicle.get_time_to_cross_next_junction()
+                            reserved_time = type(self).reserved_times[other_vehicle]
                             type(self).reserved_times[vehicle] = reserved_time
-                            type(self).arrival_times[vehicle] =  arrival_time
+                            arrival_time = self.get_arrival_time(reserved_time, vehicle)
+                            type(self).arrival_times[vehicle] = arrival_time
+                            type(self).reserved_times[other_vehicle] = arrival_time
+                            type(self).arrival_times[other_vehicle] = self.get_arrival_time(arrival_time, other_vehicle)
                         except Exception as e:
                             raise e
                 else:
