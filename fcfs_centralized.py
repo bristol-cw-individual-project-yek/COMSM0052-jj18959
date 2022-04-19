@@ -25,7 +25,7 @@ class FCFS_CentralizedPolicy(Policy):
 
 
     def insert_into_queue(self, vehicle:Vehicle, junction_id:str) -> None:
-        queue:list = FCFS_CentralizedPolicy.junction_to_queue[junction_id]
+        queue:list = type(self).junction_to_queue[junction_id]
         if not vehicle in queue:
             index = len(queue) - 1
             found:bool = False
@@ -39,61 +39,63 @@ class FCFS_CentralizedPolicy(Policy):
     
 
     def get_initial_reserve_time(self, vehicle:Vehicle, junction_id:str, current_time:float) -> float:
-        if not junction_id in FCFS_CentralizedPolicy.junction_to_vehicles:
-            FCFS_CentralizedPolicy.junction_to_vehicles[junction_id] = []
+        if not junction_id in type(self).junction_to_vehicles:
+            type(self).junction_to_vehicles[junction_id] = []
         result = current_time
-        if len(FCFS_CentralizedPolicy.junction_to_vehicles[junction_id]) == 0:
+        if len(type(self).junction_to_vehicles[junction_id]) == 0:
             return result
         else:
-            for other_vehicle in FCFS_CentralizedPolicy.junction_to_vehicles[junction_id]:
+            for other_vehicle in type(self).junction_to_vehicles[junction_id]:
                 if other_vehicle.get_next_junction().getID() == junction_id and other_vehicle.isActive:
-                    result = max(result, FCFS_CentralizedPolicy.arrival_times[other_vehicle])
+                    result = max(result, type(self).arrival_times[other_vehicle])
             return result
     
 
-    def update_junction_data(current_time:float):
-        for junction_id in FCFS_CentralizedPolicy.junction_to_vehicles:
+    def update_junction_data(self, current_time:float):
+        for junction_id in type(self).junction_to_vehicles:
             to_be_removed = []
-            for v in FCFS_CentralizedPolicy.junction_to_vehicles[junction_id]:
-                if (v.get_next_junction().getID() != junction_id or not v.isActive) and FCFS_CentralizedPolicy.arrival_times[v] < current_time:
+            for v in type(self).junction_to_vehicles[junction_id]:
+                if (v.get_next_junction().getID() != junction_id or not v.isActive) and type(self).arrival_times[v] < current_time:
                     to_be_removed.append(v)
             for v in to_be_removed:
-                FCFS_CentralizedPolicy.junction_to_vehicles[junction_id].remove(v)
-                FCFS_CentralizedPolicy.reserved_times.pop(v)
-                FCFS_CentralizedPolicy.arrival_times.pop(v)
+                type(self).junction_to_vehicles[junction_id].remove(v)
+                type(self).reserved_times.pop(v)
+                type(self).arrival_times.pop(v)
 
 
     def request_state_at_junction(self, vehicle:Vehicle, vehicles:list, junction_id:str) -> VehicleState:
         current_time = traci.simulation.getTime()
-        if FCFS_CentralizedPolicy.last_recorded_time != current_time:
-            FCFS_CentralizedPolicy.last_recorded_time = current_time
-            FCFS_CentralizedPolicy.update_junction_data(current_time)
-        if vehicle in FCFS_CentralizedPolicy.reserved_times:
-            if FCFS_CentralizedPolicy.reserved_times[vehicle] > current_time:
+        if type(self).last_recorded_time != current_time:
+            type(self).last_recorded_time = current_time
+            self.update_junction_data(current_time)
+        if vehicle in type(self).reserved_times:
+            if type(self).reserved_times[vehicle] > current_time:
                 return VehicleState.WAITING
             else:
                 return VehicleState.CROSSING
         else:
             reserved_time = self.get_initial_reserve_time(vehicle, junction_id, current_time)
             arrival_time = reserved_time + (vehicle.get_time_to_cross_next_junction() * 1.2)
-            for other_vehicle in FCFS_CentralizedPolicy.junction_to_vehicles[junction_id]:
+            type(self).reserved_times[vehicle] = reserved_time
+            type(self).arrival_times[vehicle] =  arrival_time
+            for other_vehicle in type(self).junction_to_vehicles[junction_id]:
                 if other_vehicle.get_next_junction().getID() == junction_id and other_vehicle.isActive:
                     if (not self.can_swap(vehicle, other_vehicle)) or other_vehicle.currentState == VehicleState.CROSSING:
                         pass
                     else:
                         try:
-                            temp_reserved_time = FCFS_CentralizedPolicy.arrival_times[other_vehicle]
-                            FCFS_CentralizedPolicy.reserved_times[other_vehicle] = reserved_time
-                            FCFS_CentralizedPolicy.arrival_times[other_vehicle] = reserved_time + other_vehicle.get_time_to_cross_next_junction()
+                            temp_reserved_time = type(self).arrival_times[other_vehicle]
+                            type(self).reserved_times[other_vehicle] = reserved_time
+                            type(self).arrival_times[other_vehicle] = reserved_time + other_vehicle.get_time_to_cross_next_junction()
                             reserved_time = temp_reserved_time
                             arrival_time = reserved_time + vehicle.get_time_to_cross_next_junction()
+                            type(self).reserved_times[vehicle] = reserved_time
+                            type(self).arrival_times[vehicle] =  arrival_time
                         except Exception as e:
                             raise e
                 else:
                     pass
-            FCFS_CentralizedPolicy.reserved_times[vehicle] = reserved_time
-            FCFS_CentralizedPolicy.arrival_times[vehicle] =  arrival_time
-            FCFS_CentralizedPolicy.junction_to_vehicles[junction_id].append(vehicle)
+            type(self).junction_to_vehicles[junction_id].append(vehicle)
             if current_time >= reserved_time:
                 return VehicleState.CROSSING
             else:
@@ -105,7 +107,7 @@ class FCFS_CentralizedPolicy(Policy):
             if self.is_conflicting_same_lane(vehicle, other_vehicle):
                 return VehicleState.WAITING
 
-        if vehicle.get_distance_to_junction() <= FCFS_CentralizedPolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION and vehicle.currentState != VehicleState.CROSSING:
+        if vehicle.get_distance_to_junction() <= type(self).MIN_WAITING_DISTANCE_FROM_JUNCTION and vehicle.currentState != VehicleState.CROSSING:
             junction_id = vehicle.get_next_junction().getID()
             vehicles = copy.copy(conflicting_vehicles["same_junction"])
             vehicles.append(vehicle)
