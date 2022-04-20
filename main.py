@@ -134,7 +134,6 @@ Wait time per junction stats:
 def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1, entry_name:str=""):
     shutil.rmtree("temp", ignore_errors=True)
     temp_file_name = "tmp_" + str(round(time()))
-    road_network:ntwk.Network = get_network()
     route_steps = CONFIG["steps"]
     seed:int = get_random_seed()
     rng:random.Random = random.Random()
@@ -150,6 +149,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
             route_seed = rng.randint(0, 1000000000)
         else:
             route_seed = seed
+        road_network:ntwk.Network = get_network()
         path = road_network.generateFile(temp_file_name, route_seed=route_seed)
         if not has_gui or number_of_runs > 1:
             sumoBinary = sumolib.checkBinary("sumo")
