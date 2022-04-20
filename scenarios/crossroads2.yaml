@@ -7,22 +7,22 @@ network:
 
     - id              : north
       connections     : [center]
-      location        : [0, 100]
+      location        : [0, 150]
     
     - id              : south
       connections     : [center]
-      location        : [0, 0]
+      location        : [0, -50]
     
     - id              : east
       connections     : [center]
-      location        : [50, 50]
+      location        : [100, 50]
 
     - id              : west
       connections     :
         - toNode: center
           lanes: 1
           canUTurn: false
-      location        : [-50, 50]
+      location        : [-100, 50]
 
 routes:
   - path              : [north, center, south]
