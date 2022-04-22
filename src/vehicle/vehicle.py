@@ -38,10 +38,10 @@ class Vehicle:
 
         By default, the reward = -t, where t is the total time spent waiting throughout the simulation.
 
-        If the "reserved_time" parameter is passed in, t = reserved_time - current time in the simulation instead.
+        If the "reserved_time" parameter is passed in, t = reserved_time - current time + time spent waiting at the current junction instead.
         """
         if (reserved_time):
-            waiting_time = reserved_time - traci.simulation.getTime()
+            waiting_time = (reserved_time - traci.simulation.getTime()) + self.currentTimeSpentWaiting
         else:
             waiting_time = self.totalTimeSpentWaiting
         return -waiting_time

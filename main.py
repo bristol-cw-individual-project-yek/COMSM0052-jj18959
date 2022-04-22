@@ -101,6 +101,7 @@ def get_overview_string(metrics:dict, seeds:list) -> str:
     tw_max = total_wait_time_stats["max"]
     tw_skew = total_wait_time_stats["skew"]
     tw_kurtosis = total_wait_time_stats["kurtosis"]
+    tw_samples = total_wait_time_stats["samples"]
     total_wait_time_str = f"""
 Total wait time stats:
     Mean    :   {tw_mean}
@@ -109,6 +110,7 @@ Total wait time stats:
     Max     :   {tw_max} 
     Skew    :   {tw_skew}
     Kurtosis:   {tw_kurtosis}
+    Samples :   {tw_samples}
     """
     wait_time_per_junction_stats:dict = metrics["wait_time_metrics"]["wait-times-per-junction"]
     wt_mean = wait_time_per_junction_stats["mean"]
@@ -117,6 +119,7 @@ Total wait time stats:
     wt_max = wait_time_per_junction_stats["max"]
     wt_skew = wait_time_per_junction_stats["skew"]
     wt_kurtosis = wait_time_per_junction_stats["kurtosis"]
+    wt_samples = wait_time_per_junction_stats["samples"]
     wait_time_per_junction_str = f"""
 Wait time per junction stats:
     Mean    :   {wt_mean}
@@ -125,6 +128,7 @@ Wait time per junction stats:
     Max     :   {wt_max} 
     Skew    :   {wt_skew} 
     Kurtosis:   {wt_kurtosis} 
+    Samples :   {wt_samples}
     """
     result += seed_str + collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str
     result += "\n-------------------------------\n"
