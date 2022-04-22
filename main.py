@@ -150,11 +150,11 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
 
     for simulation_number in range(number_of_runs):
         if number_of_runs > 1:
-            route_seed = rng.randint(0, 1000000000)
+            run_seed = rng.randint(0, 1000000000)
         else:
-            route_seed = seed
+            run_seed = seed
         road_network:ntwk.Network = get_network()
-        path = road_network.generateFile(temp_file_name, route_seed=route_seed)
+        path = road_network.generateFile(temp_file_name, route_seed=run_seed)
         if not has_gui or number_of_runs > 1:
             sumoBinary = sumolib.checkBinary("sumo")
         else:
@@ -164,7 +164,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
 
         traci.start(sumoCmd)
 
-        shepherd = vehicle_shepherd.VehicleShepherd(road_network, seed=seed)
+        shepherd = vehicle_shepherd.VehicleShepherd(road_network, seed=run_seed)
         shepherd.add_vehicle_types(CONFIG["vehicle-types"])
         shepherd.add_vehicles(CONFIG["vehicle-groups"])
 
@@ -234,8 +234,8 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
         total_collisions += num_of_collisions
 
         all_metrics_list.append(metrics)
-        get_overview_string(metrics, seeds=route_seed)
-        used_seeds.append(route_seed)
+        get_overview_string(metrics, seeds=run_seed)
+        used_seeds.append(run_seed)
         if log_data:
             Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, entry_folder_name=folder_name, vehicle_metadata=vehicle_metadata, metrics=metrics, simulation_number=simulation_number)
     shutil.rmtree("temp")
