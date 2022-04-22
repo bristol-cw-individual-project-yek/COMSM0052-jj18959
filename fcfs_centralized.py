@@ -24,23 +24,29 @@ class FCFS_CentralizedPolicy(Policy):
         return False
 
 
-    def insert_into_queue(self, vehicle:Vehicle, junction_id:str) -> None:
-        queue:list = type(self).junction_to_queue[junction_id]
-        if not vehicle in queue:
-            index = len(queue) - 1
-            found:bool = False
-            while index >= 0 and not found:
-                other_veh:Vehicle = queue[index]
-                if self.can_swap(vehicle, other_veh):
-                    index -= 1
-                else:
-                    found = True
-            queue.insert(index + 1, vehicle)
+    def insert_into_queue(self, vehicle:Vehicle, junction_id:str, current_time:int) -> None:
+        reserved_time = self.get_initial_reserve_time(vehicle, junction_id, current_time)
+        arrival_time = self.get_arrival_time(reserved_time, vehicle)
+        type(self).reserved_times[vehicle] = reserved_time
+        type(self).arrival_times[vehicle] = arrival_time
+        index = len(type(self).junction_to_vehicles[junction_id]) - 1
+        position_found = False
+        while index >= 0 and not position_found:
+            other_vehicle:Vehicle = type(self).junction_to_vehicles[junction_id][index]
+            if (not self.can_swap(vehicle, other_vehicle)) or other_vehicle.currentState == VehicleState.CROSSING:
+                position_found = True
+            else:
+                reserved_time = type(self).reserved_times[other_vehicle]
+                type(self).reserved_times[vehicle] = reserved_time
+                arrival_time = self.get_arrival_time(reserved_time, vehicle)
+                type(self).arrival_times[vehicle] = arrival_time
+                index -= 1
+        index += 1
+        type(self).junction_to_vehicles[junction_id].insert(index, vehicle)
+        self.update_reserved_times(junction_id, index)
     
 
     def get_initial_reserve_time(self, vehicle:Vehicle, junction_id:str, current_time:float) -> float:
-        if not junction_id in type(self).junction_to_vehicles:
-            type(self).junction_to_vehicles[junction_id] = []
         result = current_time
         if len(type(self).junction_to_vehicles[junction_id]) == 0:
             return result
@@ -55,7 +61,7 @@ class FCFS_CentralizedPolicy(Policy):
         for junction_id in type(self).junction_to_vehicles:
             to_be_removed = []
             for v in type(self).junction_to_vehicles[junction_id]:
-                if (v.get_next_junction().getID() != junction_id or not v.isActive) and type(self).arrival_times[v] < current_time:
+                if (v.get_next_junction().getID() != junction_id or not v.isActive): #and type(self).arrival_times[v] < current_time:
                     to_be_removed.append(v)
             for v in to_be_removed:
                 type(self).junction_to_vehicles[junction_id].remove(v)
@@ -80,42 +86,23 @@ class FCFS_CentralizedPolicy(Policy):
 
 
     def request_state_at_junction(self, vehicle:Vehicle, vehicles:list, junction_id:str) -> VehicleState:
+        if not junction_id in type(self).junction_to_vehicles:
+            type(self).junction_to_vehicles[junction_id] = []
+        current_time = traci.simulation.getTime()
+        if vehicle not in type(self).reserved_times:
+            self.insert_into_queue(vehicle, junction_id, current_time)
+        reserved_time = type(self).reserved_times[vehicle]
+        if current_time >= reserved_time:
+            return VehicleState.CROSSING
+        else:
+            return VehicleState.WAITING  
+
+
+    def decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
         current_time = traci.simulation.getTime()
         if type(self).last_recorded_time != current_time:
             type(self).last_recorded_time = current_time
             self.update_junction_data(current_time)
-        if vehicle in type(self).reserved_times:
-            if type(self).reserved_times[vehicle] > current_time:
-                return VehicleState.WAITING
-            else:
-                return VehicleState.CROSSING
-        else:
-            reserved_time = self.get_initial_reserve_time(vehicle, junction_id, current_time)
-            arrival_time = self.get_arrival_time(reserved_time, vehicle)
-            type(self).reserved_times[vehicle] = reserved_time
-            type(self).arrival_times[vehicle] = arrival_time
-            index = len(type(self).junction_to_vehicles[junction_id]) - 1
-            position_found = False
-            while index >= 0 and not position_found:
-                other_vehicle:Vehicle = type(self).junction_to_vehicles[junction_id][index]
-                if (not self.can_swap(vehicle, other_vehicle)) or other_vehicle.currentState == VehicleState.CROSSING:
-                    position_found = True
-                else:
-                    reserved_time = type(self).reserved_times[other_vehicle]
-                    type(self).reserved_times[vehicle] = reserved_time
-                    arrival_time = self.get_arrival_time(reserved_time, vehicle)
-                    type(self).arrival_times[vehicle] = arrival_time
-                    index -= 1
-            index += 1
-            type(self).junction_to_vehicles[junction_id].insert(index, vehicle)
-            self.update_reserved_times(junction_id, index)
-            if current_time >= reserved_time:
-                return VehicleState.CROSSING
-            else:
-                return VehicleState.WAITING  
-
-
-    def decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
         for other_vehicle in conflicting_vehicles["same_lane"]:
             if self.is_conflicting_same_lane(vehicle, other_vehicle):
                 return VehicleState.WAITING
