@@ -194,8 +194,8 @@ class Network:
             network_file_name = output_file_name + ".net.xml"
             temp_network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
             if not self.network_file_path:
-                self.network_file_path = temp_network_file_path
-                self.generateNetwork(self.network_file_path)
+                #self.network_file_path = temp_network_file_path
+                self.generateNetwork(temp_network_file_path)
             else:
                 shutil.copy(os.path.abspath(self.network_file_path), temp_network_file_path)
             
@@ -236,7 +236,7 @@ class Network:
             if self.route_file_path:
                 shutil.copy(os.path.abspath(self.route_file_path), temp_route_file_path)
             else:
-                self.route_file_path = self.generateRandomRoutes(temp_network_file_path, dest=temp_route_file_path)
+                self.generateRandomRoutes(temp_network_file_path, dest=temp_route_file_path)
             self.prepare_route_file(temp_route_file_path)
             
         sumo_cfg_file_name = output_file_name + ".sumocfg"

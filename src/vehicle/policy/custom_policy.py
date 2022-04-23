@@ -3,7 +3,7 @@ import importlib, inspect
 
 class CustomPolicy(Policy):
     
-    def __init__(self, module_path:str):
+    def __init__(self, vehicle, module_path:str):
         new_path_arr = module_path.replace("/", ".").replace("\\", ".").split(".")
         if new_path_arr[-1] == "py":
             new_path_arr.pop(-1)
@@ -14,9 +14,9 @@ class CustomPolicy(Policy):
         self.module_path = module_path
 
         for name, obj in inspect.getmembers(self.module, inspect.isclass):
-            if issubclass(obj, Policy) and obj != Policy:
+            if issubclass(obj, Policy) and obj != Policy and not bool(obj.__subclasses__()):
                 self.name = name
-                self.policy : Policy = obj()
+                self.policy : Policy = obj(vehicle)
                 break
     
 

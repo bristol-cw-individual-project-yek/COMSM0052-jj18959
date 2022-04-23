@@ -14,11 +14,11 @@ class Vehicle:
         self.currentState:VehicleState = VehicleState.DRIVING
         self.vehicleId = vehicleId
         self.currentRoute = []
-        self.currentRouteIndex = -1
+        self.currentRouteIndex = 0
         self.currentPosition = (Infinity, Infinity)
         self.currentGridPosition = (Infinity, Infinity)
         self.conflictDetectionAlgorithm = ConflictDetection()
-        self.conflictResolutionPolicy = Policy()
+        self.conflictResolutionPolicy = Policy(self)
         self.nextJunction:sumolib.net.node.Node = None
         self.visibilityAngle = 60   # in degrees
         self.vehicleType = vehicleType
@@ -38,10 +38,10 @@ class Vehicle:
 
         By default, the reward = -t, where t is the total time spent waiting throughout the simulation.
 
-        If the "reserved_time" parameter is passed in, t = reserved_time - current time in the simulation instead.
+        If the "reserved_time" parameter is passed in, t = reserved_time - current time + time spent waiting at the current junction instead.
         """
         if (reserved_time):
-            waiting_time = reserved_time - traci.simulation.getTime()
+            waiting_time = (reserved_time - traci.simulation.getTime()) + self.currentTimeSpentWaiting
         else:
             waiting_time = self.totalTimeSpentWaiting
         return -waiting_time
@@ -131,7 +131,11 @@ class Vehicle:
         self.currentRouteIndex = traci.vehicle.getRouteIndex(self.vehicleId)
         if self.currentRouteIndex < 0:
             self.currentRouteIndex = 0
-        self.nextJunction = self.get_next_junction()
+        next_junction = self.get_next_junction()
+        if next_junction.getID() != self.nextJunction.getID():
+            self.pastWaitTimesAtJunctions.append(self.currentTimeSpentWaiting)
+            self.currentTimeSpentWaiting = 0
+        self.nextJunction = next_junction
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
         self.currentGridPosition = grid.position_to_grid_square(self.currentPosition)
         conflicting_vehicles = self.conflictDetectionAlgorithm.detect_other_vehicles(self, vehicles)
@@ -143,11 +147,8 @@ class Vehicle:
         self.actBasedOnState()
         if self.currentState == VehicleState.WAITING:
             self.totalTimeSpentWaiting += 1
-            self.currentTimeSpentWaiting += 1
-        else:
-            if self.currentState == VehicleState.CROSSING:
-                self.pastWaitTimesAtJunctions.append(self.currentTimeSpentWaiting)
-                self.currentTimeSpentWaiting = 0
+            if self.get_distance_to_junction() <= self.conflictResolutionPolicy.MIN_WAITING_DISTANCE_FROM_JUNCTION:
+                self.currentTimeSpentWaiting += 1
     
 
     def actBasedOnState(self):

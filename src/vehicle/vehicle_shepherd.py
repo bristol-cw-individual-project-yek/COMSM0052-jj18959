@@ -50,6 +50,7 @@ class VehicleShepherd:
 
     # TODO: Write test for this
     def add_vehicles(self, vehicleGroups:dict):
+        to_be_added = []
         for group in vehicleGroups:
             vehGroup = vehicleGroups[group]
             self.vehicleGroups[group] = {}
@@ -58,8 +59,6 @@ class VehicleShepherd:
                 vehicle:Vehicle = Vehicle(vId)
 
                 self.set_policy(vehicle, vehGroup)
-                routeId = self.network.get_random_route_id()
-                vehicle.add_to_route(routeId, self.network)
 
                 if "vehicle-type" in vehGroup:
                     try:
@@ -87,6 +86,13 @@ class VehicleShepherd:
                 
                 self.vehicles[vId] = vehicle
                 self.vehicleGroups[group][vId] = vehicle
+                to_be_added.append(vehicle)
+
+        while len(to_be_added) > 0:
+            routeId = self.network.get_random_route_id()
+            v = to_be_added[self.rng.randint(0, len(to_be_added) - 1)]
+            v.add_to_route(routeId, self.network)
+            to_be_added.remove(v)
     
 
     def has_active_vehicles(self):
@@ -151,11 +157,11 @@ class VehicleShepherd:
         policyType = vehGroup["policy-type"]
         if policyType == "custom":
             path = vehGroup["policy-path"]
-            policy = CustomPolicy(path)
+            policy = CustomPolicy(vehicle, path)
         elif policyType == "first-come-first-serve" or policyType == "fcfs":
-            policy = FirstComeFirstServePolicy()
+            policy = FirstComeFirstServePolicy(vehicle)
         elif policyType == "priority":
-            policy = PriorityPolicy()
+            policy = PriorityPolicy(vehicle)
         else:
-            policy = Policy()
+            policy = Policy(vehicle)
         vehicle.set_conflict_resolution_policy(policy)

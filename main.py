@@ -41,8 +41,9 @@ def get_random_seed():
         return 0
 
 
-def get_network():
-    seed = get_random_seed()
+def get_network(seed=None):
+    if not seed:
+        seed = get_random_seed()
     try:
         if CONFIG["network-type"] == "scenario":
             try:
@@ -101,6 +102,7 @@ def get_overview_string(metrics:dict, seeds:list) -> str:
     tw_max = total_wait_time_stats["max"]
     tw_skew = total_wait_time_stats["skew"]
     tw_kurtosis = total_wait_time_stats["kurtosis"]
+    tw_samples = total_wait_time_stats["samples"]
     total_wait_time_str = f"""
 Total wait time stats:
     Mean    :   {tw_mean}
@@ -109,6 +111,7 @@ Total wait time stats:
     Max     :   {tw_max} 
     Skew    :   {tw_skew}
     Kurtosis:   {tw_kurtosis}
+    Samples :   {tw_samples}
     """
     wait_time_per_junction_stats:dict = metrics["wait_time_metrics"]["wait-times-per-junction"]
     wt_mean = wait_time_per_junction_stats["mean"]
@@ -117,6 +120,7 @@ Total wait time stats:
     wt_max = wait_time_per_junction_stats["max"]
     wt_skew = wait_time_per_junction_stats["skew"]
     wt_kurtosis = wait_time_per_junction_stats["kurtosis"]
+    wt_samples = wait_time_per_junction_stats["samples"]
     wait_time_per_junction_str = f"""
 Wait time per junction stats:
     Mean    :   {wt_mean}
@@ -125,6 +129,7 @@ Wait time per junction stats:
     Max     :   {wt_max} 
     Skew    :   {wt_skew} 
     Kurtosis:   {wt_kurtosis} 
+    Samples :   {wt_samples}
     """
     result += seed_str + collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str
     result += "\n-------------------------------\n"
@@ -134,7 +139,6 @@ Wait time per junction stats:
 def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1, entry_name:str=""):
     shutil.rmtree("temp", ignore_errors=True)
     temp_file_name = "tmp_" + str(round(time()))
-    road_network:ntwk.Network = get_network()
     route_steps = CONFIG["steps"]
     seed:int = get_random_seed()
     rng:random.Random = random.Random()
@@ -147,10 +151,11 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
 
     for simulation_number in range(number_of_runs):
         if number_of_runs > 1:
-            route_seed = rng.randint(0, 1000000000)
+            run_seed = rng.randint(0, 1000000000)
         else:
-            route_seed = seed
-        path = road_network.generateFile(temp_file_name, route_seed=route_seed)
+            run_seed = seed
+        road_network:ntwk.Network = get_network(run_seed)
+        path = road_network.generateFile(temp_file_name, route_seed=run_seed)
         if not has_gui or number_of_runs > 1:
             sumoBinary = sumolib.checkBinary("sumo")
         else:
@@ -160,7 +165,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
 
         traci.start(sumoCmd)
 
-        shepherd = vehicle_shepherd.VehicleShepherd(road_network, seed=seed)
+        shepherd = vehicle_shepherd.VehicleShepherd(road_network, seed=run_seed)
         shepherd.add_vehicle_types(CONFIG["vehicle-types"])
         shepherd.add_vehicles(CONFIG["vehicle-groups"])
 
@@ -230,8 +235,8 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
         total_collisions += num_of_collisions
 
         all_metrics_list.append(metrics)
-        get_overview_string(metrics, seeds=route_seed)
-        used_seeds.append(route_seed)
+        get_overview_string(metrics, seeds=run_seed)
+        used_seeds.append(run_seed)
         if log_data:
             Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, entry_folder_name=folder_name, vehicle_metadata=vehicle_metadata, metrics=metrics, simulation_number=simulation_number)
     shutil.rmtree("temp")
