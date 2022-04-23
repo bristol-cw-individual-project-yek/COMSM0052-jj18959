@@ -41,8 +41,9 @@ def get_random_seed():
         return 0
 
 
-def get_network():
-    seed = get_random_seed()
+def get_network(seed=None):
+    if not seed:
+        seed = get_random_seed()
     try:
         if CONFIG["network-type"] == "scenario":
             try:
@@ -153,7 +154,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
             run_seed = rng.randint(0, 1000000000)
         else:
             run_seed = seed
-        road_network:ntwk.Network = get_network()
+        road_network:ntwk.Network = get_network(run_seed)
         path = road_network.generateFile(temp_file_name, route_seed=run_seed)
         if not has_gui or number_of_runs > 1:
             sumoBinary = sumolib.checkBinary("sumo")
