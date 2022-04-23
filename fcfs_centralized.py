@@ -71,7 +71,7 @@ class FCFS_CentralizedPolicy(Policy):
 
 
     def get_arrival_time(self, reserved_time, vehicle):
-        return reserved_time + (vehicle.get_time_to_cross_next_junction() * 1.2)
+        return reserved_time + (vehicle.get_time_to_cross_next_junction())
 
 
     def update_reserved_times(self, junction_id:str, index):
