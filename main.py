@@ -15,6 +15,7 @@ from traci._simulation import Collision
 import src.maps.map_builder as map_builder
 from src.maps.bounding_box import BoundingBox
 from src.stats.metric_calculator import MetricCalculator
+import src.arbiter.arbiter as arbiter
 
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
@@ -168,6 +169,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
         shepherd = vehicle_shepherd.VehicleShepherd(road_network, seed=run_seed)
         shepherd.add_vehicle_types(CONFIG["vehicle-types"])
         shepherd.add_vehicles(CONFIG["vehicle-groups"])
+        shepherd.add_arbiters(CONFIG["arbiters"])
 
         vehicle_metadata = shepherd.get_vehicle_metadata()
         
@@ -178,10 +180,10 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
 
         # Perform at least one step in the simulation
         step = 1
-        data[step] = shepherd.update_vehicles()
+        data[step] = shepherd.update()
         traci.simulationStep()
         while step < route_steps and shepherd.has_active_vehicles():
-            data[step] = shepherd.update_vehicles()
+            data[step] = shepherd.update()
             traci.simulationStep()
 
             # Collect data on any collisions that are happening
@@ -227,6 +229,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
             step += 1
         
         traci.close()
+        arbiter.ArbiterManager.reset()
 
         metrics = {
             "wait_time_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),

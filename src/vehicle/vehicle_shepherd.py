@@ -1,3 +1,4 @@
+from tempfile import TemporaryFile
 import traceback
 from src.vehicle.vehicle import Vehicle
 from src.vehicle.policy.custom_policy import CustomPolicy
@@ -7,6 +8,8 @@ from src.vehicle.policy.priority_policy import PriorityPolicy
 import random
 import traci
 from src.network.network import Network
+import src.arbiter.arbiter as arbiter
+import src.arbiter.arbiter_fcfs_policy as arbiter_fcfs
 
 class VehicleShepherd:
 
@@ -17,6 +20,24 @@ class VehicleShepherd:
         self.network:Network = network
         self.seed = seed
         self.rng:random.Random = random.Random(self.seed)
+    
+
+    def set_global_arbiter_type(self, t:type):
+        for j_id in self.network.junction_ids:
+            policy = t(j_id)
+            arb:arbiter.Arbiter = arbiter.Arbiter(policy)
+            arbiter.ArbiterManager.assign_arbiter_to_junction(j_id, arb)
+
+
+    def add_arbiters(self, arbiters:dict):
+        # Add global arbiter type
+        try:
+            global_arbiter:str = arbiters["global"]
+            arb_type = global_arbiter["type"]
+            if arb_type == "fcfs":
+                self.set_global_arbiter_type(arbiter_fcfs.ArbiterFCFSPolicy)
+        except KeyError:
+            raise
     
 
     def add_vehicle_types(self, vehicleTypes:dict):
@@ -102,7 +123,8 @@ class VehicleShepherd:
         return result
 
 
-    def update_vehicles(self):
+    def update(self):
+        arbiter.ArbiterManager.update()
         vehicle_data = {}
 
         vehicles_to_be_updated = []

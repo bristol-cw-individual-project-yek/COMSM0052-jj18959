@@ -26,6 +26,7 @@ class Network:
         self.route_probability_thresholds:list = []
         self.total_route_probability_weights:float = 0.0
         self.rng:random.Random = random.Random(seed)
+        self.junction_ids:list = []
 
 
     def get_random_route_id(self) -> str:
@@ -220,6 +221,10 @@ class Network:
                 self.connection_data[connection_id]["internal"] = con.attrib["via"]
             except:
                 pass
+        junctions = root.findall("junction")
+        for junc in junctions:
+            junction_id = junc.attrib["id"]
+            self.junction_ids.append(junction_id)
         
         has_routes = False
         if self.scenario_file_path:

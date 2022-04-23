@@ -38,5 +38,10 @@ class ArbiterManager:
             raise
     
 
+    def update():
+        for j_id in ArbiterManager.__junction_to_arbiter:
+            ArbiterManager.__junction_to_arbiter[j_id].policy.on_time_updated()
+
+
     def reset():
         ArbiterManager.__junction_to_arbiter.clear()

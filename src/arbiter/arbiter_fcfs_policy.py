@@ -1,4 +1,4 @@
-from arbiter.arbiter import ArbiterPolicy
+from src.arbiter.arbiter import ArbiterPolicy
 from src.vehicle.vehicle_state import VehicleState
 import traci
 
@@ -19,6 +19,25 @@ class ArbiterFCFSPolicy(ArbiterPolicy):
             self.reserved_times[this_vehicle] = self.arrival_times[last_vehicle]
             self.arrival_times[this_vehicle] = self.get_arrival_time(self.reserved_times[this_vehicle], this_vehicle)
             index += 1
+
+
+    def can_swap(self, vehicle, other_vehicle) -> bool:
+        return False
+
+
+    def get_initial_reserve_time(self, vehicle, current_time:float) -> float:
+        result = current_time
+        if len(self.queue) == 0:
+            return result
+        else:
+            for other_vehicle in self.queue:
+                if other_vehicle.get_next_junction().getID() == self.junction_id and other_vehicle.isActive:
+                    result = max(result, self.arrival_times[other_vehicle])
+            return result
+    
+
+    def get_arrival_time(self, reserved_time, vehicle):
+        return reserved_time + (vehicle.get_time_to_cross_next_junction())
 
 
     def insert_into_queue(self, vehicle, current_time:int) -> None:
@@ -44,6 +63,7 @@ class ArbiterFCFSPolicy(ArbiterPolicy):
 
 
     def receive_message(self, vehicle):
+        print("Arbiter received message")
         current_time = traci.simulation.getTime()
         if vehicle not in self.reserved_times:
             self.insert_into_queue(vehicle, current_time)
@@ -56,13 +76,14 @@ class ArbiterFCFSPolicy(ArbiterPolicy):
 
     def on_time_updated(self):
         self.update_junction_data()
+        super().on_time_updated()
     
 
     def update_junction_data(self):
         current_time = traci.simulation.getCurrentTime()
         to_be_removed = []
         for v in self.arrival_times:
-            if (v.get_next_junction().getID() != self.junction_id or not v.isActive) and type(self).arrival_times[v] < current_time:
+            if (v.get_next_junction().getID() != self.junction_id or not v.isActive) and self.arrival_times[v] < current_time:
                 to_be_removed.append(v)
         for v in to_be_removed:
             self.reserved_times.pop(v)
