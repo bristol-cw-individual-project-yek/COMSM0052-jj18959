@@ -1,8 +1,9 @@
 from src.vehicle.vehicle_state import VehicleState
 from enum import Enum
 import src.vehicle.policy.utils as utils
+from src.arbiter.arbiter import ArbiterManager
 
-# TODO: Move all this communication stuff to new file
+# TODO: Move all this communication stuff to new file?
 class VehicleMessage():
     def __init__(self, senderID:str) -> None:
         self.senderID:str = senderID
@@ -88,30 +89,39 @@ class Policy:
         if type(message) == ConfirmMessage or type(message) == DenyMessage:
             self.message_buffer.append(message)
 
-    
-    def decide_state(self, vehicle, conflicting_vehicles:dict):
+
+    def handle_state_at_junction(self, conflicting_vehicles:dict):
+        junction_id = self.vehicle.nextJunction.getID()
         must_wait_at_junction = False
         while len(self.message_buffer) > 0:
             message:VehicleMessage = self.message_buffer.pop(0)
-            if type(message) == ReserveJunctionMessage and message.junctionID == vehicle.nextJunction.getID():
+            if type(message) == ReserveJunctionMessage and message.junctionID == self.vehicle.nextJunction.getID():
                 must_wait_at_junction = True
+        if self.vehicle.get_distance_to_junction() <= type(self).MIN_WAITING_DISTANCE_FROM_JUNCTION:
+            if ArbiterManager.has_arbiter(junction_id):
+                return ArbiterManager.send_message_to_arbiter(junction_id, self.vehicle)
+            else:
+                if must_wait_at_junction:
+                    return VehicleState.WAITING 
+                for other_vehicle in conflicting_vehicles["same_junction"]:
+                    if self.is_conflicting_same_junction(self.vehicle, other_vehicle):
+                        return VehicleState.WAITING
+            return VehicleState.CROSSING
+        return VehicleState.DRIVING
+
+    
+    def decide_state(self, vehicle, conflicting_vehicles:dict):
 
         for other_vehicle in conflicting_vehicles["same_lane"]:
             if self.is_conflicting_same_lane(vehicle, other_vehicle):
                 return VehicleState.WAITING
 
-        if vehicle.get_distance_to_junction() <= type(self).MIN_WAITING_DISTANCE_FROM_JUNCTION:
-            if must_wait_at_junction:
-                return VehicleState.WAITING 
-            for other_vehicle in conflicting_vehicles["same_junction"]:
-                if self.is_conflicting_same_junction(vehicle, other_vehicle):
-                    return VehicleState.WAITING
-        
         for other_vehicle in conflicting_vehicles["visible"]:
             if self.is_conflicting_visible(vehicle, other_vehicle):
                 return VehicleState.WAITING
 
-        state = self.decide_state_no_conflicts(vehicle)
+        #state = self.decide_state_no_conflicts(vehicle)
+        state = self.handle_state_at_junction(conflicting_vehicles)
         no_conflicts = self.confirm_no_conflicts(vehicle, state, conflicting_vehicles)
 
         if no_conflicts:

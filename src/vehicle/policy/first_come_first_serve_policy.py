@@ -77,9 +77,9 @@ class FirstComeFirstServePolicy(policy.Policy):
                 message:policy.VehicleMessage = self.message_buffer.pop(0)
                 if type(message) == policy.DenyMessage:
                     return False
+        self.vehicles_ahead_of_queue = {}
         return True
 
 
     def decide_state_no_conflicts(self, vehicle) -> VehicleState:
-        self.vehicles_ahead_of_queue = {}
         return super().decide_state_no_conflicts(vehicle)
