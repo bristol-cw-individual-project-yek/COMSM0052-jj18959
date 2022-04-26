@@ -2,6 +2,17 @@ import os
 import json
 from datetime import datetime
 import src.network.network as ntwk
+import matplotlib.pyplot as plt
+
+
+def plot_distribution(distribution:list, x_label:str, y_label:str, min:int, max:int, destination:str):
+    plt.clf()
+    num_of_bins = (max - min) // 5
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.hist(distribution, bins=num_of_bins)
+    plt.savefig(destination)
+
 
 class Logger:
     LOG_DIRECTORY_NAME:str = "logs"
@@ -28,10 +39,15 @@ class Logger:
         return entry_folder_name
     
 
-    def log_overview(overview_data:str, entry_folder_name:str):
+    def log_overview(metrics_entire_set:dict, used_seeds:list, entry_folder_name:str):
+        overview_str = Logger.get_overview_string(metrics_entire_set, str(used_seeds))
         with open(Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/overview.txt", "w") as f:
-            f.write(overview_data)
+            f.write(overview_str)
             f.close()
+        total_wait_times_path = Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/total_wait_times.png"
+        junction_wait_times_path = Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/junction_wait_times.png"
+        plot_distribution(metrics_entire_set["wait_time_metrics"]["total-wait-time"]["samples"], "Total wait time (turns)", "Number of vehicles", 0, metrics_entire_set["wait_time_metrics"]["total-wait-time"]["max"], total_wait_times_path)
+        plot_distribution(metrics_entire_set["wait_time_metrics"]["wait-times-per-junction"]["samples"],"Junction wait time (turns)", "Number of vehicles", 0, metrics_entire_set["wait_time_metrics"]["wait-times-per-junction"]["max"], junction_wait_times_path)
 
 
     def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.Network, collision_data:dict, entry_folder_name:str, vehicle_metadata:dict={}, metrics:dict={}, simulation_number:int=0) -> None:
@@ -84,3 +100,48 @@ class Logger:
             with open(log_directory_name + "/" + entry_folder_name + "/" + groupId + "/" + new_file_name, "w") as copy_file:
                 copy_file.write(contents)
                 copy_file.close()
+    
+
+    def get_overview_string(metrics:dict, seeds:list) -> str:
+        result = "\n------------RESULTS------------\n"
+        seed_str = f"Seeds used: {str(seeds)}\n\n"
+        collision_str = "Number of collisions: " + str(metrics["num_of_collisions"])
+        total_wait_time_stats:dict = metrics["wait_time_metrics"]["total-wait-time"]
+        tw_mean = total_wait_time_stats["mean"]
+        tw_median = total_wait_time_stats["median"]
+        tw_min = total_wait_time_stats["min"]
+        tw_max = total_wait_time_stats["max"]
+        tw_skew = total_wait_time_stats["skew"]
+        tw_kurtosis = total_wait_time_stats["kurtosis"]
+        tw_samples = total_wait_time_stats["samples"]
+        total_wait_time_str = f"""
+Total wait time stats:
+    Mean    :   {tw_mean}
+    Median  :   {tw_median} 
+    Min     :   {tw_min} 
+    Max     :   {tw_max} 
+    Skew    :   {tw_skew}
+    Kurtosis:   {tw_kurtosis}
+    Samples :   {tw_samples}
+    """
+        wait_time_per_junction_stats:dict = metrics["wait_time_metrics"]["wait-times-per-junction"]
+        wt_mean = wait_time_per_junction_stats["mean"]
+        wt_median = wait_time_per_junction_stats["median"]
+        wt_min = wait_time_per_junction_stats["min"]
+        wt_max = wait_time_per_junction_stats["max"]
+        wt_skew = wait_time_per_junction_stats["skew"]
+        wt_kurtosis = wait_time_per_junction_stats["kurtosis"]
+        wt_samples = wait_time_per_junction_stats["samples"]
+        wait_time_per_junction_str = f"""
+Wait time per junction stats:
+    Mean    :   {wt_mean}
+    Median  :   {wt_median} 
+    Min     :   {wt_min} 
+    Max     :   {wt_max} 
+    Skew    :   {wt_skew} 
+    Kurtosis:   {wt_kurtosis} 
+    Samples :   {wt_samples}
+    """
+        result += seed_str + collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str
+        result += "\n-------------------------------\n"
+        return result
