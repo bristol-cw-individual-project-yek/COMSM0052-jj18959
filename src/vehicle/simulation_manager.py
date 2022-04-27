@@ -11,7 +11,7 @@ from src.network.network import Network
 import src.arbiter.arbiter as arbiter
 import src.arbiter.arbiter_fcfs_policy as arbiter_fcfs
 
-class VehicleShepherd:
+class SimulationManager:
 
     def __init__(self, network:Network, seed:int):
         self.vehicles:dict = {}

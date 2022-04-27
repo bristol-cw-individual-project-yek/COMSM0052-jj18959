@@ -8,7 +8,7 @@ import src.network.grid_network as grid
 import src.network.spider_network as spider
 import traci
 import sumolib
-from src.vehicle import vehicle_shepherd
+from src.vehicle import simulation_manager
 import yaml
 from src.logger.logger import Logger
 from traci._simulation import Collision
@@ -166,10 +166,11 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
 
         traci.start(sumoCmd)
 
-        shepherd = vehicle_shepherd.VehicleShepherd(road_network, seed=run_seed)
+        shepherd = simulation_manager.SimulationManager(road_network, seed=run_seed)
         shepherd.add_vehicle_types(CONFIG["vehicle-types"])
         shepherd.add_vehicles(CONFIG["vehicle-groups"])
-        shepherd.add_arbiters(CONFIG["arbiters"])
+        if "arbiters" in CONFIG:
+            shepherd.add_arbiters(CONFIG["arbiters"])
 
         vehicle_metadata = shepherd.get_vehicle_metadata()
         
