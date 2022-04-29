@@ -144,7 +144,8 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
     seed:int = get_random_seed()
     rng:random.Random = random.Random()
     rng.seed(seed)
-    folder_name:str = Logger.create_data_folder(entry_name)
+    if log_data:
+        folder_name:str = Logger.create_data_folder(entry_name)
     used_seeds:list = []
 
     all_metrics_list = []
@@ -230,7 +231,6 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
             step += 1
         
         traci.close()
-        arbiter.ArbiterManager.reset()
 
         metrics = {
             "wait_time_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),

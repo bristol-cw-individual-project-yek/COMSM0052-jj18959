@@ -1,7 +1,6 @@
 from src.vehicle.vehicle_state import VehicleState
 from enum import Enum
 import src.vehicle.policy.utils as utils
-from src.arbiter.arbiter import ArbiterManager
 
 # TODO: Move all this communication stuff to new file?
 class VehicleMessage():
@@ -38,15 +37,29 @@ class ResponseMessage(VehicleMessage):
 
 
 class SharedNetwork():
-    id_to_policy:dict = {}
+    vehicle_id_to_policy:dict = {}
+    arbiter_id_to_policy:dict = {}
 
-    def send_message(recipient_id:str, message:VehicleMessage):
+    def send_message_to_vehicle(recipient_id:str, message:VehicleMessage):
         try:
-            recipient_policy = SharedNetwork.id_to_policy[recipient_id]
+            recipient_policy = SharedNetwork.vehicle_id_to_policy[recipient_id]
             recipient_policy.receive_message_from_vehicle(message)
         except KeyError:
             print(f"Failed to send message to {recipient_id}")
             raise
+    
+    def send_message_to_arbiter(junction_id:str, vehicle):
+        try:
+            arbiter_policy = SharedNetwork.arbiter_id_to_policy[junction_id]
+            return arbiter_policy.receive_message(vehicle)
+        except KeyError:
+            print(f"Failed to send message to {junction_id}")
+            raise
+    
+
+    def has_arbiter(junction_id:str):
+        return junction_id in SharedNetwork.arbiter_id_to_policy
+
 
 
 class Policy:
@@ -65,7 +78,7 @@ class Policy:
     def __init__(self, vehicle):
         self.vehicle = vehicle
         self.message_buffer:list = []
-        SharedNetwork.id_to_policy[vehicle.vehicleId] = self
+        SharedNetwork.vehicle_id_to_policy[vehicle.vehicleId] = self
 
 
     def process_query_data(self, query_data):
@@ -79,11 +92,11 @@ class Policy:
             else:
                 confirm_or_deny = ConfirmMessage(self.vehicle.vehicleId)
                 self.message_buffer.append(message)
-            SharedNetwork.send_message(message.senderID, confirm_or_deny)
+            SharedNetwork.send_message_to_vehicle(message.senderID, confirm_or_deny)
         if type(message) == QueryMessage:
             data = message.data
             response = ResponseMessage(self.vehicle.vehicleId, self.process_query_data(data))
-            SharedNetwork.send_message(message.senderID, response)
+            SharedNetwork.send_message_to_vehicle(message.senderID, response)
         if type(message) == ResponseMessage:
             self.message_buffer.append(message)
         if type(message) == ConfirmMessage or type(message) == DenyMessage:
@@ -98,22 +111,19 @@ class Policy:
             if type(message) == ReserveJunctionMessage and message.junctionID == self.vehicle.nextJunction.getID():
                 must_wait_at_junction = True
         if self.vehicle.get_distance_to_junction() <= type(self).MIN_WAITING_DISTANCE_FROM_JUNCTION:
-            if ArbiterManager.has_arbiter(junction_id):
-                return ArbiterManager.send_message_to_arbiter(junction_id, self.vehicle)
-            else:
-                if must_wait_at_junction:
-                    return VehicleState.WAITING 
-                for other_vehicle in conflicting_vehicles["same_junction"]:
-                    if self.is_conflicting_same_junction(self.vehicle, other_vehicle):
-                        return VehicleState.WAITING
+            if must_wait_at_junction:
+                return VehicleState.WAITING 
+            for other_vehicle in conflicting_vehicles["same_junction"]:
+                if self.is_conflicting_same_junction(self.vehicle, other_vehicle):
+                    return VehicleState.WAITING
             return VehicleState.CROSSING
         return VehicleState.DRIVING
     
 
     def decide_state(self, conflicting_vehicles:dict):
         junction_id = self.vehicle.nextJunction.getID()
-        if self.vehicle.get_distance_to_junction() <= type(self).MIN_WAITING_DISTANCE_FROM_JUNCTION and ArbiterManager.has_arbiter(junction_id):
-            return ArbiterManager.send_message_to_arbiter(junction_id, self.vehicle)
+        if self.vehicle.get_distance_to_junction() <= type(self).MIN_WAITING_DISTANCE_FROM_JUNCTION and SharedNetwork.has_arbiter(junction_id):
+            return SharedNetwork.send_message_to_arbiter(junction_id, self.vehicle)
         else:
             return self._decide_state(self.vehicle, conflicting_vehicles)
 

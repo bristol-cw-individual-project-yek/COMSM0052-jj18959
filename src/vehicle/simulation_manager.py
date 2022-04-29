@@ -15,6 +15,7 @@ class SimulationManager:
 
     def __init__(self, network:Network, seed:int):
         self.vehicles:dict = {}
+        self.arbiter_manager:arbiter.ArbiterManager = arbiter.ArbiterManager()
         self.vehicleTypes:dict = {}
         self.vehicleGroups:dict = {}
         self.network:Network = network
@@ -26,7 +27,7 @@ class SimulationManager:
         for j_id in self.network.junction_ids:
             policy = t(j_id)
             arb:arbiter.Arbiter = arbiter.Arbiter(policy)
-            arbiter.ArbiterManager.assign_arbiter_to_junction(j_id, arb)
+            self.arbiter_manager.assign_arbiter_to_junction(j_id, arb)
 
 
     def add_arbiters(self, arbiters:dict):
@@ -124,7 +125,7 @@ class SimulationManager:
 
 
     def update(self):
-        arbiter.ArbiterManager.update()
+        self.arbiter_manager.update()
         vehicle_data = {}
 
         vehicles_to_be_updated = []
