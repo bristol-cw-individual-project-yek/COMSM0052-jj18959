@@ -9,7 +9,7 @@ from xml.dom import minidom
 import randomTrips
 import sumolib
 
-class Network:
+class RoadNetwork:
 
     TEMP_FILE_DIRECTORY:str = "temp"
 
@@ -118,13 +118,13 @@ class Network:
             node_elem = ET.Element("node", node_attrib)
             node_root.append(node_elem)
         
-        edge_file_name = Network.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".edg.xml"
+        edge_file_name = RoadNetwork.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".edg.xml"
         edge_elem_tree.write(edge_file_name)
 
-        node_file_name = Network.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".nod.xml"
+        node_file_name = RoadNetwork.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".nod.xml"
         node_elem_tree.write(node_file_name)
 
-        network_output_file_path = Network.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".net.xml"
+        network_output_file_path = RoadNetwork.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".net.xml"
         os.system(f"netconvert --node-files={node_file_name} --edge-files={edge_file_name} --output-file={network_output_file_path} --lefthand=true")
         return network_output_file_path
 
@@ -163,7 +163,7 @@ class Network:
             self.total_route_probability_weights += weight
             route_num += 1
         print(self.route_probability_thresholds)
-        route_output_file_path = Network.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".rou.xml"
+        route_output_file_path = RoadNetwork.TEMP_FILE_DIRECTORY + "\\" + output_file_name + ".rou.xml"
         route_elem_tree.write(route_output_file_path)
         
         return route_output_file_path
@@ -185,15 +185,15 @@ class Network:
 
 
     def generateFile(self, output_file_name:str, route_seed:int=None):
-        if not os.path.exists(Network.TEMP_FILE_DIRECTORY):
-            os.makedirs(Network.TEMP_FILE_DIRECTORY)
+        if not os.path.exists(RoadNetwork.TEMP_FILE_DIRECTORY):
+            os.makedirs(RoadNetwork.TEMP_FILE_DIRECTORY)
         
         if self.scenario_file_path:
             temp_network_file_path = self.create_network_from_yaml(output_file_name, self.scenario_file_path)
             network_file_name = os.path.basename(temp_network_file_path)
         else:
             network_file_name = output_file_name + ".net.xml"
-            temp_network_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, network_file_name)
+            temp_network_file_path = os.path.join(RoadNetwork.TEMP_FILE_DIRECTORY, network_file_name)
             if not self.network_file_path:
                 #self.network_file_path = temp_network_file_path
                 self.generateNetwork(temp_network_file_path)
@@ -237,7 +237,7 @@ class Network:
                 pass
         if not has_routes:
             route_file_name = output_file_name + ".rou.xml"
-            temp_route_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, route_file_name)
+            temp_route_file_path = os.path.join(RoadNetwork.TEMP_FILE_DIRECTORY, route_file_name)
             if self.route_file_path:
                 shutil.copy(os.path.abspath(self.route_file_path), temp_route_file_path)
             else:
@@ -252,7 +252,7 @@ class Network:
         sumo_network_elem.set("value",network_file_name)
         sumo_route_elem = ET.SubElement(sumo_input, "route-files")
         sumo_route_elem.set("value", route_file_name)
-        sumo_path = os.path.join(Network.TEMP_FILE_DIRECTORY, sumo_cfg_file_name)
+        sumo_path = os.path.join(RoadNetwork.TEMP_FILE_DIRECTORY, sumo_cfg_file_name)
         sumo_tree.write(sumo_path, encoding="utf-8")
 
         print(sumo_path)
@@ -273,7 +273,7 @@ class Network:
         if dest:
             route_file_path = dest
         else:
-            route_file_path = os.path.join(Network.TEMP_FILE_DIRECTORY, os.path.basename(network_file_path.replace(".net", ".rou")))
+            route_file_path = os.path.join(RoadNetwork.TEMP_FILE_DIRECTORY, os.path.basename(network_file_path.replace(".net", ".rou")))
         routes_cmd = "duarouter -n=" + network_file_path + " -r=" + trip_file_path + " -o=" + route_file_path + " --named-routes=true --route-steps=" + str(route_steps)
         os.system(routes_cmd)
 

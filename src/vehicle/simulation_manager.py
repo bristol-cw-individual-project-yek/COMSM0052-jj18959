@@ -7,24 +7,24 @@ from src.vehicle.policy.first_come_first_serve_policy import FirstComeFirstServe
 from src.vehicle.policy.priority_policy import PriorityPolicy
 import random
 import traci
-from src.network.network import Network
+from src.road_network.road_network import RoadNetwork
 import src.arbiter.arbiter as arbiter
 import src.arbiter.arbiter_fcfs_policy as arbiter_fcfs
 
 class SimulationManager:
 
-    def __init__(self, network:Network, seed:int):
+    def __init__(self, network:RoadNetwork, seed:int):
         self.vehicles:dict = {}
         self.arbiter_manager:arbiter.ArbiterManager = arbiter.ArbiterManager()
         self.vehicleTypes:dict = {}
         self.vehicleGroups:dict = {}
-        self.network:Network = network
+        self.road_network:RoadNetwork = network
         self.seed = seed
         self.rng:random.Random = random.Random(self.seed)
     
 
     def set_global_arbiter_type(self, t:type):
-        for j_id in self.network.junction_ids:
+        for j_id in self.road_network.junction_ids:
             policy = t(j_id)
             arb:arbiter.Arbiter = arbiter.Arbiter(policy)
             self.arbiter_manager.assign_arbiter_to_junction(j_id, arb)
@@ -111,9 +111,9 @@ class SimulationManager:
                 to_be_added.append(vehicle)
 
         while len(to_be_added) > 0:
-            routeId = self.network.get_random_route_id()
+            routeId = self.road_network.get_random_route_id()
             v = to_be_added[self.rng.randint(0, len(to_be_added) - 1)]
-            v.add_to_route(routeId, self.network)
+            v.add_to_route(routeId, self.road_network)
             to_be_added.remove(v)
     
 

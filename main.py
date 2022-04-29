@@ -3,9 +3,9 @@ import random
 import shutil
 from time import time
 import dotenv
-import src.network.network as ntwk
-import src.network.grid_network as grid
-import src.network.spider_network as spider
+import src.road_network.road_network as ntwk
+import src.road_network.grid_network as grid
+import src.road_network.spider_network as spider
 import traci
 import sumolib
 from src.vehicle import simulation_manager
@@ -53,7 +53,7 @@ def get_network(seed=None):
                     scenario_name += ".yaml"
             except KeyError:
                 raise
-            network = ntwk.Network({}, seed=seed, scenario_file_path=SCENARIO_FOLDER_PATH + "\\" + scenario_name)
+            network = ntwk.RoadNetwork({}, seed=seed, scenario_file_path=SCENARIO_FOLDER_PATH + "\\" + scenario_name)
         elif CONFIG["network-type"] == "local":
             try:
                 network_file_path = CONFIG["network-file-path"]
@@ -61,9 +61,9 @@ def get_network(seed=None):
                 raise
             try:
                 route_file_path = CONFIG["route-file-path"]
-                network = ntwk.Network({}, seed=seed, network_file_path=network_file_path, route_file_path=route_file_path)
+                network = ntwk.RoadNetwork({}, seed=seed, network_file_path=network_file_path, route_file_path=route_file_path)
             except KeyError:
-                network = ntwk.Network({}, seed=seed, network_file_path=network_file_path)
+                network = ntwk.RoadNetwork({}, seed=seed, network_file_path=network_file_path)
         elif CONFIG["network-type"] == "osm":
             osm_settings = CONFIG["osm-area-settings"]
             origin_lat = osm_settings["origin-latitude"]
@@ -73,13 +73,13 @@ def get_network(seed=None):
             bbox:BoundingBox = BoundingBox.from_origin(origin_lat=origin_lat, origin_long=origin_long, width=width, height=height)
 
             # TODO: Decouple this, as well as the one in network/network.py
-            if not os.path.exists(ntwk.Network.TEMP_FILE_DIRECTORY):
-                os.makedirs(ntwk.Network.TEMP_FILE_DIRECTORY)
-            osm_path = map_builder.get_osm_area(bbox, f"{ntwk.Network.TEMP_FILE_DIRECTORY}/results")
+            if not os.path.exists(ntwk.RoadNetwork.TEMP_FILE_DIRECTORY):
+                os.makedirs(ntwk.RoadNetwork.TEMP_FILE_DIRECTORY)
+            osm_path = map_builder.get_osm_area(bbox, f"{ntwk.RoadNetwork.TEMP_FILE_DIRECTORY}/results")
             file_path = map_builder.build_map_from_osm(osm_path)
-            network = ntwk.Network({}, seed=seed, network_file_path=file_path)
+            network = ntwk.RoadNetwork({}, seed=seed, network_file_path=file_path)
         elif CONFIG["network-type"] == "random":
-            network = ntwk.Network(CONFIG["random-settings"], seed=seed)
+            network = ntwk.RoadNetwork(CONFIG["random-settings"], seed=seed)
         elif CONFIG["network-type"] == "grid":
             network = grid.GridNetwork(CONFIG["grid-settings"], seed=seed)
         elif CONFIG["network-type"] == "spider":
@@ -156,7 +156,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
             run_seed = rng.randint(0, 1000000000)
         else:
             run_seed = seed
-        road_network:ntwk.Network = get_network(run_seed)
+        road_network:ntwk.RoadNetwork = get_network(run_seed)
         path = road_network.generateFile(temp_file_name, route_seed=run_seed)
         if not has_gui or number_of_runs > 1:
             sumoBinary = sumolib.checkBinary("sumo")
