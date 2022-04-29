@@ -1,7 +1,7 @@
-from src.vehicle.policy.policy import Policy
+from src.vehicle.policy.policy import VehiclePolicy
 import importlib, inspect
 
-class CustomPolicy(Policy):
+class CustomPolicy(VehiclePolicy):
     
     def __init__(self, vehicle, module_path:str):
         super().__init__(vehicle)
@@ -15,9 +15,9 @@ class CustomPolicy(Policy):
         self.module_path = module_path
 
         for name, obj in inspect.getmembers(self.module, inspect.isclass):
-            if issubclass(obj, Policy) and obj != Policy and not bool(obj.__subclasses__()):
+            if issubclass(obj, VehiclePolicy) and obj != VehiclePolicy and not bool(obj.__subclasses__()):
                 self.name = name
-                self.policy : Policy = obj(vehicle)
+                self.policy : VehiclePolicy = obj(vehicle)
                 break
     
 

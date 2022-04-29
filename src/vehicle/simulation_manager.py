@@ -2,7 +2,7 @@ from tempfile import TemporaryFile
 import traceback
 from src.vehicle.vehicle import Vehicle
 from src.vehicle.policy.custom_policy import CustomPolicy
-from src.vehicle.policy.policy import Policy
+from src.vehicle.policy.policy import VehiclePolicy
 from src.vehicle.policy.first_come_first_serve_policy import FirstComeFirstServePolicy
 from src.vehicle.policy.priority_policy import PriorityPolicy
 import random
@@ -186,5 +186,5 @@ class SimulationManager:
         elif policyType == "priority":
             policy = PriorityPolicy(vehicle)
         else:
-            policy = Policy(vehicle)
+            policy = VehiclePolicy(vehicle)
         vehicle.set_conflict_resolution_policy(policy)

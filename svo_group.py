@@ -1,10 +1,10 @@
-from src.vehicle.policy.policy import Policy
+from src.vehicle.policy.policy import VehiclePolicy
 from src.vehicle.vehicle import Vehicle
 from src.vehicle.vehicle_state import VehicleState
 import copy
 import src.vehicle.policy.utils as utils
 
-class SVOGroupPolicy(Policy):
+class SVOGroupPolicy(VehiclePolicy):
 
     def _decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
         for other_vehicle in conflicting_vehicles["same_lane"]:

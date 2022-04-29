@@ -2,7 +2,7 @@ import src.vehicle.policy.policy as policy
 from src.vehicle.vehicle_state import VehicleState
 import src.vehicle.policy.utils as utils
 
-class FirstComeFirstServePolicy(policy.Policy):
+class FirstComeFirstServePolicy(policy.VehiclePolicy):
 
     def __init__(self, vehicle) -> None:
         self.vehicles_ahead_of_queue:dict = {}     # Queue containing other vehicles that go first

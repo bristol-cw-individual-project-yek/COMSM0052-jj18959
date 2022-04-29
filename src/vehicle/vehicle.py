@@ -1,7 +1,7 @@
 from numpy import Infinity
 from src.vehicle.vehicle_conflict_detection import ConflictDetection
 from src.vehicle.vehicle_state import VehicleState
-from src.vehicle.policy.policy import Policy
+from src.vehicle.policy.policy import VehiclePolicy
 from src.vehicle.policy.custom_policy import CustomPolicy
 import src.vehicle.grid as grid
 import traci
@@ -18,7 +18,7 @@ class Vehicle:
         self.currentPosition = (Infinity, Infinity)
         self.currentGridPosition = (Infinity, Infinity)
         self.conflictDetectionAlgorithm = ConflictDetection()
-        self.conflictResolutionPolicy = Policy(self)
+        self.conflictResolutionPolicy = VehiclePolicy(self)
         self.nextJunction:sumolib.net.node.Node = None
         self.visibilityAngle = 60   # in degrees
         self.vehicleType = vehicleType
@@ -98,7 +98,7 @@ class Vehicle:
         print("Speed of ", self.vehicleId, ": ", self.speed)
     
 
-    def set_conflict_resolution_policy(self, policy:Policy):
+    def set_conflict_resolution_policy(self, policy:VehiclePolicy):
         self.conflictResolutionPolicy = policy
     
 
