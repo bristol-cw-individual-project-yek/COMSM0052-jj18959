@@ -8,7 +8,7 @@ class PriorityPolicy(Policy):
     Lower vehicle.priority value means higher priority.
     """ # TODO: Decide whether we should change this.
 
-    def decide_state(self, vehicle, conflicting_vehicles:dict):
+    def _decide_state(self, vehicle, conflicting_vehicles:dict):
         next_junction = vehicle.nextJunction
 
         if vehicle.currentState != VehicleState.CROSSING:

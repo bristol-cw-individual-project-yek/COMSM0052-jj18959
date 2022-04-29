@@ -42,9 +42,9 @@ class TestPriorityPolicy(unittest.TestCase):
         ]
         expected_results = [VehicleState.WAITING, VehicleState.WAITING, VehicleState.CROSSING]
         
-        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[0], conflicts[0]), expected_results[0])
-        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[1], conflicts[1]), expected_results[1])
-        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[2], conflicts[2]), expected_results[2])
+        self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicles[0], conflicts[0]), expected_results[0])
+        self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicles[1], conflicts[1]), expected_results[1])
+        self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicles[2], conflicts[2]), expected_results[2])
     
 
     def test_priority_when_priority_vehicle_is_within_limit(self):
@@ -82,9 +82,9 @@ class TestPriorityPolicy(unittest.TestCase):
         ]
         expected_results = [VehicleState.WAITING, VehicleState.WAITING, VehicleState.DRIVING]
         
-        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[0], conflicts[0]), expected_results[0])
-        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[1], conflicts[1]), expected_results[1])
-        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[2], conflicts[2]), expected_results[2])
+        self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicles[0], conflicts[0]), expected_results[0])
+        self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicles[1], conflicts[1]), expected_results[1])
+        self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicles[2], conflicts[2]), expected_results[2])
     
 
     def test_priority_when_priority_vehicle_is_outside_limit(self):
@@ -122,9 +122,9 @@ class TestPriorityPolicy(unittest.TestCase):
         ]
         expected_results = [VehicleState.DRIVING, VehicleState.DRIVING, VehicleState.DRIVING]
         
-        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[0], conflicts[0]), expected_results[0])
-        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[1], conflicts[1]), expected_results[1])
-        self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicles[2], conflicts[2]), expected_results[2])
+        self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicles[0], conflicts[0]), expected_results[0])
+        self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicles[1], conflicts[1]), expected_results[1])
+        self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicles[2], conflicts[2]), expected_results[2])
         
 
 if __name__ == "__main__":

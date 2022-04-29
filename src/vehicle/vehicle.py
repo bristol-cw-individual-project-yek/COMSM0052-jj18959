@@ -139,7 +139,7 @@ class Vehicle:
         self.currentPosition = traci.vehicle.getPosition(self.vehicleId)
         self.currentGridPosition = grid.position_to_grid_square(self.currentPosition)
         conflicting_vehicles = self.conflictDetectionAlgorithm.detect_other_vehicles(self, vehicles)
-        self.currentState = self.conflictResolutionPolicy.decide_state(self, conflicting_vehicles)
+        self.currentState = self.conflictResolutionPolicy.decide_state(conflicting_vehicles)
         message:str = "Position of " + self.vehicleId + ": " + str(self.currentPosition) + "\n"
         message += "Grid position of " + self.vehicleId + ": " + str(self.currentGridPosition)
         #print(message)

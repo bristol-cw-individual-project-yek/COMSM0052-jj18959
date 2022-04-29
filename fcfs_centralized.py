@@ -98,7 +98,7 @@ class FCFS_CentralizedPolicy(Policy):
             return VehicleState.WAITING  
 
 
-    def decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
+    def _decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
         current_time = traci.simulation.getTime()
         if type(self).last_recorded_time != current_time:
             type(self).last_recorded_time = current_time

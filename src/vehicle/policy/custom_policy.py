@@ -4,6 +4,7 @@ import importlib, inspect
 class CustomPolicy(Policy):
     
     def __init__(self, vehicle, module_path:str):
+        super().__init__(vehicle)
         new_path_arr = module_path.replace("/", ".").replace("\\", ".").split(".")
         if new_path_arr[-1] == "py":
             new_path_arr.pop(-1)
@@ -20,5 +21,5 @@ class CustomPolicy(Policy):
                 break
     
 
-    def decide_state(self, vehicle, conflicting_vehicles):
-        return self.policy.decide_state(vehicle, conflicting_vehicles)
+    def _decide_state(self, vehicle, conflicting_vehicles):
+        return self.policy._decide_state(vehicle, conflicting_vehicles)

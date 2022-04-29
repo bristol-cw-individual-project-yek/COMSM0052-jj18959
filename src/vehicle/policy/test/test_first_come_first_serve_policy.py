@@ -39,7 +39,7 @@ class TestFirstComeFirstServePolicy(unittest.TestCase):
         ]
         expected_results = [VehicleState.WAITING, VehicleState.CROSSING, VehicleState.WAITING]
         for i in range(len(vehicles)):
-            self.assertEqual(vehicle.conflictResolutionPolicy.decide_state(vehicle, conflicts[i]), expected_results[i])
+            self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicle, conflicts[i]), expected_results[i])
         
 
 if __name__ == "__main__":
