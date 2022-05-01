@@ -9,7 +9,7 @@ import sys
 
 class TestFirstComeFirstServePolicy(unittest.TestCase):
 
-    def test_fcfs(self):
+    def test_fcfs_1(self):
         vehicles = []
         positions = [(0, 10), (9, 10), (12, 10)]
         junction = Node("junction", "junction", (10, 10), [])
@@ -37,9 +37,12 @@ class TestFirstComeFirstServePolicy(unittest.TestCase):
                 "same_lane"     : []
             },
         ]
-        expected_results = [VehicleState.WAITING, VehicleState.CROSSING, VehicleState.WAITING]
+        expected_results = [VehicleState.WAITING,
+                            VehicleState.CROSSING,
+                            VehicleState.WAITING]
         for i in range(len(vehicles)):
-            self.assertEqual(vehicle.conflictResolutionPolicy._decide_state(vehicle, conflicts[i]), expected_results[i])
+            state = vehicle.conflictResolutionPolicy._decide_state(vehicle, conflicts[i])
+            self.assertEqual(state, expected_results[i])
         
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ import traci
 from src.road_network.road_network import RoadNetwork
 import src.arbiter.arbiter as arbiter
 import src.arbiter.arbiter_fcfs_policy as arbiter_fcfs
+import src.arbiter.arbiter_fcfs_svo as arbiter_svo
 
 class SimulationManager:
 
@@ -37,6 +38,8 @@ class SimulationManager:
             arb_type = global_arbiter["type"]
             if arb_type == "fcfs":
                 self.set_global_arbiter_type(arbiter_fcfs.ArbiterFCFSPolicy)
+            elif arb_type == "fcfs_svo":
+                self.set_global_arbiter_type(arbiter_svo.Arbiter_FCFS_SVO_Policy)
         except KeyError:
             raise
     
