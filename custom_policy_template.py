@@ -2,7 +2,7 @@ from src.vehicle.policy.policy import VehiclePolicy
 from src.vehicle.vehicle import Vehicle
 from src.vehicle.vehicle_state import VehicleState
 
-class CustomTestPolicy(VehiclePolicy):
+class CustomPolicyTemplate(VehiclePolicy):
 
     def _decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
         for other_vehicle in conflicting_vehicles["same_junction"]:

@@ -38,23 +38,23 @@ class Vehicle:
 
         By default, the reward = -t, where t is the total time spent waiting throughout the simulation.
 
-        If the "reserved_time" parameter is passed in, t = reserved_time - current time + time spent waiting at the current junction instead.
+        If the "reserved_time" parameter is passed in, t = reserved_time - current time + total time spent waiting instead.
         """
         if (reserved_time):
-            waiting_time = (reserved_time - traci.simulation.getTime()) + self.currentTimeSpentWaiting
+            waiting_time = (reserved_time - traci.simulation.getTime()) + self.totalTimeSpentWaiting
         else:
             waiting_time = self.totalTimeSpentWaiting
         return -waiting_time
 
 
-    def get_social_value_orientation_utility_one_to_one(self, other_vehicle, reserved_time:float=None, other_reserved_time:float=None) -> float:
+    def get_svo_utility_one_to_one(self, other_vehicle, reserved_time:float=None, other_reserved_time:float=None) -> float:
         reward:float = self.get_reward(reserved_time)
         other_reward:float = other_vehicle.get_reward(other_reserved_time)
         utility:float = (reward * math.cos(self.svo_angle)) + (other_reward * math.sin(self.svo_angle))
         return utility
     
 
-    def get_social_value_orientation_utility_group_average(self, other_vehicles:list, weights:list=None) -> float:
+    def get_svo_utility_group_average(self, other_vehicles:list, weights:list=None) -> float:
         if weights:
             assert(len(other_vehicles) == len(weights))
         reward:float = self.get_reward()
@@ -73,7 +73,7 @@ class Vehicle:
         return utility
     
 
-    def get_social_value_orientation_utility_group_sum(self, other_vehicles:list, weights:list=None) -> float:
+    def get_svo_utility_group_sum(self, other_vehicles:list, weights:list=None) -> float:
         if weights:
             assert(len(other_vehicles) == len(weights))
         reward:float = self.get_reward()

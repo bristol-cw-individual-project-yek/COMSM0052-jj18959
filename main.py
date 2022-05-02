@@ -46,7 +46,7 @@ def get_network(seed=None):
     if not seed:
         seed = get_random_seed()
     try:
-        if CONFIG["network-type"] == "scenario":
+        if CONFIG["network-type"] == "yaml":
             try:
                 scenario_name:str = CONFIG["scenario-name"]
                 if not scenario_name.endswith(".yaml"):
