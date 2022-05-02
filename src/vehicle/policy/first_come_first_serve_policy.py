@@ -17,8 +17,8 @@ class FirstComeFirstServePolicy(policy.VehiclePolicy):
         return response_data
             
 
-    def _decide_state(self, vehicle, conflicting_vehicles:dict):
-        state = super()._decide_state(vehicle, conflicting_vehicles)
+    def decide_state(self, vehicle, conflicting_vehicles:dict):
+        state = super().decide_state(vehicle, conflicting_vehicles)
         if state == VehicleState.WAITING:
             self.time_spent_waiting += 1
         else:

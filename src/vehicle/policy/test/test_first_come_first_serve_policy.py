@@ -41,7 +41,7 @@ class TestFirstComeFirstServePolicy(unittest.TestCase):
                             VehicleState.CROSSING,
                             VehicleState.WAITING]
         for i in range(len(vehicles)):
-            state = vehicle.conflictResolutionPolicy._decide_state(vehicle, conflicts[i])
+            state = vehicle.conflictResolutionPolicy.decide_state(vehicle, conflicts[i])
             self.assertEqual(state, expected_results[i])
         
 

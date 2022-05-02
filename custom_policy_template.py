@@ -4,7 +4,7 @@ from src.vehicle.vehicle_state import VehicleState
 
 class CustomPolicyTemplate(VehiclePolicy):
 
-    def _decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
+    def decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
         for other_vehicle in conflicting_vehicles["same_junction"]:
             if self.is_conflicting_same_junction(vehicle, other_vehicle):
                 return VehicleState.WAITING

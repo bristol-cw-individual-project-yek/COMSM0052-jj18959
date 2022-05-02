@@ -6,7 +6,7 @@ import src.vehicle.policy.utils as utils
 
 class SVOGroupPolicy(VehiclePolicy):
 
-    def _decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
+    def decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
         for other_vehicle in conflicting_vehicles["same_lane"]:
             if self.is_conflicting_same_lane(vehicle, other_vehicle):
                 return VehicleState.WAITING

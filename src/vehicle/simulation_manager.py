@@ -11,6 +11,7 @@ from src.road_network.road_network import RoadNetwork
 import src.arbiter.arbiter as arbiter
 import src.arbiter.arbiter_fcfs_policy as arbiter_fcfs
 import src.arbiter.arbiter_fcfs_svo as arbiter_svo
+import src.arbiter.arbiter_priority as arbiter_priority
 
 class SimulationManager:
 
@@ -40,6 +41,8 @@ class SimulationManager:
                 self.set_global_arbiter_type(arbiter_fcfs.ArbiterFCFSPolicy)
             elif arb_type == "fcfs_svo":
                 self.set_global_arbiter_type(arbiter_svo.Arbiter_FCFS_SVO_Policy)
+            elif arb_type == "priority":
+                self.set_global_arbiter_type(arbiter_priority.ArbiterPriorityPolicy)
         except KeyError:
             raise
     

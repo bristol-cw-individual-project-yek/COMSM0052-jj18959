@@ -21,5 +21,5 @@ class CustomPolicy(VehiclePolicy):
                 break
     
 
-    def _decide_state(self, vehicle, conflicting_vehicles):
-        return self.policy._decide_state(vehicle, conflicting_vehicles)
+    def decide_state(self, vehicle, conflicting_vehicles):
+        return self.policy.decide_state(vehicle, conflicting_vehicles)

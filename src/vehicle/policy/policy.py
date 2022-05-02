@@ -120,15 +120,15 @@ class VehiclePolicy:
         return VehicleState.DRIVING
     
 
-    def decide_state(self, conflicting_vehicles:dict):
+    def _decide_state(self, conflicting_vehicles:dict):
         junction_id = self.vehicle.nextJunction.getID()
         if self.vehicle.get_distance_to_junction() <= type(self).MIN_WAITING_DISTANCE_FROM_JUNCTION and SharedNetwork.has_arbiter(junction_id):
             return SharedNetwork.send_message_to_arbiter(junction_id, self.vehicle)
         else:
-            return self._decide_state(self.vehicle, conflicting_vehicles)
+            return self.decide_state(self.vehicle, conflicting_vehicles)
 
     
-    def _decide_state(self, vehicle, conflicting_vehicles:dict):
+    def decide_state(self, vehicle, conflicting_vehicles:dict):
 
         for other_vehicle in conflicting_vehicles["same_lane"]:
             if self.is_conflicting_same_lane(vehicle, other_vehicle):
