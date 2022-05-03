@@ -1,7 +1,7 @@
 import os
-from src.network.network import Network
+from src.road_network.road_network import RoadNetwork
 
-class GridNetwork(Network):
+class GridNetwork(RoadNetwork):
 
     def generateNetwork(self, network_file_path):
         netgen_cmd = "netgenerate --grid --output-file=" + network_file_path

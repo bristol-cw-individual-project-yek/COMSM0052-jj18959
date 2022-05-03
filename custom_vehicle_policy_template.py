@@ -1,8 +1,8 @@
-from src.vehicle.policy.policy import Policy
+from src.vehicle.policy.policy import VehiclePolicy
 from src.vehicle.vehicle import Vehicle
 from src.vehicle.vehicle_state import VehicleState
 
-class CustomTestPolicy(Policy):
+class CustomVehiclePolicyTemplate(VehiclePolicy):
 
     def decide_state(self, vehicle:Vehicle, conflicting_vehicles: dict):
         for other_vehicle in conflicting_vehicles["same_junction"]:

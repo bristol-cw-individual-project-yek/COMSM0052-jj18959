@@ -1,11 +1,11 @@
-from src.vehicle.policy.policy import Policy
+from src.vehicle.policy.policy import VehiclePolicy
 from src.vehicle.vehicle import Vehicle
 from src.vehicle.vehicle_state import VehicleState
 import src.vehicle.policy.utils as utils
 import traci
 import copy
 
-class FCFS_CentralizedPolicy(Policy):
+class FCFS_CentralizedPolicy(VehiclePolicy):
     junction_to_vehicles:dict = {}
     reserved_times:dict = {}
     arrival_times:dict = {}

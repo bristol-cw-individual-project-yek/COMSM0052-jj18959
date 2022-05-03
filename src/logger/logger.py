@@ -1,7 +1,7 @@
 import os
 import json
 from datetime import datetime
-import src.network.network as ntwk
+import src.road_network.road_network as ntwk
 import matplotlib.pyplot as plt
 
 
@@ -50,7 +50,7 @@ class Logger:
         plot_distribution(metrics_entire_set["wait_time_metrics"]["wait-times-per-junction"]["samples"],"Junction wait time (turns)", "Number of vehicles", 0, metrics_entire_set["wait_time_metrics"]["wait-times-per-junction"]["max"], junction_wait_times_path)
 
 
-    def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.Network, collision_data:dict, entry_folder_name:str, vehicle_metadata:dict={}, metrics:dict={}, simulation_number:int=0) -> None:
+    def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.RoadNetwork, collision_data:dict, entry_folder_name:str, vehicle_metadata:dict={}, metrics:dict={}, simulation_number:int=0) -> None:
         network_data = network.getData()
         vehicle_group_data = config_data["vehicle-groups"]
         custom_policies = {}

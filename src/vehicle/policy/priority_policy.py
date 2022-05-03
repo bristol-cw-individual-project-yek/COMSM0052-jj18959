@@ -1,7 +1,7 @@
-from src.vehicle.policy.policy import Policy
+from src.vehicle.policy.policy import VehiclePolicy
 from src.vehicle.vehicle_state import VehicleState
 
-class PriorityPolicy(Policy):
+class PriorityPolicy(VehiclePolicy):
     """
     Policy based on vehicle.priority values.
 
