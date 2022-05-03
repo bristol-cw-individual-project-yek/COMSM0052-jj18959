@@ -92,51 +92,6 @@ def get_network(seed=None):
     return network
 
 
-def get_overview_string(metrics:dict, seeds:list) -> str:
-    result = "\n------------RESULTS------------\n"
-    seed_str = f"Seeds used: {str(seeds)}\n\n"
-    collision_str = "Number of collisions: " + str(metrics["num_of_collisions"])
-    total_wait_time_stats:dict = metrics["wait_time_metrics"]["total-wait-time"]
-    tw_mean = total_wait_time_stats["mean"]
-    tw_median = total_wait_time_stats["median"]
-    tw_min = total_wait_time_stats["min"]
-    tw_max = total_wait_time_stats["max"]
-    tw_skew = total_wait_time_stats["skew"]
-    tw_kurtosis = total_wait_time_stats["kurtosis"]
-    tw_samples = total_wait_time_stats["samples"]
-    total_wait_time_str = f"""
-Total wait time stats:
-    Mean    :   {tw_mean}
-    Median  :   {tw_median} 
-    Min     :   {tw_min} 
-    Max     :   {tw_max} 
-    Skew    :   {tw_skew}
-    Kurtosis:   {tw_kurtosis}
-    Samples :   {tw_samples}
-    """
-    wait_time_per_junction_stats:dict = metrics["wait_time_metrics"]["wait-times-per-junction"]
-    wt_mean = wait_time_per_junction_stats["mean"]
-    wt_median = wait_time_per_junction_stats["median"]
-    wt_min = wait_time_per_junction_stats["min"]
-    wt_max = wait_time_per_junction_stats["max"]
-    wt_skew = wait_time_per_junction_stats["skew"]
-    wt_kurtosis = wait_time_per_junction_stats["kurtosis"]
-    wt_samples = wait_time_per_junction_stats["samples"]
-    wait_time_per_junction_str = f"""
-Wait time per junction stats:
-    Mean    :   {wt_mean}
-    Median  :   {wt_median} 
-    Min     :   {wt_min} 
-    Max     :   {wt_max} 
-    Skew    :   {wt_skew} 
-    Kurtosis:   {wt_kurtosis} 
-    Samples :   {wt_samples}
-    """
-    result += seed_str + collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str
-    result += "\n-------------------------------\n"
-    return result
-
-
 def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1, entry_name:str=""):
     shutil.rmtree("temp", ignore_errors=True)
     temp_file_name = "tmp_" + str(round(time()))
@@ -239,7 +194,7 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
         total_collisions += num_of_collisions
 
         all_metrics_list.append(metrics)
-        get_overview_string(metrics, seeds=run_seed)
+        Logger.get_overview_string(metrics, seeds=run_seed)
         used_seeds.append(run_seed)
         if log_data:
             Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, entry_folder_name=folder_name, vehicle_metadata=vehicle_metadata, metrics=metrics, simulation_number=simulation_number)
@@ -248,10 +203,10 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
         "wait_time_metrics"  : MetricCalculator.calculate_multiple_runs(all_metrics_list),
         "num_of_collisions" : total_collisions
     }
-    overview:str = get_overview_string(metrics_entire_set, str(used_seeds))
+    overview:str = Logger.get_overview_string(metrics_entire_set, str(used_seeds))
     print(overview)
     if log_data:
-        Logger.log_overview(overview, folder_name)
+        Logger.log_overview(metrics_entire_set, used_seeds, folder_name)
 
 
 def test_osm_get():
