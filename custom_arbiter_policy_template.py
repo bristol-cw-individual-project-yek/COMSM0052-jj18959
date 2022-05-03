@@ -8,8 +8,8 @@ class CustomArbiterPolicyTemplate(ArbiterPolicy):
         super().__init__(junction_id)
 
 
-    def receive_message(self, vehicle):
-        return super().receive_message(vehicle)
+    def receive_request(self, vehicle):
+        return super().receive_request(vehicle)
     
     
     def on_time_updated(self) -> None:

@@ -7,7 +7,7 @@ class ArbiterPolicy:
         SharedNetwork.arbiter_id_to_policy[junction_id] = self
 
 
-    def receive_message(self, vehicle):
+    def receive_request(self, vehicle):
         return VehicleState.WAITING
     
     
@@ -36,7 +36,7 @@ class ArbiterManager:
     def send_message_to_arbiter(self, junction_id:str, vehicle):
         try:
             arbiter:Arbiter = self.__junction_to_arbiter[junction_id]
-            return arbiter.policy.receive_message(vehicle)
+            return arbiter.policy.receive_request(vehicle)
         except KeyError:
             pass
     

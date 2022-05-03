@@ -62,7 +62,7 @@ class ArbiterFCFSPolicy(ArbiterPolicy):
         self.update_reserved_times(index)
 
 
-    def receive_message(self, vehicle):
+    def receive_request(self, vehicle):
         current_time = traci.simulation.getTime()
         if vehicle not in self.reserved_times:
             self.insert_into_queue(vehicle, current_time)

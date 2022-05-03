@@ -21,5 +21,5 @@ class ArbiterCustomPolicy(ArbiterPolicy):
                 break
     
 
-    def receive_message(self, vehicle):
-        return self.policy.receive_message(vehicle)
+    def receive_request(self, vehicle):
+        return self.policy.receive_request(vehicle)
