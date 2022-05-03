@@ -51,7 +51,7 @@ class SharedNetwork():
     def send_message_to_arbiter(junction_id:str, vehicle):
         try:
             arbiter_policy = SharedNetwork.arbiter_id_to_policy[junction_id]
-            return arbiter_policy.receive_message(vehicle)
+            return arbiter_policy.receive_request(vehicle)
         except KeyError:
             print(f"Failed to send message to {junction_id}")
             raise
