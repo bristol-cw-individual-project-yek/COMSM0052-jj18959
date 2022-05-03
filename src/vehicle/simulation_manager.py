@@ -1,5 +1,6 @@
 from tempfile import TemporaryFile
 import traceback
+from src.arbiter import arbiter_custom_policy
 from src.vehicle.vehicle import Vehicle
 from src.vehicle.policy.custom_policy import CustomPolicy
 from src.vehicle.policy.policy import VehiclePolicy
@@ -10,7 +11,6 @@ import traci
 from src.road_network.road_network import RoadNetwork
 import src.arbiter.arbiter as arbiter
 import src.arbiter.arbiter_fcfs_policy as arbiter_fcfs
-import src.arbiter.arbiter_fcfs_svo as arbiter_svo
 import src.arbiter.arbiter_priority as arbiter_priority
 
 class SimulationManager:
@@ -25,26 +25,54 @@ class SimulationManager:
         self.rng:random.Random = random.Random(self.seed)
     
 
-    def set_global_arbiter_type(self, t:type):
+    def set_global_arbiter_type(self, t:type, path:str=None):
         for j_id in self.road_network.junction_ids:
+            self.set_arbiter_type_at_junction(t, j_id, path)
+    
+
+    def set_arbiter_type_at_junction(self, t:type, j_id:str, path:str=None):
+        
+        if t == arbiter_custom_policy.ArbiterCustomPolicy:
+            policy = t(j_id, path)
+        else:
             policy = t(j_id)
-            arb:arbiter.Arbiter = arbiter.Arbiter(policy)
-            self.arbiter_manager.assign_arbiter_to_junction(j_id, arb)
+        arb:arbiter.Arbiter = arbiter.Arbiter(policy)
+        self.arbiter_manager.assign_arbiter_to_junction(j_id, arb)
 
 
     def add_arbiters(self, arbiters:dict):
         # Add global arbiter type
         try:
-            global_arbiter:str = arbiters["global"]
+            global_arbiter = arbiters["global"]
             arb_type = global_arbiter["type"]
             if arb_type == "fcfs":
                 self.set_global_arbiter_type(arbiter_fcfs.ArbiterFCFSPolicy)
-            elif arb_type == "fcfs_svo":
-                self.set_global_arbiter_type(arbiter_svo.Arbiter_FCFS_SVO_Policy)
             elif arb_type == "priority":
                 self.set_global_arbiter_type(arbiter_priority.ArbiterPriorityPolicy)
+            elif arb_type == "custom":
+                arb_path = global_arbiter["path"]
+                self.set_global_arbiter_type(arbiter_custom_policy.ArbiterCustomPolicy, arb_path)
         except KeyError:
             raise
+        # Add local arbiter types
+        try:
+            local_arbiters = arbiters["local"]
+            for l_a in local_arbiters:
+                arb_type = l_a["type"]
+                junctions = l_a["junctions"]
+                for j in junctions:
+                    if arb_type == "fcfs":
+                        self.set_arbiter_type_at_junction(arbiter_fcfs.ArbiterFCFSPolicy, j)
+                    elif arb_type == "priority":
+                        self.set_arbiter_type_at_junction(arbiter_priority.ArbiterPriorityPolicy, j)
+                    elif arb_type == "custom":
+                        arb_path = global_arbiter["path"]
+                        self.set_arbiter_type_at_junction(arbiter_custom_policy.ArbiterCustomPolicy, j, arb_path)
+        except KeyError as e:
+            if e.args[0] == "local":
+                pass
+            else:
+                raise
     
 
     def add_vehicle_types(self, vehicleTypes:dict):
@@ -93,17 +121,21 @@ class SimulationManager:
                         vehType = vehGroup["vehicle-type"]
                         vehicle.set_vehicle_type(vehType)
                     except KeyError:
-                        print(traceback.format_exc())
+                        #print(traceback.format_exc())
+                        pass
                     except traci.exceptions.TraCIException:
-                        print(traceback.format_exc())
+                        #print(traceback.format_exc())
+                        pass
                     try:
                         vehicle.set_speed(self.vehicleTypes[vehType]["speed"])
                     except KeyError:
-                        print(traceback.format_exc())
+                        pass
+                        #print(traceback.format_exc())
                 try:
                     vehicle.set_priority(vehGroup["priority"])
                 except KeyError:
-                    print(traceback.format_exc())
+                    #print(traceback.format_exc())
+                    pass
                 
                 if "svo" in vehGroup:
                     vehicle.svo_angle = vehGroup["svo"]
