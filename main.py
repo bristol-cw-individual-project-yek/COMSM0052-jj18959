@@ -8,7 +8,7 @@ import src.road_network.grid_network as grid
 import src.road_network.spider_network as spider
 import traci
 import sumolib
-from src.vehicle import simulation_manager
+from src import simulation_manager
 import yaml
 from src.logger.logger import Logger
 from traci._simulation import Collision
