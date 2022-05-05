@@ -4,6 +4,7 @@ from src.vehicle.policy.policy import SharedNetwork
 class ArbiterPolicy:
     def __init__(self, junction_id:str):
         self.junction_id = junction_id
+        self.current_time = 0
         SharedNetwork.arbiter_id_to_policy[junction_id] = self
 
 
@@ -11,8 +12,8 @@ class ArbiterPolicy:
         return VehicleState.WAITING
     
     
-    def on_time_updated(self) -> None:
-        pass
+    def on_time_updated(self, time) -> None:
+        self.current_time = time
 
 
 class Arbiter:
@@ -41,9 +42,9 @@ class ArbiterManager:
             pass
     
 
-    def update(self):
+    def update(self, time):
         for j_id in self.__junction_to_arbiter:
-            self.__junction_to_arbiter[j_id].policy.on_time_updated()
+            self.__junction_to_arbiter[j_id].policy.on_time_updated(time)
 
 
     def reset():

@@ -166,7 +166,7 @@ class SimulationManager:
 
 
     def update(self):
-        self.arbiter_manager.update()
+        self.arbiter_manager.update(traci.simulation.getTime())
         vehicle_data = {}
 
         vehicles_to_be_updated = []

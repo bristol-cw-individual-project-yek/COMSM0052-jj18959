@@ -104,7 +104,6 @@ class Vehicle:
 
     def set_priority(self, priority:int):
         self.priority = priority
-        print("Priority of ", self.vehicleId, ": ", self.priority)
     
 
     def add_to_route(self, routeId, network):
@@ -171,9 +170,8 @@ class Vehicle:
         try:
             next_edge = self.currentRoute[self.currentRouteIndex + 1]
             return self.network.getConnectionLength(current_edge, next_edge)
-        except IndexError as e:
-            print(str(e))
-            return 0
+        except IndexError:
+            return 1
     
 
     def get_time_to_cross_next_junction(self) -> float:

@@ -38,7 +38,15 @@ spider-settings:
   omit-center: false
 
 
-steps: 200
+# Optional settings for arbiter agents
+#arbiters:
+#  global:
+#    type: "fcfs"
+#  local:
+#      - type: "fcfs"
+#        junctions: []
+
+steps: 1000
 vehicle-groups:
   group-1:
     policy-type: "default"
@@ -46,7 +54,7 @@ vehicle-groups:
     priority: 1
   group-2:
     policy-type: "custom"
-    policy-path: "custom_policy_template.py"
+    policy-path: "custom_vehicle_policy_template.py"
     num: 1
     vehicle-type: "bus"
     priority: 2
