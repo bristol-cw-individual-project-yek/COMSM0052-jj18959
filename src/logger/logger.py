@@ -69,35 +69,61 @@ class Logger:
     def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.RoadNetwork, collision_data:dict, entry_folder_name:str, vehicle_metadata:dict={}, metrics:dict={}, simulation_number:int=0) -> None:
         network_data = network.getData()
         vehicle_group_data = config_data["vehicle-groups"]
-        custom_policies = {}
+        custom_vehicle_policies = {}
+        custom_arbiter_paths = []
 
-        # Get any custom policies
+        # Get any custom vehicle policies
         for groupId in vehicle_group_data:
             group = vehicle_group_data[groupId]
             if group["policy-type"] == "custom" and "policy-path" in group:
-                custom_policies[groupId] = group["policy-path"]
+                custom_vehicle_policies[groupId] = group["policy-path"]
         
-        # Record custom policies if necessary
+        # Record custom vehicle policies if necessary
         try:
-            Logger.record_custom_policies(custom_policies, Logger.LOG_DIRECTORY_NAME, entry_folder_name)
+            Logger.record_custom_vehicle_policies(custom_vehicle_policies, Logger.LOG_DIRECTORY_NAME, entry_folder_name)
         except FileExistsError:
             pass
 
+
+        # Record any custom arbiter policies
+        try:
+            arbiter_data = config_data["arbiters"]
+            try:
+                global_arb = arbiter_data["global"]
+                if global_arb["type"] == "custom":
+                    custom_arbiter_paths.append(global_arb["path"])
+            except KeyError:
+                pass
+            try:
+                local_arbs = arbiter_data["local"]
+                for local_arb in local_arbs:
+                    if local_arb["type"] == "custom":
+                        custom_arbiter_paths.append(local_arb["path"])
+            except KeyError:
+                pass
+            Logger.record_custom_arbiter_policies(custom_arbiter_paths, Logger.LOG_DIRECTORY_NAME, entry_folder_name)
+        except KeyError:
+            pass
+
         # Replace paths with the relative file path of the records
-        for groupId in custom_policies:
-            custom_policies[groupId] = groupId + "/" + os.path.basename(custom_policies[groupId])
+        for groupId in custom_vehicle_policies:
+            custom_vehicle_policies[groupId] = groupId + "/" + os.path.basename(custom_vehicle_policies[groupId])
 
         data = {
             "network_data"          : network_data,
             "steps"                 : config_data["steps"],
             "metrics"               : metrics,
             "vehicle_group_data"    : vehicle_group_data,
-            "custom_policies"       : custom_policies,
+            "custom_policies"       : custom_vehicle_policies,
             "vehicle_type_data"     : config_data["vehicle-types"],
             "vehicle_metadata"      : vehicle_metadata,
             "collision_data"        : collision_data,
             "step_data"             : step_data,
         }
+        try:
+            data["arbiters"] = arbiter_data = config_data["arbiters"]
+        except:
+            pass
         data["network_data"]["network_type"] = config_data["network-type"]
         
         with open(Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/" + Logger.DATA_DIRECTORY_NAME + "/" + "sim_" + str(simulation_number) + ".json", "w") as f:
@@ -105,7 +131,22 @@ class Logger:
             f.close()
     
 
-    def record_custom_policies(custom_policies:dict, log_directory_name:str, entry_folder_name:str):
+    def record_custom_arbiter_policies(custom_policy_paths:list, log_directory_name:str, entry_folder_name:str):
+        try:
+            os.makedirs(log_directory_name + "/" + entry_folder_name + "/arbiters")
+        except:
+            pass
+        for path in custom_policy_paths:
+            with open(path, "r") as original_file:
+                contents = original_file.read()
+                original_file.close()
+            new_file_name = os.path.basename(path)
+            with open(log_directory_name + "/" + entry_folder_name + "/arbiters" + "/" + new_file_name, "w") as copy_file:
+                copy_file.write(contents)
+                copy_file.close()
+
+
+    def record_custom_vehicle_policies(custom_policies:dict, log_directory_name:str, entry_folder_name:str):
         for groupId in custom_policies:
             path:str = custom_policies[groupId]
             with open(path, "r") as original_file:
