@@ -4,6 +4,7 @@ from src.vehicle.policy.policy import SharedNetwork
 class ArbiterPolicy:
     def __init__(self, junction_id:str):
         self.junction_id = junction_id
+        self.current_time = 0
         SharedNetwork.arbiter_id_to_policy[junction_id] = self
 
 

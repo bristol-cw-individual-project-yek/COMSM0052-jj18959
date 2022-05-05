@@ -30,7 +30,7 @@ class ArbiterFCFSPolicy(ArbiterPolicy):
             return result
         else:
             for other_vehicle in self.queue:
-                if other_vehicle.get_next_junction().getID() == self.junction_id and other_vehicle.isActive:
+                if other_vehicle.nextJunction.getID() == self.junction_id and other_vehicle.isActive:
                     result = max(result, self.arrival_times[other_vehicle])
             return result
     
