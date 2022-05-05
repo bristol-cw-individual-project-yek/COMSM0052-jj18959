@@ -52,8 +52,11 @@ class SimulationManager:
             elif arb_type == "custom":
                 arb_path = global_arbiter["path"]
                 self.set_global_arbiter_type(arbiter_custom_policy.ArbiterCustomPolicy, arb_path)
-        except KeyError:
-            raise
+        except KeyError as e:
+            if e.args[0] == "global":
+                pass
+            else:
+                raise
         # Add local arbiter types
         try:
             local_arbiters = arbiters["local"]
@@ -66,7 +69,7 @@ class SimulationManager:
                     elif arb_type == "priority":
                         self.set_arbiter_type_at_junction(arbiter_priority.ArbiterPriorityPolicy, j)
                     elif arb_type == "custom":
-                        arb_path = global_arbiter["path"]
+                        arb_path = l_a["path"]
                         self.set_arbiter_type_at_junction(arbiter_custom_policy.ArbiterCustomPolicy, j, arb_path)
         except KeyError as e:
             if e.args[0] == "local":
