@@ -1,6 +1,5 @@
 import unittest
 from src.arbiter.arbiter import Arbiter
-from src.road_network.road_network import RoadNetwork
 from src.vehicle.policy.policy import VehiclePolicy
 from src.vehicle.vehicle_state import VehicleState
 from src.vehicle.vehicle import Vehicle
