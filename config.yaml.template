@@ -38,7 +38,15 @@ spider-settings:
   omit-center: false
 
 
-steps: 200
+# Optional settings for arbiter agents
+#arbiters:
+#  global:
+#    type: "fcfs"
+#  local:
+#      - type: "fcfs"
+#        junctions: []
+
+steps: 1000
 vehicle-groups:
   group-1:
     policy-type: "default"
