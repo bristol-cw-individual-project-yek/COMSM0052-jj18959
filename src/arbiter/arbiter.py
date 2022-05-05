@@ -11,8 +11,8 @@ class ArbiterPolicy:
         return VehicleState.WAITING
     
     
-    def on_time_updated(self) -> None:
-        pass
+    def on_time_updated(self, time) -> None:
+        self.current_time = time
 
 
 class Arbiter:
@@ -41,9 +41,9 @@ class ArbiterManager:
             pass
     
 
-    def update(self):
+    def update(self, time):
         for j_id in self.__junction_to_arbiter:
-            self.__junction_to_arbiter[j_id].policy.on_time_updated()
+            self.__junction_to_arbiter[j_id].policy.on_time_updated(time)
 
 
     def reset():

@@ -23,3 +23,7 @@ class ArbiterCustomPolicy(ArbiterPolicy):
 
     def receive_request(self, vehicle):
         return self.policy.receive_request(vehicle)
+    
+
+    def on_time_updated(self, time) -> None:
+        return self.policy.on_time_updated(time)

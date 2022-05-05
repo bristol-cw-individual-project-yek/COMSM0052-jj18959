@@ -1,6 +1,5 @@
 from src.arbiter.arbiter import ArbiterPolicy
 from src.vehicle.vehicle_state import VehicleState
-import traci
 
 class ArbiterFCFSPolicy(ArbiterPolicy):
 
@@ -63,26 +62,24 @@ class ArbiterFCFSPolicy(ArbiterPolicy):
 
 
     def receive_request(self, vehicle):
-        current_time = traci.simulation.getTime()
         if vehicle not in self.reserved_times:
-            self.insert_into_queue(vehicle, current_time)
+            self.insert_into_queue(vehicle, self.current_time)
         reserved_time = self.reserved_times[vehicle]
-        if current_time >= reserved_time:
+        if self.current_time >= reserved_time:
             return VehicleState.CROSSING
         else:
             return VehicleState.WAITING
     
 
-    def on_time_updated(self):
+    def on_time_updated(self, time):
         self.update_junction_data()
-        super().on_time_updated()
+        super().on_time_updated(time)
     
 
     def update_junction_data(self):
-        current_time = traci.simulation.getCurrentTime()
         to_be_removed = []
         for v in self.arrival_times:
-            if (v.get_next_junction().getID() != self.junction_id or not v.isActive) and self.arrival_times[v] < current_time:
+            if (v.get_next_junction().getID() != self.junction_id or not v.isActive) and self.arrival_times[v] < self.current_time:
                 to_be_removed.append(v)
         for v in to_be_removed:
             self.reserved_times.pop(v)
