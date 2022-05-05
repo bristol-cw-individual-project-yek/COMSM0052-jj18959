@@ -29,7 +29,8 @@ There are also several optional commands:
 
 ### User settings
 
-User settings can be defined in the ```config.yaml``` file.
+User settings can be defined in the ```config.yaml``` file. This can be used to define properties of the road network, agents in the simulation, etc.
+An example is given in the form of ```config.yaml.template```.
 
 ### Data logs
 
