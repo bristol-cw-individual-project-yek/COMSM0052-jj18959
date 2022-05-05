@@ -46,7 +46,7 @@ vehicle-groups:
     priority: 1
   group-2:
     policy-type: "custom"
-    policy-path: "custom_policy_template.py"
+    policy-path: "custom_vehicle_policy_template.py"
     num: 1
     vehicle-type: "bus"
     priority: 2
