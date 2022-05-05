@@ -104,7 +104,6 @@ class Vehicle:
 
     def set_priority(self, priority:int):
         self.priority = priority
-        print("Priority of ", self.vehicleId, ": ", self.priority)
     
 
     def add_to_route(self, routeId, network):
