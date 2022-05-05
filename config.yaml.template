@@ -1,8 +1,9 @@
 network-type: "random"
-route-seed: 0
+seed: 0
 
 # Map settings for non-random generated maps
-network-file-path: ""
+network-file-path: "scenarios/crossroads.net.xml"
+route-file-path: "scenarios/crossroads.rou.xml"
 osm-area-settings:
   origin-latitude: 51.5
   origin-longitude: -2.6
@@ -18,6 +19,8 @@ random-settings:
   min-angle: 45
   num-tries: 50
   connectivity: 0.95
+  seed: 19087
+
 
 # Settings specific to the "grid" map type
 grid-settings:
@@ -36,7 +39,15 @@ spider-settings:
   omit-center: false
 
 
-steps: 200
+# Optional settings for arbiter agents
+#arbiters:
+#  global:
+#    type: "fcfs"
+#  local:
+#      - type: "fcfs"
+#        junctions: []
+
+steps: 1000
 vehicle-groups:
   group-1:
     policy-type: "default"
@@ -44,7 +55,7 @@ vehicle-groups:
     priority: 1
   group-2:
     policy-type: "custom"
-    policy-path: "test_custom.py"
+    policy-path: "custom_vehicle_policy_template.py"
     num: 1
     vehicle-type: "bus"
     priority: 2

@@ -1,24 +1,30 @@
 import unittest
-from src.vehicle.policy.first_come_first_serve_policy import FirstComeFirstServePolicy
+from src.arbiter.arbiter import Arbiter
+from src.vehicle.policy.policy import VehiclePolicy
 from src.vehicle.vehicle_state import VehicleState
 from src.vehicle.vehicle import Vehicle
-from sumolib.net.node import Node
-import os
-import sys
+import sumolib
+from src.arbiter.arbiter import ArbiterManager
+from src.arbiter.arbiter_fcfs_policy import ArbiterFCFSPolicy
 
 
-class TestFirstComeFirstServePolicy(unittest.TestCase):
+class TestArbiterFCFSPolicy(unittest.TestCase):
 
     def test_fcfs_1(self):
         vehicles = []
-        positions = [(0, 10), (9, 10), (12, 10)]
-        junction = Node("junction", "junction", (10, 10), [])
+        positions = [(9, 10), (0, 10), (12, 10)]
+        junction = sumolib.net.node.Node("junction", "junction", (10, 10), [])
+        arbiter_manager = ArbiterManager()
+        arbiter_policy = ArbiterFCFSPolicy("junction")
+        arbiter = Arbiter(arbiter_policy)
+        arbiter_manager.assign_arbiter_to_junction("junction", arbiter)
         for i in range(3):
             vehicle = Vehicle(str(i))
             vehicle.isActive = True
-            vehicle.set_conflict_resolution_policy(FirstComeFirstServePolicy(vehicle))
+            vehicle.set_conflict_resolution_policy(VehiclePolicy(vehicle))
             vehicle.nextJunction = junction
             vehicle.currentPosition = positions[i]
+            vehicle.currentRoute = [""]
             vehicles.append(vehicle)
         conflicts = [
             {
@@ -37,11 +43,11 @@ class TestFirstComeFirstServePolicy(unittest.TestCase):
                 "same_lane"     : []
             },
         ]
-        expected_results = [VehicleState.WAITING,
-                            VehicleState.CROSSING,
+        expected_results = [VehicleState.CROSSING,
+                            VehicleState.WAITING,
                             VehicleState.WAITING]
         for i in range(len(vehicles)):
-            state = vehicles[i].conflictResolutionPolicy.decide_state(vehicle, conflicts[i])
+            state = vehicles[i].conflictResolutionPolicy._decide_state(conflicts[i])
             self.assertEqual(state, expected_results[i])
         
 

@@ -5,3 +5,4 @@ sumolib
 pyyaml
 numpy
 wget
+shapely

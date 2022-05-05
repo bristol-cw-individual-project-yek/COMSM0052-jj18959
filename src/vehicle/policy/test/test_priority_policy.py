@@ -17,7 +17,7 @@ class TestPriorityPolicy(unittest.TestCase):
         for i in range(3):
             vehicle = Vehicle(str(i))
             vehicle.isActive = True
-            vehicle.set_conflict_resolution_policy(PriorityPolicy())
+            vehicle.set_conflict_resolution_policy(PriorityPolicy(vehicle))
             vehicle.nextJunction = junction
             vehicle.currentPosition = positions[i]
             vehicle.priority = priorities[i]
@@ -57,7 +57,7 @@ class TestPriorityPolicy(unittest.TestCase):
         for i in range(3):
             vehicle = Vehicle(str(i))
             vehicle.isActive = True
-            vehicle.set_conflict_resolution_policy(PriorityPolicy())
+            vehicle.set_conflict_resolution_policy(PriorityPolicy(vehicle))
             vehicle.nextJunction = junction
             vehicle.currentPosition = positions[i]
             vehicle.priority = priorities[i]
@@ -97,7 +97,7 @@ class TestPriorityPolicy(unittest.TestCase):
         for i in range(3):
             vehicle = Vehicle(str(i))
             vehicle.isActive = True
-            vehicle.set_conflict_resolution_policy(PriorityPolicy())
+            vehicle.set_conflict_resolution_policy(PriorityPolicy(vehicle))
             vehicle.nextJunction = junction
             vehicle.currentPosition = positions[i]
             vehicle.priority = priorities[i]
