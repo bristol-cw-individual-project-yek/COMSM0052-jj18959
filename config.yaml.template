@@ -21,6 +21,7 @@ random-settings:
   connectivity: 0.95
   seed: 19087
 
+
 # Settings specific to the "grid" map type
 grid-settings:
   x-number: 2

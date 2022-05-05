@@ -1,4 +1,5 @@
 import os, sys
+
 import random
 import shutil
 from time import time
@@ -31,6 +32,7 @@ try:
         stream.close()
 except:
     raise
+
 
 SCENARIO_FOLDER_PATH = "scenarios"
 
@@ -207,6 +209,22 @@ def run_simulation(has_gui:bool=False, log_data:bool=False, number_of_runs:int=1
     print(overview)
     if log_data:
         Logger.log_overview(metrics_entire_set, used_seeds, folder_name)
+
+
+def test_osm_get():
+    map_builder.get_osm_area(BoundingBox(-2.65, 51, -2.5943, 52), "test_files/results")
+
+
+    metrics = {
+        "wait_time_metrics"  : MetricCalculator.calculate(vehicles=shepherd.vehicles),
+        "num_of_collisions" : num_of_collisions
+    }
+
+    display_metrics(metrics)
+
+    if log_data:
+        Logger.log_data_as_json(config_data=CONFIG, step_data=data, network=road_network, collision_data=collision_data, vehicle_metadata=vehicle_metadata, metrics=metrics)
+    shutil.rmtree("temp")
 
 
 def test_osm_get():
