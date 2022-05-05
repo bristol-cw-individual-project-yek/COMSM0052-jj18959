@@ -48,6 +48,22 @@ class Logger:
         junction_wait_times_path = Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/junction_wait_times.png"
         plot_distribution(metrics_entire_set["wait_time_metrics"]["total-wait-time"]["samples"], "Total wait time (turns)", "Number of vehicles", 0, metrics_entire_set["wait_time_metrics"]["total-wait-time"]["max"], total_wait_times_path)
         plot_distribution(metrics_entire_set["wait_time_metrics"]["wait-times-per-junction"]["samples"],"Junction wait time (turns)", "Number of vehicles", 0, metrics_entire_set["wait_time_metrics"]["wait-times-per-junction"]["max"], junction_wait_times_path)
+        with open(Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/total_wait_times.csv", "w") as f:
+            total_wait_time_stats:dict = metrics_entire_set["wait_time_metrics"]["total-wait-time"]
+            tw_samples = total_wait_time_stats["samples"]
+            output_str = ""
+            for sample in tw_samples:
+                output_str += str(sample) + ",\n"
+            f.write(output_str)
+            f.close()
+        with open(Logger.LOG_DIRECTORY_NAME + "/" + entry_folder_name + "/wait_times_per_junction.csv", "w") as f:
+            wait_time_per_junction_stats:dict = metrics_entire_set["wait_time_metrics"]["wait-times-per-junction"]
+            wt_samples = wait_time_per_junction_stats["samples"]
+            output_str = ""
+            for sample in wt_samples:
+                output_str += str(sample) + ",\n"
+            f.write(output_str)
+            f.close()
 
 
     def log_data_as_json(config_data:dict, step_data:dict, network:ntwk.RoadNetwork, collision_data:dict, entry_folder_name:str, vehicle_metadata:dict={}, metrics:dict={}, simulation_number:int=0) -> None:
@@ -122,7 +138,6 @@ Total wait time stats:
     Max     :   {tw_max} 
     Skew    :   {tw_skew}
     Kurtosis:   {tw_kurtosis}
-    Samples :   {tw_samples}
     """
         wait_time_per_junction_stats:dict = metrics["wait_time_metrics"]["wait-times-per-junction"]
         wt_mean = wait_time_per_junction_stats["mean"]
@@ -140,7 +155,6 @@ Wait time per junction stats:
     Max     :   {wt_max} 
     Skew    :   {wt_skew} 
     Kurtosis:   {wt_kurtosis} 
-    Samples :   {wt_samples}
     """
         result += seed_str + collision_str + "\n" + total_wait_time_str + "\n" + wait_time_per_junction_str
         result += "\n-------------------------------\n"
