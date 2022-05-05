@@ -4,7 +4,6 @@ import shutil
 import xml.etree.ElementTree as ET
 import yaml
 from typing import Union
-from xml.dom import minidom
 
 import randomTrips
 import sumolib

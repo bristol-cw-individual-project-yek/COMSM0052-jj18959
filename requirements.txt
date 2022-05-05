@@ -6,3 +6,6 @@ pyyaml
 numpy
 wget
 shapely
+matplotlib
+typing
+importlib

@@ -1,5 +1,3 @@
-from tempfile import TemporaryFile
-import traceback
 from src.arbiter import arbiter_custom_policy
 from src.vehicle.vehicle import Vehicle
 from src.vehicle.policy.custom_policy import CustomPolicy
